@@ -1,0 +1,23 @@
+{
+    "parameters":
+    {
+        "items": 0
+    },
+    "menus":
+    {
+        "items": 1,
+        "0": "main",
+
+        "main":
+        {
+            "items": 3,
+            "0": "Optimize Microstrip Antenna (OMA)",
+            "1": "~ Help",
+            "2": "~ Exit"
+        }
+    },
+    "help":
+    {
+        "items": 0
+    }
+}

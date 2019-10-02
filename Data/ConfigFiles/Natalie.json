@@ -1,0 +1,90 @@
+{
+    "parameters":
+    {
+        "items": 6,
+
+        "0": "frequency",
+        "1": "mesh",
+        "2": "runt", 
+        "3": "trust region",
+        "4": "surrogates",
+        "5": "data",    
+
+        "frequency":
+        {
+            "items": 4,
+            
+            "0": "lower frequency offset",
+            "1": "upper frequency offset",
+            "2": "samples",
+            "3": "accuracy check samples",
+
+            "lower frequency offset":   0.01e9,
+            "upper frequency offset":   0.01e9,
+            "samples":                  2,
+            "accuracy check samples":   2
+        },
+        "mesh":
+        {
+            "items": 2,
+
+            "0": "wire radius",
+            "1": "size",
+
+            "wire radius":  0.001,
+            "size":         "Coarse"
+        },
+        "runt":
+        {
+            "items": 3,
+
+            "0": "parallel",
+            "1": "run",
+            "2": "interactive",
+
+            "parallel":     true,
+            "run":          true,
+            "interactive":  false
+        },
+
+        "trust region":
+        {
+            "items": 4,
+
+            "iterations":           75,
+            "candidates":           2,
+            "initial region":       3,
+            "accuracy requirement": 0.9
+        },
+
+        "surrogates":
+        {
+            "items": 1,
+
+            "0": "candidates",
+
+            "candidates": 5
+        },
+
+        "data":
+        {
+            "items": 1,
+            
+            "0": "mold type",
+
+            "mold type":    "absolute"
+        }
+    },
+    "scalars":
+    {
+        "items": 0
+    },
+    "menus":
+    {
+        "items": 0
+    },
+    "help":
+    {
+        "items": 0
+    }
+}

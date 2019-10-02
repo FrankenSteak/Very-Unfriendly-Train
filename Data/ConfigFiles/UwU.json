@@ -1,0 +1,19 @@
+{
+    "parameters":
+    {
+        "items": 2,
+        "0": "allow testing",
+        "1": "show output",
+
+        "allow testing": false,
+        "show output": false
+    },
+    "menus":
+    {
+        "items": 0
+    },
+    "help":
+    {
+        "items": 0
+    }
+}

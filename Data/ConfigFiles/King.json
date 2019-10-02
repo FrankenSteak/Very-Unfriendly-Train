@@ -1,0 +1,29 @@
+{
+    "parameters":
+    {
+        "items": 2,
+        "0": "allow testing",
+        "1": "show output",
+
+        "allow testing":
+        {
+            "default": false
+        },
+        "show output":
+        {
+            "default": false
+        }
+    },
+    "scalars":
+    {
+        "items": 0
+    },
+    "menus":
+    {
+        "items": 0
+    },
+    "help":
+    {
+        "items": 0
+    }
+}

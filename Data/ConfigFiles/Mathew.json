@@ -1,0 +1,18 @@
+{
+    "parameters":
+    {
+        "items": 1,
+
+        "offset":   8.0,
+        "divisor":  1.5,
+        "product":  1.5
+    },
+    "menus":
+    {
+        "items": 0
+    },
+    "help":
+    {
+        "items": 0
+    }
+}

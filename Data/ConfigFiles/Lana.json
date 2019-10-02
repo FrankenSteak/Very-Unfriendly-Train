@@ -1,0 +1,26 @@
+{
+    "parameters" : {
+        "items" : 1, 
+        "0" : "app location", 
+        "1" : "working directory", 
+        "2" : "default units", 
+        "app location" : {
+            "default" : "C:\\Program Files\\Altair\\2018\\feko\\bin"
+        }, 
+        "working directory" : {
+            "default" : "C:\\Users\\project\\0. My Work\\1. Repositories\\0. Unfriendly Train\\Code\\Templates\\Tests\\Lua"
+        }, 
+        "default units" : {
+            "default" : "Millimetres"
+        }
+    }, 
+    "scalars" : {
+        "items" : 0
+    }, 
+    "menus" : {
+        "items" : 0
+    }, 
+    "help" : {
+        "items" : 0
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "parameters":
+    {
+        "items": 3,
+        "0": "allow testing",
+        "1": "show output",
+        "2": "data range",
+
+        "allow testing": false,
+        "show output" : false,
+        "data range":
+        {
+            "lower": -1.0,
+            "upper": 1.0,
+            "center": 0.0
+        }
+    },
+    "menus":
+    {
+        "items": 0
+    },
+    "help":
+    {
+        "items": 0
+    }
+}

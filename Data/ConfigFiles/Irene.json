@@ -1,0 +1,92 @@
+{
+    "parameters":
+    {
+        "items": 0
+    },
+    "menus":
+    {
+        "items": 6,
+        "0": "main",
+        "1": "frequency",
+        "2": "params",
+        "3": "substrate values",
+        "4": "substrate names",
+        "5": "substrate heights",
+
+        "main":
+        {
+            "items": 5,
+            "0": "Create a new antenna geometry (NG)",
+            "1": "Use an existing antenna geometry (IG)",
+            "2": "~ Edit Configurations",
+            "3": "~ Help",
+            "4": "~ Exit"
+        },
+        "frequency":
+        {
+            "items": 2,
+            "0": "Lower Frequency",
+            "1": "Upper Frequency"
+        },
+        "params":
+        {
+            "items": 4,
+            "0": "Length",
+            "1": "Width",
+            "2": "Substrate",
+            "3": "Substrate Height"
+        },
+        "substrate values":
+        {
+            "items": 1,
+            "0": 4.4
+        },
+        "substrate names":
+        {
+            "items": 1,
+            "0": "FR4"
+        },
+        "substrate heights":
+        {
+            "items": 1,
+            "0": 16
+        }
+    },
+    "help":
+    {
+        "items": 4,
+        "0": "help main",
+        "1": "help ig",
+        "2": "help ng",
+        "3": "help op",
+
+        "help main":
+        {
+            "items": 4,
+            "0": "\t0: New Geometry     - Specify the parameters of the antenna to use during the optimization process",
+            "1": "\t1: Import Geometry  - Import an existing antenna geometry from a .json file to use during the optimization process",
+            "2": "\t2: ~ Config Editor  - Opens the config editor",
+            "3": "\t4: ~ Exit           - Exists the current instance of Irene"
+        },
+        "help ig":
+        {
+            "items": 2,
+            "0": "\t   ~ {cancel}         - Exists the current antenna import process",
+            "1": "\t   ~ {name}           - Import antenna geometry from {name}.json"
+        },
+        "help ng":
+        {
+            "items": 3,
+            "0": "\t0: Frequency Range  - Specify the frequency range in which the antenna should operate",
+            "1": "\t1: Parameters       - Specify the parameters of the antenna such as Length, Width, Permitivitty, Height",
+            "2": "\t3: ~ Exit           - Exits the current antenna setup process"
+        },
+        "help op":
+        {
+            "items": 3,
+            "0": "\t0: Start Optimization   - Starts the optimization process using the current configuration",
+            "1": "\t1: ~ Edit Nat config    - Go to the config editor for the current instance of Nat",
+            "2": "\t3: ~ Exit               - Exits the current optimization process without executing antenna optimization"
+        }
+    }
+}

@@ -1,0 +1,358 @@
+{
+    "parameters":
+    {
+        "items": 6,
+
+        "0": "directory",
+        "1": "feed",
+        "2": "ground plane",
+        "3": "radiating plane",
+        "4": "substrate",
+        "5": "fitness",
+
+        "directory": "",
+
+        "feed":
+        {
+            "items": 2,
+
+            "0": "center",
+            "1": "width",
+
+            "center":   0.0,
+            "width":    0.0 
+        },
+        "ground plane":
+        {
+            "items": 5,
+
+            "0": "l",
+            "1": "w",
+            "2": "x",
+            "3": "y",
+            "4": "slots",
+
+            "l": 0.0,
+            "w": 0.0,
+            "x": 0.0,
+            "h": 0.0,
+
+            "slots":
+            {
+                "items": 0
+            }
+        },
+        "radiating plane":
+        {
+            "items": 5,
+            
+            "0": "l",
+            "1": "w",
+            "2": "x",
+            "3": "y",
+            "4": "slots",
+
+            "l": 0.0,
+            "w": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            
+            "slots":
+            {
+                "items": 0
+            }
+        },
+        "substrate":
+        {
+            "items": 8,
+
+            "0": "l",
+            "1": "w",
+            "2": "h",
+            "3": "x",
+            "4": "y",
+            "5": "permitivitty",
+            "6": "loss",
+            "7": "name",
+
+            "l": 0.0,
+            "w": 0.0,
+            "h": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+
+            "permitivitty": 0.0,
+            "loss":         0.0,
+            "name":         ""
+        },
+        "fitness":
+        {
+            "items": 0
+        }
+    },
+    "scalars":
+    {
+        "items": 4,
+
+        "0": "feed",
+        "1": "ground plane",
+        "2": "radiating plane",
+        "3": "substrate",
+
+        "feed":
+        {
+            "items": 2,
+
+            "0": "center",
+            "1": "width",
+
+            "center":
+            {
+                "region":   0.0,
+                "range":    1.0
+            },
+            "width":
+            {
+                "region":   0.9,
+                "range":    0.05
+            }
+        },
+        "ground plane":
+        {
+            "items": 5,
+
+            "0": "l",
+            "1": "w",
+            "2": "x",
+            "3": "y",
+            "4": "slots",
+
+            "l":
+            {
+                "region":   0.3,
+                "range":    4.0
+            },
+            "w":
+            {
+                "region":   0.3,
+                "range":    4.0
+            },
+            "x":
+            {
+                "region":   0.0,
+                "range":    0.35
+            },
+            "y":
+            {
+                "region":   0.0,
+                "range":    0.35
+            },
+            "slots":
+            {
+                "items": 3,
+
+                "0": "create slot",
+                "1": "remove slot",
+                "2": "change slot",
+
+                "create slot":
+                {
+                    "items": 3,
+                    
+                    "0": "default",
+                    "1": "x",
+                    "2": "y",
+                    
+                    "default":
+                    {
+                        "region":   1.0,
+                        "range":    0.0
+                    },
+                    "x":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    },
+                    "y":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    }
+                },
+                "remove slot":
+                {
+                    "region":   1.0,
+                    "range":    0.0
+                },
+                "change slot":
+                {
+                    "items": 3,
+                    
+                    "0": "probability",
+                    "1": "x",
+                    "2": "y",
+
+                    "probability":
+                    {
+                        "region":   1.0,
+                        "range":    0.0
+                    },
+                    "x":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    },
+                    "y":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    }
+                }
+            }
+        },
+        "radiating plane":
+        {
+            "items": 5,
+
+            "0": "l",
+            "1": "w",
+            "2": "x",
+            "3": "y",
+            "4": "slots",
+
+            "l":
+            {
+                "region":   0.3,
+                "range":    2.0
+            },
+            "w":
+            {
+                "region":   0.3,
+                "range":    2.0
+            },
+            "x":
+            {
+                "region":   0.3,
+                "range":    1.0
+            },
+            "y":
+            {
+                "region":   0.3,
+                "range":    1.0
+            },
+            "slots":
+            {
+                "items": 3,
+
+                "0": "create slot",
+                "1": "remove slot",
+                "2": "change slot",
+
+                "create slot":
+                {
+                    "items": 3,
+                    
+                    "0": "default",
+                    "1": "x",
+                    "2": "y",
+
+                    "default":
+                    {
+                        "region":   1.0,
+                        "range":    0.0
+                    },
+                    "x":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    },
+                    "y":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    }
+                },
+                "remove slot":
+                {
+                    "region":   1.0,
+                    "range":    0.0
+                },
+                "change slot":
+                {
+                    "items": 3,
+                    
+                    "0": "probability",
+                    "1": "x",
+                    "2": "y",
+
+                    "probability":
+                    {
+                        "region":   1.0,
+                        "range":    0.0
+                    },
+                    "x":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    },
+                    "y":
+                    {
+                        "region":   0.0,
+                        "range":    0.0
+                    }
+                }
+            }
+        },
+        "substrate":
+        {
+            "items": 6,
+
+            "0": "l",
+            "1": "w",
+            "2": "h",
+            "3": "x",
+            "4": "y",
+            "6": "change substrate",
+
+            "l":
+            {
+                "region":   0.0,
+                "range":    0.5
+            },
+            "w":
+            {
+                "region":   0.0,
+                "range":    0.05
+            },
+            "h":
+            {
+                "region":   0.0,
+                "range":    0.0
+            },
+            "x":
+            {
+                "region":   0.0,
+                "range":    0.0
+            },
+            "y":
+            {
+                "region":   0.0,
+                "range":    0.0
+            },
+
+            "change substrate":
+            {
+                "region":   1.0,
+                "range":    0.0
+            }
+        }
+    },
+    "menus":
+    {
+        "items": 0
+    },
+    "help":
+    {
+        "items": 0
+    }
+}

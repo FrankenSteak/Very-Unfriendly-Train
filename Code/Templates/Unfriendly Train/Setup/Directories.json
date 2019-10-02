@@ -1,0 +1,11 @@
+{
+    "items": 3,
+    
+    "0": "feko",
+    "1": "lua",
+    "2": "natalie",
+
+    "feko":     "C:\\Program Files\\Altair\\2018\\feko\\bin",
+    "lua":      "\\Templates\\Tests\\Lua\\",
+    "natalie":  "\\Data\\Simulations\\"
+}

@@ -1,0 +1,627 @@
+{
+    "categories":
+    {
+        "items": 2,
+        "0": "social",
+        "1": "work",
+        "2": "life"
+    },
+    "social":
+    {
+        "items": 39,
+
+        "0": "amith",
+        "1": "andre & ez",
+        "3": "bianca",
+        "4": "caera",
+        "5": "davin",
+        "6": "eckaard",
+        "7": "elise",
+        "8": "jarred",
+        "9": "jessica",
+        "10": "julian",
+        "11": "kelvn",
+        "12": "lana",
+        "13": "leylan",
+        "14": "liam",
+        "15": "lisa",
+        "16": "ouma marie",
+        "17": "ouma thea",
+        "18": "mervin & retha",
+        "19": "michael oozthuizen",
+        "20": "mike",
+        "21": "monique",
+        "22": "peter kok",
+        "23": "phil",
+        "24": "ross",
+        "25": "rowen",
+        "26": "sarah",
+        "27": "shane",
+        "28": "sholto",
+        "29": "steph",
+        "30": "taynita",
+        "31": "thea-marie",
+        "32": "wade yang",
+        "33": "wade jackson",
+        "34": "wernich",
+        "35": "wian",
+
+        "36": "ducky",
+        "37": "calvin",
+        "38": "riaan",
+
+        "amith":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "andre & ez":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "bianca":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "caera":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "davin":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "eckaard":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "elise":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "jarred":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "jessica":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "julian":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "kelvn":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "lana":
+        {
+            "date": "idk",
+            "task": "Revise"
+        },
+        "leylan":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "liam":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "lisa":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "ouma marie":
+        {
+            "date": "24-Sep-2019",
+            "task": "Check-In"
+        },
+        "ouma thea":
+        {
+            "date": "24-Sep-2019",
+            "task": "Check-In"
+        },
+        "mervin & rehta":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "michael oosthuizen":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "mike":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "monique":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "peter kok":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "phil":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "ross":
+        {
+            "date": "01-Nov-2019",
+            "task": "revise"
+        },
+        "rowen":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "sarah":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "shane":
+        {
+            "date": "19-Sep-2019",
+            "task": "Revise"
+        },
+        "sholto":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "steph":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "taynita":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "thea-marie":
+        {
+            "date": "idk",
+            "task": "Revise"
+        },
+        "wade yang":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "wade jackson":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "wernich":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "wian":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        
+        "ducky":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        },
+        "calvin":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise - get number"
+        },
+        "riaan":
+        {
+            "date": "01-Nov-2019",
+            "task": "Revise"
+        }
+    },
+    "work":
+    {
+        "items": 0,
+        
+        "0": "general",
+
+        "1": "heimi",
+        "2": "irene",
+        "3": "natalie",
+        "4": "matthew",
+        "5": "golem",
+        "6": "annie",
+        "7": "data",
+        "8": "david",
+        "9": "lana",
+        
+        "10": "revision",
+        "11": "research",
+
+        "12": "optimizers",
+
+        "general":
+        {
+            "items": 7,
+
+            "0": 
+            {
+                "task": "Character shortcut for menus?",
+                "date": "NA" 
+            },
+            "1": 
+            {
+                "task": "Unit test",
+                "date": "21-Sep-2019"
+            },
+            "2": 
+            {
+                "task": "outsource all imports to a single helper file?",
+                "date": "NA" 
+            },
+            "3":
+            {
+                "task": "Advanced helps for user interface classes {Heimi, Irene, Nat}",
+                "date": "NA"
+            },
+            "4":
+            {
+                "task": "make configEditor() for all classes",
+                "date": "NA"
+            },
+            "5":
+            {
+                "task": "Config editor class",
+                "date": "NA"
+            }
+        },
+
+        "heimi":
+        {
+            "items": 1,
+
+            "0":
+            {
+                "task": "mode change",
+                "date": "NA"
+            }
+        },
+        "irene":
+        {
+            "items": 1,
+
+            "0": 
+            {
+                "task": "review",
+                "date": "NA"
+            }
+        },
+        "natalie":
+        {
+            "items": 3,
+
+            "0":
+            {
+                "task": "make advanced Optimize()",
+                "date": "NA",
+
+                "details":
+                {
+                    "items": 2,
+                    "0": "import full antenna config",
+                    "1": "user defines optimization ??? idk what this is supposed to mean"
+                }
+            },
+            "1":
+            {
+                "task": "implement slot surface change during candidate generation",
+                "date": "NA"
+            },
+            "2":
+            {
+                "task": "review",
+                "date": "NA"
+            }
+        },
+        "matthew":
+        {
+            "items": 5,
+
+            "0":
+            {
+                "task": "Get Parameters - optimize substrate selection",
+                "date": "Daily"
+            },
+            "1":
+            {
+                "task": "Get Fitness",
+                "date": "Daily"
+            },
+            "2":
+            {
+                "task": "Compare",
+                "date": "Daily"
+            },
+            "3":
+            {
+                "task": "Finish class",
+                "date": "Daily"
+            },
+            "4":
+            {
+                "task": "Translate antenna geometries in python",
+                "date": "Daily"
+            }
+        },
+        "golem":
+        {
+            "items": 1,
+
+            "0":
+            {
+                "task": "Review",
+                "date": "NA"
+            }
+        },
+        "annie":
+        {
+            "items": 1,
+
+            "0":
+            {
+                "task": "Review",
+                "date": "NA"
+            }
+        },
+        "data":
+        {
+            "items": 1,
+
+            "0":
+            {
+                "task": "Review",
+                "date": "NA"
+            }
+        },
+        "david":
+        {
+            "items": 1,
+
+            "0":
+            {
+                "task": "Run sims",
+                "date": "Daily - check"
+            }
+        },
+        "lana":
+        {
+            "items": 0,
+
+            "0":
+            {
+                "date": "17-Sep-2019",
+                "task": "Create class"
+            },
+            "1":
+            {
+                "date": "17-Sep-2019",
+                "task": "Design class"
+            },
+            "2":
+            {
+                "date": "17-Sep-2019",
+                "task": "Implement class"
+            }
+        },
+
+        "revision":
+        {
+            "items": 4,
+
+            "0":
+            {
+                "date": "Daily",
+                "task": "Review Antenna Theory"
+            },
+            "1":
+            {
+                "date": "Daily",
+                "task": "Review Surrogate Theory"
+            },
+            "2":
+            {
+                "date": "Daily",
+                "task": "Review Optimization Theory"
+            },
+            "3":
+            {
+                "date": "Daily",
+                "task": "Revise Project Scope"
+            }
+        },
+        "research":
+        {
+            "items": 10,
+
+            "0": 
+            {
+                "date": "NA",
+                "task": "Graph Theory"
+            },
+            "1":
+            {
+                "date": "NA",
+                "task": "Finite Markov Decision Process"
+            },
+            "2":
+            {
+                "date": "NA",
+                "task": "Deep Q-Learning"
+            },
+            "3":
+            {
+                "date": "NA",
+                "task": "Double Q-Learning, Delayed Q-Learning, Greaddy Q-Learning",
+                "details": "Assess if viable"
+            },
+            "4":
+            {
+                "date": "NA",
+                "task": "adjoint solvers"
+            },
+            "5":
+            {
+                "date": "NA",
+                "task": "Bayesian Framework"
+            },
+            "6":
+            {
+                "date": "Daily",
+                "task": "Latin Hypercube Design"
+            },
+            "7":
+            {
+                "date": "NA",
+                "task": "Check Applications of gecko on wiki"
+            },
+            "8":
+            {
+                "date": "NA",
+                "task": "propositional formulas"
+            },
+            "9":
+            {
+                "date": "NA",
+                "task": "Deep belief networks, deep boltzman machines"
+            }
+
+        },
+
+        "optimizers":
+        {
+            "items": 6,
+
+            "0":
+            {
+                "date": "NA",
+                "task": "Bee Colony"
+            },
+            "1":
+            {
+                "date": "NA",
+                "task": "Ant Colony"
+            },
+            "2":
+            {
+                "date": "NA",
+                "task": "Cuckoo"
+            },
+            "3": 
+            {
+                "date": "NA",
+                "task": "Nelder-mead"
+            },
+            "4":
+            {
+                "date": "NA",
+                "task": "Simmulated Annealing"
+            },
+            "5":
+            {
+                "date": "25-Sep-2019",
+                "task": "Develop own optimization algorithm"
+            }
+        }
+    },
+    "life":
+    {
+        "items": 0,
+
+        "0": "clean",
+        "1": "cook",
+
+        "clean":
+        {
+            "items": 7,
+
+            "0":
+            {
+                "date": "Daily",
+                "task": "clean beadroom - general"
+            },
+            "1":
+            {
+                "date": "Daily",
+                "task": "clean bedroom - advanced"
+            },
+            "2":
+            {
+                "date": "17-Sep-2019",
+                "task": "wash floors"
+            },
+            "3":
+            {
+                "date": "Daily",
+                "task": "clean all cupboards"
+            },
+            "4":
+            {
+                "date": "Daily",
+                "task": "clean bathrom"
+            },
+            "5":
+            {
+                "date": "Daily",
+                "task": "clean living area"
+            },
+            "6":
+            {
+                "date": "19-Sep-2019",
+                "task": "Laundry"
+            }
+        },
+        "cook":
+        {
+            "items": 3,
+
+            "0":
+            {
+                "date": "22-Sep-2019",
+                "task": "Plan weekly meals"
+            },
+            "1":
+            {
+                "date": "23-Sep-2019",
+                "task": "Buy weekly groceries"
+            },
+            "2":
+            {
+                "date": "23-Sep-2019",
+                "task": "Cook dinners for rest of week"
+            }
+        }
+    }
+}

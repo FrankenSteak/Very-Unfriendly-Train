@@ -1,0 +1,31 @@
+{
+    "parameters":
+    {
+        "items": 3,
+        "0": "allow testing",
+        "1": "show output",
+        "2": "optimizers",
+
+        "allow testing": false,
+        "show output": false,
+        "optimizers":
+        {
+            "items": 1,
+            "0": "tro",
+    
+            "tro":
+            {
+                "name": "Trust-Region Optimization",
+                "path": "\\Data\\ConfigFiles\\GA\\TRO.json"
+            }
+        }
+    },
+    "menus":
+    {
+        "items": 0
+    },
+    "help":
+    {
+        "items": 0
+    }
+}
