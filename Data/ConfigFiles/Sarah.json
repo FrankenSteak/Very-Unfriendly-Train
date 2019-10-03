@@ -21,69 +21,95 @@
             
             "pso":
             {
-                "items": 6,
-                "0": "iterations",
-                "1": "candidates",
-                "2": "candidate scalar",
-                "3": "acc check point",
-                "4": "acc requirement",
-                "5": "parameters",
+                "items":    2,
 
-                "iterations":
+                "0":    "training",
+                "1":    "mapping",
+
+                "training":
                 {
-                    "items": 2,
-                    "0": "algorithm",
-                    "1": "back propagation",
+                    "items": 6,
+                    "0": "iterations",
+                    "1": "candidates",
+                    "2": "candidate scalar",
+                    "3": "acc check point",
+                    "4": "acc requirement",
+                    "5": "parameters",
 
-                    "algorithm":
+                    "iterations":
                     {
-                        "default": 20
+                        "items": 2,
+                        "0": "algorithm",
+                        "1": "back propagation",
+
+                        "algorithm":
+                        {
+                            "default": 20
+                        },
+                        "back propagation":
+                        {
+                            "default": 15
+                        }
                     },
-                    "back propagation":
+                    "candidates":
                     {
-                        "default": 15
+                        "default": 25
+                    },
+                    "candidate scalar":
+                    {
+                        "default": 9.0
+                    },
+                    "acc check point":
+                    {
+                        "default": 5
+                    },
+                    "acc requirement":
+                    {
+                        "default": 0.75
+                    },
+                    "parameters":
+                    {
+                        "items": 4,
+                        "0": "phi 1",
+                        "1": "phi 2",
+                        "2": "eta",
+                        "3": "fitness sample size",
+
+                        "phi 1":
+                        {
+                            "default": 0.1
+                        },
+                        "phi 2":
+                        {
+                            "default": 40.0
+                        },
+                        "eta":
+                        {
+                            "default": 0.25
+                        },
+                        "fitness sample size":
+                        {
+                            "default": 30
+                        }
                     }
                 },
-                "candidates":
+                "mapping":
                 {
-                    "default": 25
-                },
-                "candidate scalar":
-                {
-                    "default": 9.0
-                },
-                "acc check point":
-                {
-                    "default": 5
-                },
-                "acc requirement":
-                {
-                    "default": 0.75
-                },
-                "parameters":
-                {
-                    "items": 4,
-                    "0": "phi 1",
-                    "1": "phi 2",
-                    "2": "eta",
-                    "3": "fitness sample size",
+                    "items": 6,
 
-                    "phi 1":
-                    {
-                        "default": 0.1
-                    },
-                    "phi 2":
-                    {
-                        "default": 40.0
-                    },
-                    "eta":
-                    {
-                        "default": 0.25
-                    },
-                    "fitness sample size":
-                    {
-                        "default": 30
-                    }
+                    "0":    "iterations",
+                    "1":    "candidates",
+                    "2":    "scalar",
+                    "3":    "phi1",
+                    "4":    "phi2",
+                    "5":    "eta",
+
+                    "iterations":   66,
+                    "candidates":   50,
+                    "scalar":       1.0,
+                    "phi1":         0.1,
+                    "phi2":         40.0,
+                    "eta":          0.25
                 }
             }
         }

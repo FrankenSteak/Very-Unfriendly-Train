@@ -67,6 +67,9 @@ class Data:
         self.__lUsedOutput          = None
         self.__lUsedClass           = None
 
+        self.__lMap_Input           = None
+        self.__lMap_Output          = None
+
         #   endregion
 
         #   region STEP 1.3: Bools
@@ -570,6 +573,8 @@ class Data:
 
     #   region Front-End: Gets
 
+    #       region Front-End-(Gets): Data width and length
+
     def getLen(self) ->  int:
         """
             Description:
@@ -720,6 +725,11 @@ class Data:
             #   STEP 7: Return
             return 1
 
+    #
+    #       endregion
+
+    #       region Front-End-(Gets): Data maps
+
     def getDataRange(self) -> dict:
         """
             Description:
@@ -752,7 +762,155 @@ class Data:
 
         #   STEP 3: Return
         return dOut
+    
+    def getInputMap(self) -> vars:
+        """
+            Description:
+
+                If the input data for this dataset has been mapped then the
+                mapping data will be returned.
+        """
+
+        #   STEP 0: Local variables
+
+        #   STEP 1: Setup - Local variables
+
+        #   STEP 2: Check if map doesn't exist
+        if (self.__lMap_Input == None):
+            #   STEP 3: Return nothing
+            return None
+
+        #   STEP 4: Return map
+        return self.__lMap_Input
+
+    def getOutputMap(self) -> vars:
+        """
+            Description:
+
+                If the output data for this dataset has been mapped then the
+                mapping data will be returned.
+        """
+
+        #   STEP 0: Local variables
+
+        #   STEP 1: Setup - Local variables
+
+        #   STEP 2: Check if map doesn't exist
+        if (self.__lMap_Output == None):
+            #   STEP 3: Return nothing
+            return None
+
+        #   STEP 4: Return map
+        return self.__lMap_Output
+
+    def getOutputMin(self, index: int) -> float:
+        """
+            Description:
+
+                Iterates through the output data to find the smalles output
+                data sample.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            
+            Parameters:
+
+                + index = ( int ) The index in the output of the minimum that
+                    is being searched for
+        """
+
+        #   STEP 0: Local variables
+        fOut                    = np.inf
+
+        #   STEP 1: Setup - Local variables
+
+        #   STEP 2: Loop through outputs
+        for i in range(0, len( self.__lOutput )):
+            #   STEP 3: Check if smaller than current minimum
+            if (self.__lOutput[i][index] < fOut):
+                #   STEP 4: Update output
+                fOut    = self.__lOutput[i][index]
+
+        #   STEP 5: Loop through used outputs
+        for i in range(0, len( self.__lUsedOutput )):
+            #   STEP 6: Check if smaller than current minimum
+            if (self.__lUsedOutput[i][index] < fOut):
+                #   STEP 7: Update output
+                fOut    = self.__lUsedOutput[i][index]
+
+        #   STEP 8: Return
+        return fOut
+
+    def getInputDistance(self, index: int) -> list:
+        """
+            Description:
+
+                Gets the euclidian distance of each input from the specified
+                input given that the input is in range.
+        """
+
+        #   STEP 0: Local variables
+        lOut                    = []
+
+        lInput                  = None
+
+        #   STEP 1: Setup - Local variables
+        self.reset()
+
+        #   region STEP 2->6: Error checking
+
+        #   STEP 2: Check that there is data in input
+        if ( len( self.__lInput ) > 0):
+            #   STEP 3: Check index in range
+            if ( index >= len( self.__lInput )):
+                #   STEP 4: Error handling
+                raise Exception("An error occured in Data.getInputDistance() -> Step 3: Index out of range")
         
+        #   STEP 5: No input list
+        else:
+            #   STEP 6: Error handling
+            raise Exception("An error occured in Data.getInputDistance() -> Step 5: No input list for dataset")
+
+        #
+        #   endregion
+
+        #   STEP 7: Update - Local variables
+        lInput  = self.__lInput[index]
+
+        #   STEP 8: Loop through inputs
+        for i in range(0, len(self.__lInput)):
+            #   STEP 9: Setup - Scope variables
+            fTmp_Sum    = 0.0
+
+            #   STEP 10: Check input isn't reference index
+            if (i != index):
+                #   STEP 11: Loop through input
+                for j in range(0, len(lInput)):
+                    #   STEP 12: Check inputs not none
+                    if ((lInput[j] != None) and (self.__lInput[i][j] != None)):
+                        #   STEP 13: Get distance of point
+                        fTmp_Point  = np.square(lInput[j] - self.__lInput[i][j])
+
+                        #   STEP 14: Add to sum
+                        fTmp_Sum    += fTmp_Point
+
+            #   STEP 15: Root the sum
+            fTmp_Sum    = np.sqrt(fTmp_Sum)
+
+            #   STEP 16: Append to list
+            lOut.append(fTmp_Sum)
+            
+        #   STEP 17: Return
+        return lOut
+        
+    #
+    #       endregion    
+    
+    #       region Front-End-(Gets): Data samples
+
     def getDNR(self, **kwargs) -> dict:
         """
             Description:
@@ -903,6 +1061,11 @@ class Data:
         #   STEP 7: Outsource - Return
         return self.getDNR(index=iIndex)
 
+    #
+    #   endregion
+
+    #       region Front-End-(Gets): Unique outputs
+
     def getUniqueOutputs(self) -> list:
         """
             Description:
@@ -969,7 +1132,10 @@ class Data:
 
         #   STEP 4: Return
         return self.__iUniqueOutputs
-
+    
+    #
+    #       endregion
+    
     #
     #   endregion
 
@@ -996,6 +1162,35 @@ class Data:
 
     #   region Front-End: Data-Manipulation
 
+    def autoMapData(self) -> None:
+        """
+            Description:
+
+                Maps the data of the input and output data lists of this Data
+                instance to fall between [-1, 1] with a center value of 0.
+        """
+
+        #   STEP 0: Local variables
+        dRange                  = None
+
+        dMap                    = None
+
+        #   STEP 1: Setup - Local variables
+        dMap                    = self.__getDefaultMap__(isSelf=True, inValue=0, outValue=0)
+
+        #   STEP 2: Populate temp dictionary
+        dRange = {
+            "lower": -1.0,
+            "center": 0.0,
+            "upper": 1.0
+        }
+
+        #   STEP 3: Outsource
+        self.mapData(range=dRange, map=dMap)
+
+        #   STEP 4: Return
+        return
+    
     def mapData(self, **kwargs) -> None:
         """
             Description:
@@ -1169,13 +1364,16 @@ class Data:
             #   region STEP 27->29: Map data
 
             #   STEP 27: Outsource input ranges
-            lRange_Input = self.__getDataRange__(data=self.__lInput, map=lMap_Input, range=lRange_Input, min=dMin_Input, max=dMax_Input)
+            lRange_Input        = self.__getDataRange__(data=self.__lInput, map=lMap_Input, range=lRange_Input, min=dMin_Input, max=dMax_Input)
 
             #   STEP 28: Oursource input center and width 
-            lRange_Input = self.__getDataParameters__(range=lRange_Input)
+            lRange_Input        = self.__getDataParameters__(range=lRange_Input)
 
             #   STEP 29: Outsoruce input mapping
-            self.__lInput = self.__getData__(dataRange=kwargs["mapRange"], data=self.__lInput, map=lMap_Input, range=lRange_Input)
+            dTmp_Data           = self.__getData__(dataRange=kwargs["mapRange"], data=self.__lInput, map=lMap_Input, range=lRange_Input)
+            
+            self.__lInput       = dTmp_Data["data"]
+            self.__lMap_Input   = dTmp_Data["map"]
 
             #
             #   endregion
@@ -1234,13 +1432,16 @@ class Data:
             #   region STEP 44->46: Map data
 
             #   STEP 44: Outsource output ranges
-            lRange_Output = self.__getDataRange__(data=self.__lOutput, map=lMap_Output, range=lRange_Output, min=dMin_Output, max=dMax_Output)
+            lRange_Output       = self.__getDataRange__(data=self.__lOutput, map=lMap_Output, range=lRange_Output, min=dMin_Output, max=dMax_Output)
 
             #   STEP 45: Outsource output center and width
-            lRange_Output = self.__getDataParameters__(range=lRange_Output)
+            lRange_Output       = self.__getDataParameters__(range=lRange_Output)
 
             #   STEP 46: Outsource output mapping
-            self.__lOutput = self.__getData__(dataRange=kwargs["mapRange"], data=self.__lOutput, map=lMap_Output, range=lRange_Output)
+            dTmp_Data           = self.__getData__(dataRange=kwargs["mapRange"], data=self.__lOutput, map=lMap_Output, range=lRange_Output)
+
+            self.__lOutput      = dTmp_Data["data"]
+            self.__lMap_Output  = dTmp_Data["map"]
 
             #
             #   endregion
@@ -1256,35 +1457,62 @@ class Data:
         #   STEP 48: Return
         return
 
-    def autoMapData(self) -> None:
+    def remap(self, **kwargs) -> list:
         """
-            Description:
+            Desciption:
 
-                Maps the data of the input and output data lists of this Data
-                instance to fall between [-1, 1] with a center value of 0.
+                This function remaps a provided input to be similar to the
+                input dataset before normalization.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + candidate = ( list ) A list of inputs of the same length as
+                    the current inputs for this dataset
+                    ~ Required
         """
 
         #   STEP 0: Local variables
-        dRange                  = None
-
-        dMap                    = None
-
+        lOut                    = []
+        
         #   STEP 1: Setup - Local variables
-        dMap                    = self.__getDefaultMap__(isSelf=True, inValue=0, outValue=0)
+        
+        #   region STEP 2->7: Error checking
 
-        #   STEP 2: Populate temp dictionary
-        dRange = {
-            "lower": -1.0,
-            "center": 0.0,
-            "upper": 1.0
-        }
+        #   STEP 2: Check if candidate arg passed
+        if ("candidate" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Data.remap() -> Step 2: No candidate arg passed")
 
-        #   STEP 3: Outsource
-        self.mapData(range=dRange, map=dMap)
+        #   STEP 4: Check if candidate same length as current input
+        if (len(kwargs["candidate"]) != self.getInputWidth()):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Data.remap() -> Step 4: The provided input is not the same length as the input length of the dataset")
 
-        #   STEP 4: Return
-        return
-    
+        #   STEP 6: Check input map exists
+        if (self.__lMap_Input == None):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Data.remap() -> Step 6: No input mapping for this dataset exists")
+
+        #
+        #   endregion
+
+        #   STEP 8: Loop through input
+        for i in range(0, self.getInputWidth()):
+            #   STEP 9: Get new value
+            fTmp    = self.__lMap_Input[i][4] + ( ( self.__lMap_Input[i][5] / 2.0 ) * kwargs["candidate"][i] )
+
+            #   STEP 10: Append to output
+            lOut.append(fTmp)
+
+        #   STEP 11: Return
+        return lOut
+
     def splitData(self, **kwargs) -> dict:
         """
             Description:
@@ -2146,7 +2374,7 @@ class Data:
         #   STEP 8: Return
         return lRange
 
-    def __getData__(self, **kwargs) -> list:
+    def __getData__(self, **kwargs) -> dict:
         """
             Description:
 
@@ -2194,65 +2422,72 @@ class Data:
 
         iDataWidth              = None
 
+        lMap_Out                = []
+
         #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->9: Error checking
 
         #   STEP 2: Check if dataRange passed
         if ("dataRange" not in kwargs):
             #   STEP 3: Error handling
             raise Exception("An error occured in Data.__getData__() -> Step 2: No dataRange argument passed")
 
-        else:
-            #   STEP 4: Init local vars
-            fRangeUpper = float( kwargs["dataRange"]["upper"] - kwargs["dataRange"]["center"] )
-            fRangeLower = float( kwargs["dataRange"]["center"] - kwargs["dataRange"]["lower"] )
-
         #   STEP 5: Check if data passed
         if ("data" not in kwargs):
-            #   STEP 6: Error handling
+            #   STEP 5: Error handling
             raise Exception("An error occured in Data.__getData__() -> Step 5: No data argument passed")
 
-        else:
-            #   STEP 7: Init local vars
-            lData = kwargs["data"]
-
-            iDataWidth = len(lData[0])
-
-        #   STEP 8: Check if map was passed
+        #   STEP 6: Check if map was passed
         if ("map" not in kwargs):
-            #   STEP 9: Error handling
+            #   STEP 7: Error handling
             raise Exception("An error occured in Data.__getData__() -> Step 8: No map argument passed")
 
-        else:
-            #   STEP 10: Init local vars
-            lMap = kwargs["map"]
-
-        #   STEP 11: Check if range was passed
+        #   STEP 8: Check if range was passed
         if ("range" not in kwargs):
-            #   STEP 12: Error handling
+            #   STEP 9: Error handling
             raise Exception("An error occured in Data.__getData__() -> Step 11: No range argument passed")
 
-        else:
-            #   STEP 13: Init local vars
-            lRange = kwargs["range"]
+        #
+        #   endregion
 
-        #   STEP 14: Iterate through data
+        #   STEP 10: Setup - Class variables
+
+        #   STEP 11: Setup - Local variables
+        lData       = kwargs["data"]
+        lMap        = kwargs["map"]
+        lRange      = kwargs["range"]
+        
+        fRangeUpper = float( kwargs["dataRange"]["upper"] - kwargs["dataRange"]["center"] )
+        fRangeLower = float( kwargs["dataRange"]["center"] - kwargs["dataRange"]["lower"] )
+        
+        iDataWidth  = len(lData[0])
+
+        #   STEP 12: Iterate through data
         for i in range(0, len(lData)):
-            #   STEP 15: Iterate through values in data point
+            #   STEP 13: Iterate through values in data point
             for j in range(0, iDataWidth):
-                #   STEP 16: Check that entry is not None
+                #   STEP 14: Check that entry is not None
                 if (lData[i][j] != None):
-                    #   STEP 17: Get range and center
-                    fCenter = lRange[lMap[j]][4]
-                    fRange  = lRange[lMap[j]][5]
+                    #   STEP 15: Get range and center
+                    lTmp_Map    = lRange[lMap[j]]
 
-                    #   STEP 18: Get offset
+                    fCenter     = lTmp_Map[4]
+                    fRange      = lTmp_Map[5]
+
+                    #   STEP 16: Get offset
                     fOffset = lData[i][j] - fCenter
+
+                    #   STEP 17: Check if class map not set
+                    if (len(lMap_Out) == j):
+                        #   STEP 18: Append current map
+                        lMap_Out.append(lTmp_Map)
 
                     #   STEP 19: Check that range > 0
                     if (fRange == 0):
                         #   STEP 20: Set to center
-                        #   ToDo might not be right
                         lData[i][j] = kwargs["dataRange"]["center"]
+
                         continue
 
                     #   STEP 21: Get percentage offset
@@ -2271,11 +2506,25 @@ class Data:
                     lData[i][j] = fOffset + kwargs["dataRange"]["center"]
 
                 else:
-                    #   STEP 26: Set data point to center 
+                    #   STEP 26: Check if class map not set
+                    if (len(lMap_Out) == j):
+                        #   STEP 27: Get map
+                        lTmp_Map    = lRange[lMap[j]]
+
+                        #   STEP 28: Append current map
+                        lMap_Out.append(lTmp_Map)
+
+                    #   STEP 29: Set data point to center 
                     lData[i][j] = 0.0
 
-        #   STEP 28: Return
-        return lData
+        #   STEP 30: Populate output dict
+        dOut    = {
+            "data": lData,
+            "map":  lMap_Out
+        }
+
+        #   STEP 31: Return
+        return dOut
 
     #
     #   endregion

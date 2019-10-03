@@ -193,31 +193,52 @@ class SwarmChan:
                 :return: >> (None)
         """
 
-        #   STEP 1: Check that the data size is correct
+        #   STEP 0: Local variables
+
+        #   STEP 1: Setup - Local variables
+
+        #   STEP 2: Check that the data size is correct
         if (len(_lData) != self.__iParticles):
-            raise Exception("Error in Swarm.setParticleFitness: Wrong data size for fitness initialization")
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Swarm.setParticleFitness() -> Step 2: Wrong data size for fitness initialization")
 
-        #   STEP 2: Be safe OwO
+        #   STEP 4: Be safe OwO
         try:
-
-            #   STEP 3: Do the loopdy loop
+            #   STEP 5: Do the loopdy loop
             for i in range(0, self.__iParticles):
-                self.lParticles[i].setFitness(_lData[i])
+                #   STEP 6: Check if fitness is list
+                if (type(_lData[i]) == list):
+                    #   STEP 7: Setup - Tmp variables
+                    fSum    = 0.0
 
-                if (_lData[i] < self.fBestSolution):
+                    #   STEP 8: Loop through list
+                    for j in range(0, len( _lData[i] ) ):
+                        #   STEP 9: Sum fitness values
+                        fSum    += _lData[i][j]
+
+                    #   STEP 10: Set particle fitness
+                    self.lParticles[i].setFitness( fSum )
+
+                #   STEP 11: Fitness isn't a list
+                else:
+                    #   STEP 12: Set particle fitness
+                    self.lParticles[i].setFitness(_lData[i])
+
+                #   STEP 13: Check if current particle fitness is new best
+                if (self.lParticles[i].fFitness < self.fBestSolution):
+                    #   STEP 14: Update - Best variables
                     self.iBestSolution = i
                     self.lBestSolution = self.lParticles[i].lCurrPosition
 
-                    self.fBestSolution = _lData[i]
+                    self.fBestSolution = self.lParticles[i].fFitness
             
-            print("", end="")
-
+        #   STEP 15: Oopsie daisie
         except Exception as ex:
-            #   STEP 4: Whoopsy daisy
+            #   STEP 16: Whoopsy daisy
             print("Initial error: ", ex)
-            raise Exception("Error in Swarm.setParticleFitness() -> Step 2")
+            raise Exception("Error in Swarm.setParticleFitness() -> Step 15")
 
-        #   STEP 5: Return
+        #   STEP 17: Return
         return    
         
     #
@@ -314,21 +335,30 @@ class SwarmChan:
                 #   STEP 4: Create velocity
                 lVel = []
                 
+                #   STEP 5: Loop through list
                 for j in range(0, len(_lData[i])):
-                    lVel.append(np.zeros(len(_lData[i][j])))
+                    #   STEP 6: Check if 2D list
+                    if (type(_lData[i][j]) == list):
+                        #   STEP 7: Append zeros to velocity
+                        lVel.append(np.zeros(len(_lData[i][j])))
 
-                #   STEP 5: Set velocity
+                    #   STEP 8: Not a list
+                    else:
+                        #   STEP 9: Append zero to velocity
+                        lVel.append(0.0)
+
+                #   STEP 10: Set velocity
                 self.lParticles[i].lVelocity = lVel
                 
         except Exception as ex:
-            #   STEP 2.?: Whoopsy daisy
+            #   STEP 11: Whoopsy daisy
             print("Initial error: ", ex)
             raise Exception("Error in Swarm.psoInitParticlePositions()")
         
-        #   STEP 3: Set PSO positions flag to True
+        #   STEP 12: Set PSO positions flag to True
         self.__bPsoState[0] = True
 
-        #   STEP 4: Return
+        #   STEP 13: Return
         return
 
     def initPsoFitness(self, _lData: list) -> None:

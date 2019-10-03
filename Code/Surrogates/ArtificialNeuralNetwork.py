@@ -1907,6 +1907,12 @@ class Annie:
 
 					~ child set	= ( vars ) The child data set created from the
 						incorrecy data samples
+
+			|\n
+
+			ToDo:
+
+				+ Recount steps
 		"""
 
 		#	STEP 0: Local variables
@@ -1918,8 +1924,10 @@ class Annie:
 		#	STEP 1: Setup - Local variables
 		iBatch_Iterations	= int( np.ceil( _dData.getLen() / iBatch_Size ) )
 
-		if (iBatch_Iterations == 1):
-			iBatch_Size = int(iBatch_Size * 1.5)
+		#	STEP 2: Check for small dataset
+		if (_dData.getLen() < iBatch_Size):
+			#	STEP 3: Update - Batch size
+			iBatch_Size 	+= min( _dData.getLen() * _dData.getInputWidth(), 2 * iBatch_Size )
 
 		#	STEP 2: User Output
 		if (self.bShowOutput):

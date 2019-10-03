@@ -37,8 +37,6 @@ class UwU:
         #region STEP 0: Local variables
 
         self.__enum                 = en.UwU
-        self.__cf                   = Conny()
-        self.__cf.load(self.__enum.value)
 
         #endregion
 
@@ -46,7 +44,7 @@ class UwU:
 
         #   region STEP 1.1: Bools
 
-        self.__bAllowTesting        = self.__cf.data["parameters"]["allow testing"]
+        self.__bAllowTesting        = False# self.__cf.data["parameters"]["allow testing"]
 
         #   endregion
 
@@ -67,7 +65,7 @@ class UwU:
 
         #   region STEP 2.2: Bools
 
-        self.bShowOutput        = self.__cf.data["parameters"]["show output"]
+        self.bShowOutput        = False #self.__cf.data["parameters"]["show output"]
 
         #   endregion
 
@@ -76,17 +74,10 @@ class UwU:
         self.data               = {}
 
         #   endregion
+
+        #endregion
         
-        #endregion
-
-        #region STEP 3: Setup - Private variables
-
-        #endregion
-
-        #region STEP 4: Setup - Public variables
-
-        #endregion
-
+        #   STEP 3: Return
         return
     
     #

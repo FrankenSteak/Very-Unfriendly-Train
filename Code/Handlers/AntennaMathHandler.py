@@ -7,6 +7,7 @@ import  numpy                           as np
 import  os
 import  random                          as rn
 import  sys
+import  time                            as tm
 
 sys.path.append(os.path.abspath("."))
 
@@ -443,11 +444,12 @@ class Matthew:
 
         #   STEP 29: Populate output
         dOut = {
-            "items":    3,
+            "items":    4,
 
             "0":        "feed",
             "1":        "ground plane",
             "2":        "radiating plane",
+            "3":        "substrate",
 
             "feed":
             {
@@ -501,6 +503,12 @@ class Matthew:
             },
             "substrate":
             {
+                "items":    4,
+                "0":    "l",
+                "1":    "w",
+                "2":    "x",
+                "3":    "y",
+                
                 "x": 0.0,
                 "y": 0.0,
                 "l": dGeometry["ground plane"]["length"],
@@ -1413,10 +1421,7 @@ class Matthew:
 
         #   STEP 4: Check if file exists
         if (os.path.exists(kwargs["dir"]) == False):
-            #   STEP 5: Error handling
-            print("An error occured in Matthew.__getFitness_Frequency__() -> Step 4: Specified .out file does not exist")
-            print("\t- Directory: " + kwargs["dir"])
-            print("\t- Returning default fitness library.\n")
+            print("\n\n\tAn error occured in Matthew.__getFitness_Frequency__() -> Step 4: Specified .out file does not exist")
             
             dOut ={
                 "lower":

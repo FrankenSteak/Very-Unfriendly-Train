@@ -209,9 +209,6 @@ class Golem:
                 + rand  = ( bool ) A flag that specifies whether or not random
                     parameters are allowed for the training and mapping process
 
-                + testing   = ( bool ) Disables Data.setData() for testing
-                    purposes
-
                 + remap = ( bool ) A flag to indicate if the results of the
                     mapping should be un-normalized via the dataset
 
@@ -266,7 +263,7 @@ class Golem:
             #   STEP 12: Check remapping state
             if (kwargs["remap"]):
                 #   STEP 13: Remap
-                self.vBest = kwargs["data"].remap( cp.deepcopy( self.vBest ) )
+                self.vBest = kwargs["data"].remap( candidate=cp.deepcopy( self.vBest ) )
 
         #   STEP 14: Populate output dict
         dOut = {
@@ -676,7 +673,7 @@ class Golem:
         self.__initGlobals__()
 
         #   STEP 11: Start threads
-        print("\t~ Starting surrogate training")
+        print("\t{" + Helga.time() + "} - Starting surrogate training\t\t-> ", end="")
         tUI_Thread.start()
         tTR_Thread.start()
 
@@ -721,9 +718,6 @@ class Golem:
 
                 #   STEP 26: Exit loop
                 break
-
-        #   STEP 27: Return
-        del tUI_Thread
 
         return
 
@@ -853,22 +847,32 @@ class Golem:
                 #   STEP 22: User output - minimal
                 print("!", end="")
 
-            else:
+            elif (fTmp_Accuracy["percent accuracy"] == 1.0):
                 #   STEP 23: Minimal output
+                print(":", end="")
+
+            elif (fTmp_Fitness < fBest_Fitness):
+                fBest_Fitness   = fTmp_Fitness
+                iBest_Index     = i
+                
+                print("#", end="")
+
+            else:
                 print(".", end="")
 
             #   STEP 24: Check if fitness below required and min surrogates generated 
             if ((fBest_Fitness < kwargs["acc"]) and (i >= kwargs["min"])):
                 #   STEP 25: Exit loop early
-                print("")
                 break
 
             #   STEP 26: Check if exit even
             if (thread_eEX.is_set()):
                 #   STEP 27: Exit loop early
-                print("")
                 break
 
+
+        print("")
+        
         #   STEP 28: Swap best surrogate to index = 0
         dSwap_0                         = thread_lTR_Results[0]
         thread_lTR_Results[0]           = thread_lTR_Results[iBest_Index]
@@ -935,6 +939,18 @@ class Golem:
 
                 Maps the fittest surrogate as well as all the other surrogates
                 whose fitness were within the required range
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + data  = ( vars ) A Data container containing the dataset to
+                    be used during the mapping process
+                    ~ Required
         """
 
         #   STEP 0: Local variables
@@ -943,37 +959,72 @@ class Golem:
         self.vBest              = None
         self.vFitness           = np.inf
 
+        fTmp_Fitness            = np.inf
+
         #   STEP 1: Setup - Local variables
         self.lMap_Results     = []
         self.lMap_Fitness     = []
         
-        #   STEP 2: User output
-        print("\t~ Starting surrogate mapping\t\t-> ", end="")
+        #   STEP 2: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Golem.__map_srgOverseer__() -> Step 2: No data arg passed")
 
-        #   STEP 3: Loop through surrogates
-        for i in range(0, len(self.__lSRG)):
-            #   STEP 4: If surrogate fitness less than required or i == 0
-            if ((i == 0) or (self.__lSRG_Accuracy[i] == 1.0)):
-                #   STEP 5: Outsource
-                dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i], optimizer=ga.TRO)
+        #   STEP 4: User output
+        if (self.bShowOutput):
+            print("\t{" + Helga.time() + "} - Starting surrogate mapping\t\t\t-> ", end="")
 
-                #   STEP 6: Append to results
-                self.lMap_Results.append(dTmp_MapResults["result"])
-                self.lMap_Fitness.append(dTmp_MapResults["fitness"])
+        #   STEP 5: If optimizer output
+        if (optimizer.bShowOutput):
+            print("")
 
-                #   STEP 7: Check if new fittest
-                if (dTmp_MapResults["fitness"] < self.vFitness):
-                    #   STEP 8: Set new fittest
-                    self.vBest      = dTmp_MapResults["result"]
-                    self.vFitness   = dTmp_MapResults["fitness"]
+        try:
 
-                    print("!", end="")
+            #   STEP 6: Loop through surrogates
+            for i in range(0, len(self.__lSRG)):
+                #   STEP 7: Setup - Scope varibales
+                dTmp_MapResults     = None
 
-                else:
-                    print(".", end="")
+                #   STEP 8: Best candidate
+                if (i == 0):
+                    #   STEP 9: Outsource threaded mapping
+                    dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])#, optimizer=ga.TRO)
 
-        #   STEP 9: Return
-        print("")
+                #   STEP 10: Else if accuracy = 100%
+                elif (self.__lSRG_Accuracy[i] == 1.0):
+                    #   STEP 11: Outsource mapping
+                    dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])
+
+                #   STPE 12: CHeck if there are results
+                if (dTmp_MapResults != None):
+                    #   STEP 13: Append to results
+                    self.lMap_Results.append(dTmp_MapResults["result"])
+                    self.lMap_Fitness.append(dTmp_MapResults["fitness"])
+
+                    #   STEP 14: Check - Optimizer output status
+                    if (optimizer.bShowOutput == False):
+                        #   STEP 15: Check if new results are best
+                        if (dTmp_MapResults["fitness"] < fTmp_Fitness):
+                            #   STEP 16: Update - Local variables
+                            fTmp_Fitness    = dTmp_MapResults["fitness"]
+
+                            #   STEP 17: User output
+                            print("!", end="")
+
+                        #   STEP 18: Not new best
+                        else:
+                            #   STEP 19: User output
+                            print(".", end="")
+
+            #   STEP 14: Setup - Best results
+            self.vBest      = self.lMap_Results[0]
+            self.vFitness   = self.lMap_Fitness[0]
+
+        except Exception as ex:
+            print("Initial error: ", ex)
+            print("An error occured in Golem.__map_srgOverseer__()")
+
+        #   STEP 15: Return
         return
 
     #
@@ -991,7 +1042,6 @@ class Golem:
         #   STEP -1: Global variables
         global  thread_sUI
         global  thread_eUI
-        global  thread_lUI
 
         global  thread_eGlobal
 
@@ -1000,11 +1050,11 @@ class Golem:
         #   STEP 1: Setup - Local variables
         
         #   STEP 2: Attempt to acquire lock
-        if (thread_eUI.is_set()):
+        if (thread_eUI.is_set() == True):
             thread_eUI.wait()
 
         #   STEP 3: Wait for user input
-        thread_sUI = input("\t> ")
+        thread_sUI = input("")
 
         #   STEP 5: Check that parent hasn't reset
         if (thread_eUI != None):

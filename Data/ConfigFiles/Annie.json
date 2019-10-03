@@ -111,7 +111,7 @@
                 "2": "acc requirement",
 
                 "epochs":           10,
-                "batch size":       25,
+                "batch size":       20,
                 "acc requirement":  0.985
             }
         },

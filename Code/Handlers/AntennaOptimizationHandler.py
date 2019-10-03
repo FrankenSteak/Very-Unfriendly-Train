@@ -90,8 +90,6 @@ class Natalie:
 
         #region STEP 1: Private variables
 
-        self.__iSRG_Candidates  = None
-
         #   region  STEP 1.1: Antenna Params
 
         self.__sDirectory       = None
@@ -115,6 +113,7 @@ class Natalie:
         self.__iTRO_Candidates  = None
 
         self.__iTRO_Region      = None
+        self.__iTRO_Region_SRG  = None
 
         self.__fTRO_Acc         = None
 
@@ -122,44 +121,50 @@ class Natalie:
 
         #   region STEP 1.3: TRO Runtime requirements
 
-        self.__dTRO_Template    = None
+        self.__dTemplate        = None
 
         #   endregion
 
         #endregion
 
-        #region STEP 2->5: Error checking
+        #   STEP 2: Public variables
+        self.bShowOutput        = self.__cf.data["parameters"]["show output"]
 
-        #   STEP 2: Check if ant arg was passed
+        #region STEP 3->7: Error checking
+
+        #   STEP 3: Check if ant arg was passed
         if ("ant" not in kwargs):
-            #   STEP 3: Error handling
+            #   STEP 4: Error handling
             raise Exception("An error occured in Natalie.__init__() -> Step 4: No ant arg passed")
         
-        #   STEP 4: Check if params arg passed
+        #   STEP 5: Check if params arg passed
         if ("params" in kwargs):
-            #   STEP 5: Check if overwrite arg passed
+            #   STEP 6: Check if overwrite arg passed
             if ("overwrite" not in kwargs):
-                #   STEP 6: Error handling
+                #   STEP 7: Error handling
                 raise Exception("An error occured in Natalie.__init__() -> Step 5: No overwrite arg passed")
+        
         #
         #   endregion
 
-        #region STEP 6->9: Init class
+        #region STEP 8->11: Init class
 
-        #   STEP 6: Check if default init
+        #   STEP 8: Check if default init
         if ("params" in kwargs):
-            #   STEP 7: Outsource init
+            #   STEP 9: Outsource init
             self.__initClass__(params=kwargs["params"], overwrite=kwargs["overwrite"])
             
-        #   STEP 8: Outsource default init
+        #   STEP 10: Outsource default init
         else:
             self.__initClass__()
 
-        #   STEP 9: Init antenna params
+        #   STEP 11: Init antenna params
         self.__initAnt__(ant=kwargs["ant"])
-
+        
+        #
         #endregion
 
+        #   STEP 12: Return
         return
 
     #
@@ -200,6 +205,8 @@ class Natalie:
                 + recount steps
         """
 
+        #   region STEP 0->1: Setup - Initial variable setup
+
         #   STEP 0: Local variables
         dAnt_Best_Geo           = cp.deepcopy(self.__dAnt_Center)
 
@@ -210,7 +217,8 @@ class Natalie:
 
         sDir                    = self.__sDirectory + "\\" + Helga.ticks()
 
-        iRegion                 = cp.deepcopy(self.__iTRO_Region)
+        iRegion_Algorithm       = cp.deepcopy(self.__iTRO_Region)
+        iRegion_SRG             = cp.deepcopy(self.__iTRO_Region_SRG)
 
         bUseSurrogate           = False
         bSaveContinuous         = False
@@ -221,6 +229,11 @@ class Natalie:
         del dAnt_Best_Geo["fitness"]
 
         os.mkdir(sDir)
+
+        #
+        #   endregion
+
+        #   region STEP 2->7: Setup - Local variables
 
         #   STEP 2: Check if surrogate use in kwargs
         if ("use_surrogate" in kwargs):
@@ -237,57 +250,74 @@ class Natalie:
             #   STEP 7: Update - Local var
             bDelUnworthy    = kwargs["del_unworthy"]
 
-        #   STEP 8: User output
-        print("Natalie (Optimize) {" + Helga.time() + "} - Begining Trust-Region Optimization of patch antenna.")
+        #
+        #   endregion
 
-        #   region STEP 9->52: TRO
+        #   STEP 8: User output
+        if (self.bShowOutput):
+            print("Natalie (Optimize) {" + Helga.time() + "} - Begining Trust-Region Optimization of patch antenna.")
+
+        #   region STEP 9->74: TRO
 
         #   STEP 9: Loop through max iterations
         for j in range(0, self.__iTRO_Iterations):
             #   STEP 10: Iteration tmp vars
-            iTmp_Index          = 0
-            iTmp_Fitness        = np.inf
+            iCount          = 0
+            iTmp_Index      = 0
+            iTmp_Fitness    = np.inf
 
-            bTmp_Region         = False
+            bTmp_Region     = False
 
-            #   region STEP 11->17: Candidate generation and simulation
+            #   region STEP 11->20: Candidate generation and simulation
 
-            #   STEP 11: Get candidates
-            lTmp_Candidates = self.__getCandidates__(center=dAnt_Best_Geo, region=iRegion, candidates=self.__iTRO_Candidates)
+            while (True):
+                #   STEP 11: Get candidates
+                lTmp_Candidates = self.__getCandidates__(center=dAnt_Best_Geo, region=iRegion_SRG, candidates=self.__iTRO_Candidates)
 
-            #   STEP 12: Get fitness
-            lTmp_Fitness    = Matthew.getPatch_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+                #   STEP 12: User output
+                if (self.bShowOutput):
+                    print("\n\t{" + Helga.time() + "} - Simulating " + str(self.__iTRO_Candidates) + " antenna candidates\n")
 
-            #   STEP 13: Append current best to temp lists
-            lTmp_Candidates.append(dAnt_Best_Geo)
-            lTmp_Fitness.append(dAnt_Best_Fit)
+                #   STEP 13: Simulate antennas
+                lTmp_Fitness    = Matthew.getPatch_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
 
-            #   STEP 14: Evaluate overall fitness of all geometries  
-            lTmp_Fitness_Actual = self.__evalFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
-            
-            #   STEP 15: Loop through candidates
-            iCount = 0
-            while (iCount < len(lTmp_Fitness_Actual)):
-                #   STEP 16: CHeck that default library wasn't returned
-                if (lTmp_Fitness_Actual[iCount]["desired"] == np.inf):
-                    #   STEP 17: Pop from list
-                    lTmp_Fitness_Actual.pop(iCount)
-                    lTmp_Candidates.pop(iCount)
+                #   STEP 14: Append current best to temp lists
+                lTmp_Candidates.append(dAnt_Best_Geo)
+                lTmp_Fitness.append(dAnt_Best_Fit)
+
+                #   STEP 15: Evaluate overall fitness of all geometries  
+                lTmp_Fitness_Actual = self.__evalFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
+                
+                #   STEP 16: Loop through candidates
+                while (iCount < len(lTmp_Fitness_Actual)):
+                    #   STEP 17: CHeck that default library wasn't returned
+                    if (lTmp_Fitness_Actual[iCount]["desired"] == np.inf):
+                        #   STEP 18: Pop from list
+                        lTmp_Fitness_Actual.pop(iCount)
+                        lTmp_Candidates.pop(iCount)
+
+                    #   STEP 19: Not default library
+                    else:
+                        #   STEP 20: Increment counter
+                        iCount += 1
+
+                if (len(lTmp_Candidates) >= self.__iTRO_Candidates):
+                    break
 
                 else:
-                    iCount += 1
+                    Helga.nop()
 
             #
             #   endregion
 
-            #   region STEP 18->??: Surrogate stuff
+            #   region STEP 21->37: Surrogate stuff
 
-            #   STEP 18: Check for surrogate use
+            #   STEP 21: Check surrogate status
             if (bUseSurrogate):
                 
-                #   region STEP 19->??: Get data for surrogate model
+                #   region STEP 22->29: Setup - Data container
 
-                #   STEP 15: Local variables
+                #   STEP 22: Setup - Scope variables
                 dTmp_Data               = None
                 dTmp_DataRange          = None
                 dTmp_DataMap            = None
@@ -296,17 +326,17 @@ class Natalie:
                 lTmp_DataMap_In         = []
                 lTmp_DataMap_Out        = []
 
-                #   STEP 16: Get new data set
+                #   STEP 23: Setup - New data container
                 dTmp_Data = self.__moldData__(candidates=lTmp_Candidates, fitness=lTmp_Fitness_Actual)
 
-                #   STEP 17: Set final data range
+                #   STEP 24: Setup - Final data range
                 dTmp_DataRange      = {
                     "lower":    -1.0,
                     "center":   0.0,
                     "upper":    1.0
                 }
 
-                #   STPE 18: Get data maps
+                #   STPE 25: Setup - Data maps
                 for i in range(0, len(dTmp_Data["in"])):
                     lTmp_DataMap_In.append(i)
 
@@ -317,12 +347,20 @@ class Natalie:
                     "in":   lTmp_DataMap_In,
                     "out":  lTmp_DataMap_Out
                 }
+                
+                #   STEP 26: Setup - Data container
+                vData   = Data()
 
-                #   STEP 19: Get data minz
+                vData.setData(data=dTmp_Data,           automap=False,          transpose=True)
+                
+                #   STEP 27: Get output minimum
+                fTmp_OutputMin  = vData.getOutputMin(0)
+
+                #   STEP 28: Setup - Data minz
                 dTmp_DataMin        = {
                     "output":
                     {
-                        "0":    [1.25, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.15, 0.05, 0.0]
+                        "0":    [fTmp_OutputMin - 0.075]
                     },
                     "input":
                     {
@@ -330,149 +368,170 @@ class Natalie:
                     }
                 }
 
+                #   STEP 29: Map data
+                print("\t\tDistance: ", vData.getInputDistance(1), end="\n\n")
+
+                vData.mapData(mapRange=dTmp_DataRange,  mapSets=dTmp_DataMap,   input=True,         output=True,        min=dTmp_DataMin)
+
+                print("\t\tDistance: ", vData.getInputDistance(1), end="\n\n")
+
                 #
                 #   endregion
-                
-                #   STEP 20: Creat tmp vars
-                vData   = Data()
 
-                vData.setData(data=dTmp_Data, automap=False, transpose=True)
-                
-                vData.mapData(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=True, output=True, min=dTmp_DataMin)
-                
-                vData.exportData(file=sDir + "\\Data_" + Helga.ticks() + ".json", full_path=True)
+                #   region STEP 30->37: Surrogate creation, training, mapping, simulationg, and fitness evaluation
 
-                #   STEP 21: Create new surrogate handler
+                #   STEP 30: Create new surrogate handler
                 vGolem = Golem(numSurrogates=8)
 
+                #   STEP 31: Update - surrogate handler parameters
                 vGolem.bSRG_Random              = True
                 vGolem.bSRG_RandomParameters    = False
 
-                #   STEP 22: Train and map the surrogates
-                vGolem.trainAndMap(testing=True, data=vData, region=float(iRegion)/self.__iTRO_Region, rand=True)
+                #   STEP 32: Train and map the surrogates
+                lSRG_Results    = vGolem.trainAndMap(data=vData, region=float(iRegion_Algorithm)/self.__iTRO_Region, rand=True, remap=True)
+                
+                #   STEP 33: Remap - Surrogate candidate
+                lSRG_Candidate  = self.__remapData__(candidate=lSRG_Results["result"])
 
-                #   STEP 23: Get fitness fqor surrogate results
-                #lTmp_SurrogateFitness   = Matthew.getPatch_Json(dir=sDir, ant=[lTmp_SurrogateResults["result"]], frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+                #   STEP 34: User output
+                if (self.bShowOutput):
+                    print("\n\t{" + Helga.time() + "} - Simulating surrogate candidate antenna")
 
-                #   STEP 24: Append surrogate results to current lists
-                #lTmp_Candidates.append(lTmp_SurrogateResults[0])
-                #lTmp_Fitness.append(lTmp_SurrogateFitness[0])
+                #   STEP 35: Simulate - Surrogate candidate
+                lSRG_Fitness    = Matthew.getPatch_Json(dir=sDir, ant=[lSRG_Candidate], frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+                lTmp_Fitness.append(lSRG_Fitness[0])
+
+                #   STEP 36: Evaluate   - Surrogate candidate fitness
+                lSRG_Fitness    = self.__evalFitness__(ant=[lSRG_Candidate], fitness=lSRG_Fitness)
+            
+                #   STEP 37: Append - Surrogate candidate
+                lTmp_Candidates.append(lSRG_Candidate)
+                lTmp_Fitness_Actual.append(lSRG_Fitness[0])
+
+                #
+                #   endregion
 
             #
             #   endregion
 
-            #   region STEP 25->39: Candidate evaluation
+            #   region STEP 38->42: Candidate evaluation
 
-            #   STEP 25: Reset best candidates
+            #   STEP 38: Reset best candidates
             dAnt_Best_Geo   = None
             dAnt_Best_Fit   = None
 
-            #   STEP 26: Loop through candidates
+            #   STEP 39: Loop through candidates
             for i in range(0, len(lTmp_Fitness_Actual)):
-                #   STEP 27: Check if less than current best fitness
+                #   STEP 40: Check if less than current best fitness
                 if (lTmp_Fitness_Actual[i]["final"] < iTmp_Fitness):
-                    #   STEP 28: Update tmp vars
+                    #   STEP 41: Update tmp vars
                     iTmp_Index      = i
                     iTmp_Fitness    = lTmp_Fitness_Actual[i]["final"]
 
-            #   STEP 29: Set new best candidate
+            #   STEP 42: Set new best candidate
             dAnt_Best_Geo = lTmp_Candidates[iTmp_Index]
             dAnt_Best_Fit = lTmp_Fitness[iTmp_Index]
             
             #
             #   endregion
 
-            #   region STEP 30->35: Cull the unworthy :)
+            #   region STEP 43->61: Region update
 
-            #   STEP 30: Check for unworthy deletion
-            if (bDelUnworthy):
-                #   STEP 31: Loop through candidates
-                for i in range(0, len(lTmp_Fitness_Actual)):
-                    #   STEP 32: If not current best and not previous best
-                    if ((i != iTmp_Index) and (i != self.__iTRO_Candidates)):
-                        #   STEP 33: Get path for directory
-                        sTmp_Path = os.path.dirname(lTmp_Fitness[i]["dir"])
-
-                        #   STEP 34: If not center
-                        if ("center" not in sTmp_Path):
-                            #   STEP 35: Delete directory
-                            sh.rmtree(sTmp_Path)
-
-            #
-            #   endregion
-            
-            #   region STEP 33->45: Region update
-
-            #   STEP 33: Check for surrogate use
+            #   STEP 43: Check for surrogate use
             if (bUseSurrogate):
-                #   STEP 34: Check if surrogate candidate
+                #   STEP 44: Check if surrogate candidate
                 if (iTmp_Index == len(lTmp_Candidates) - 1):
-                    #   STEP 35: Update region
-                    iRegion         += 1
-                    bTmp_Region     = True
+                    #   STEP 45: Update region
+                    iRegion_Algorithm   += 1
+                    iRegion_SRG         += 1
 
-                    #   STEP 36: User output
-                    print("\n\t- Iteration (" + str(j) + ") {" + Helga.time() + "} : Increasing region -> " + str(iRegion))
+                    bTmp_Region         = True
 
-                    dHold = lTmp_Fitness_Actual[self.__iTRO_Candidates]
-                    print("\t\t-Initial:", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
-                    
-                    dHold = lTmp_Fitness_Actual[iTmp_Index]
-                    print("\t\t-New:\t", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                    print("")
+                    #   STEP 46: User output
+                    if (self.bShowOutput):
+                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region via surrogate -> " + str(iRegion_Algorithm))
 
-            #   STEP 37: Check for region update
+                        dHold = lTmp_Fitness_Actual[self.__iTRO_Candidates]
+                        print("\t\t-Initial:", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        
+                        dHold = lTmp_Fitness_Actual[iTmp_Index]
+                        print("\t\t-New:\t", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        print("")
+
+                elif (iRegion_SRG > 0):
+                    iRegion_SRG     -= 1
+
+            #   STEP 47: Check region update status
             if (bTmp_Region == False):
-                #   STEP 38: Check if new best
+                #   STEP 48: Check if new best
                 if (iTmp_Index != self.__iTRO_Candidates):
-                    #   STEP 39: Update region
-                    iRegion += 1
+                    #   STEP 49: Update region
+                    iRegion_Algorithm   += 1
 
-                    #   STEP 40: User output
-                    print("\n\t- Iteration (" + str(j) + ") {" + Helga.time() + "} : Increasing region via Surrogate -> " + str(iRegion))
+                    #   STEP 50: User output
+                    if (self.bShowOutput):
+                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Algorithm))
 
+                #   STEP 51: Not new best
+                else:
+                    #   STEP 52: Check if we lost the surrogate
+                    if (lTmp_Fitness_Actual[ len( lTmp_Fitness_Actual ) - 1 ]["final"] != np.inf):
+                        #   STEP 53: Check if region too small
+                        if (iRegion_Algorithm <= 0):
+                            #   STEP 54: Exit loop
+                            break
+                        
+                        #   STPE 55: Region not too small yet
+                        else:
+                            #   STEP 56: Update - Decrement region
+                            iRegion_Algorithm   -= 1
+                            iRegion_SRG         -= 1
+
+                            #   STEP 57: User output
+                            if (self.bShowOutput):
+                                print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Algorithm))
+
+                    #   STEP 58: Lost surrogate candidate
+                    else:
+                        #   STEP 59: User output
+                        if (self.bShowOutput):
+                            print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") - Surrogate lost, maintaing region -> " + str(iRegion_Algorithm))
+
+                #   STEP 60: User output
+                if (self.bShowOutput):
                     dHold = lTmp_Fitness_Actual[self.__iTRO_Candidates]
                     print("\t\t-Initial:", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                     
                     dHold = lTmp_Fitness_Actual[iTmp_Index]
                     print("\t\t-New:\t", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+
+                    #   STEP 61: Check for surrogate use status
+                    if (bUseSurrogate):
+                        dHold = lTmp_Fitness_Actual[len(lTmp_Candidates) - 1]
+                        print("\t\t-SRG:\t", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        
                     print("")
-
-                #   STEP 41: Not new best
-                else:
-                    #   STEP 42: Check if region too small
-                    if (iRegion <= 0):
-                        #   STEP 43: Exit loop
-                        break
-
-                    else:
-                        #   STEP 44: Update region
-                        iRegion -= 1
-
-                        #   STEP 45: User output
-                        print("\n\t- Iteration (" + str(j) + ") {" + Helga.time() + "} : Decreasing region -> " + str(iRegion))
-                        print("")
 
             #
             #   endregion
 
-            #   region STEP 46->52: Continuous save
+            #   region STEP 62->68: Continuous save
 
-            #   STEP 46: Check for continuous save
+            #   STEP 62: Check for continuous save
             if (bSaveContinuous):
-                #   STEP 47: Get local vars
+                #   STEP 63: Setup - File location
                 sTmp_File = sDir + "\\" + str(j) + ".json"
 
-                #   STEP 48: Create file
+                #   STEP 64: Create file
                 vTmp_File   = open(sTmp_File, "a")
 
-                #   STEP 49: Close file
+                #   STEP 65: Close file
                 vTmp_File.close()
                 vTmp_File = None
 
-                #   STEP 50: Re-open file
+                #   STEP 66: Re-open file
                 with open(sTmp_File, "r+") as vTmp_File:
-                    #   STEP 51: Create temp dictionary
+                    #   STEP 67: Create temp dictionary
                     dTmp = {
                         "geometry": dAnt_Best_Geo,
                         "fitness":  lTmp_Fitness_Actual[iTmp_Index],
@@ -480,16 +539,35 @@ class Natalie:
                         "natalie":  self.__cf.data
                     }
 
-                    #   STEP 52: Dump data
+                    #   STEP 68: Dump data
                     js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
 
             #
             #   endregion
         
+            #   region STEP 69->74: Cull the unworthy :)
+
+            #   STEP 69: Check culling status
+            if (bDelUnworthy):
+                #   STEP 70: Loop through candidates
+                for i in range(0, len(lTmp_Fitness_Actual)):
+                    #   STEP 71: If not current best and not previous best
+                    if ((i != iTmp_Index) and (i != self.__iTRO_Candidates)):
+                        #   STEP 72: Get path for directory
+                        sTmp_Path = os.path.dirname(lTmp_Fitness[i]["dir"])
+
+                        #   STEP 73: If not center
+                        if ("center" not in sTmp_Path):
+                            #   STEP 74: Delete directory
+                            sh.rmtree(sTmp_Path)
+
+            #
+            #   endregion
+            
         #
         #   endregion
 
-        #   STEP 53: Return
+        #   STEP 75: Return
         return
         
     #
@@ -547,8 +625,6 @@ class Natalie:
                 self.__cf.update()
 
         #   STEP 8: Init - Class variables
-        self.__iSRG_Candidates  = self.__cf.data["parameters"]["surrogates"]["candidates"]
-
         self.__dAnt_Mesh = {
             "wire radius":      self.__cf.data["parameters"]["mesh"]["wire radius"],
             "size":             self.__cf.data["parameters"]["mesh"]["size"]
@@ -562,8 +638,8 @@ class Natalie:
 
         self.__iTRO_Iterations  = self.__cf.data["parameters"]["trust region"]["iterations"]
         self.__iTRO_Candidates  = self.__cf.data["parameters"]["trust region"]["candidates"]
-        self.__iTRO_Region      = self.__cf.data["parameters"]["trust region"]["initial region"]
-        self.__fTRO_Acc         = self.__cf.data["parameters"]["trust region"]["accuracy requirement"]
+        self.__iTRO_Region      = self.__cf.data["parameters"]["trust region"]["algorithm region"]
+        self.__iTRO_Region_SRG  = self.__cf.data["parameters"]["trust region"]["surrogate region"]
 
         #   region STEP 9->11: Retrieve default ant config
 
@@ -675,7 +751,8 @@ class Natalie:
         dFrequency["samples"] = self.__cf.data["parameters"]["frequency"]["accuracy check samples"]
 
         #   STEP 13: User output
-        print("Natalie (init-ant) {" + Helga.time() + "} - Generating initial antenna for specified frequency")
+        if (self.bShowOutput):
+            print("Natalie (init-ant) {" + Helga.time() + "} - Generating initial antenna for specified frequency")
 
         #   STEP 14: Get default patch
         self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=self.__sDirectory, substrate=self.__dAnt_Substrate, frequency=dFrequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
@@ -854,6 +931,7 @@ class Natalie:
                 "0":        "feed",
                 "1":        "ground plane",
                 "2":        "radiating plane",
+                "3":        "substrate",
 
                 "feed":
                 {
@@ -867,13 +945,13 @@ class Natalie:
                 },
                 "ground plane":
                 {
-                    "items":    4,
+                    "items":    5,
 
                     "0":        "l",
                     "1":        "w",
                     "2":        "x",
                     "3":        "y",
-                    #"4":        "slots",
+                    "4":        "slots",
 
                     "l":        self.__randVal__(center=dCenter["ground plane"]["l"], scalars=dScalars["ground plane"]["l"], region=iRegion),
                     "w":        self.__randVal__(center=dCenter["ground plane"]["w"], scalars=dScalars["ground plane"]["w"], region=iRegion),
@@ -884,13 +962,13 @@ class Natalie:
                 },
                 "radiating plane":
                 {
-                    "items":    4,
+                    "items":    5,
 
                     "0":        "l",
                     "1":        "w",
                     "2":        "x",
                     "3":        "y",
-                    #"4":        "slots",
+                    "4":        "slots",
                     
                     "l":        self.__randVal__(center=dCenter["radiating plane"]["l"], scalars=dScalars["radiating plane"]["l"], region=iRegion),
                     "w":        self.__randVal__(center=dCenter["radiating plane"]["w"], scalars=dScalars["radiating plane"]["w"], region=iRegion),
@@ -920,83 +998,23 @@ class Natalie:
                 }
             }
 
-            #   region STEP 11->13: Get substrate x co-ordinate
+            #   STEP 11: Update - Candidate substrate
+            self.__remapData_Substrate__(candidate=dTmp_Candidate)
 
-            #   STEP 11: if ground plane x less than radiating plane
-            if (dTmp_Candidate["ground plane"]["x"] < dTmp_Candidate["radiating plane"]['x']):
-                #   STEP 12: Set x = gp[x]
-                dTmp_Candidate["substrate"]["x"] = dTmp_Candidate["ground plane"]["x"]
-
-            else:
-                #   STEP 13: Set x = rp[x]
-                dTmp_Candidate["substrate"]["x"] = dTmp_Candidate["radiating plane"]["x"]
-
-            #
-            #   endregion
-
-            #   region STEP 14->16: Get substrate y co-ordinate
-
-            #   STEP 14: If gp y less than rp
-            if (dTmp_Candidate["ground plane"]["y"] < dTmp_Candidate["radiating plane"]["y"]):
-                #   STEP 16: Set y = gp[y]
-                dTmp_Candidate["substrate"]["y"] = dTmp_Candidate["ground plane"]["y"]
-
-            else:
-                #   STEP 17: Set y = rp[yu]
-                dTmp_Candidate["substrate"]["y"] = dTmp_Candidate["radiating plane"]["y"]
-                
-            #
-            #   endregion
-
-            #   region STEP 17->20: Get substrate length
-
-            #   STEP 17: Get furthest on l axis
-            fTmp_GP = dTmp_Candidate["ground plane"]["x"] + dTmp_Candidate["ground plane"]["l"]
-            fTmp_RP = dTmp_Candidate["radiating plane"]["x"] + dTmp_Candidate["radiating plane"]["l"]
-
-            #   STEP 18: If gp l less than rp
-            if (fTmp_GP > fTmp_RP):
-                #   STEP 19: Set l = gp
-                dTmp_Candidate["substrate"]["l"] = fTmp_GP - dTmp_Candidate["substrate"]["x"]
-
-            else:
-                #   STEP 20: Set l = rp
-                dTmp_Candidate["substrate"]["l"] = fTmp_RP - dTmp_Candidate["substrate"]["x"] + 0.05
-                dTmp_Candidate["ground plane"]["l"] = fTmp_RP - dTmp_Candidate["ground plane"]["x"] + 0.05
-
-            #
-            #   endregion
-
-            #   region STEP 21->24: Get substrate width
-
-            #   STEP 21: Get furthest on W axis
-            fTmp_GP = dTmp_Candidate["ground plane"]["y"] + dTmp_Candidate["ground plane"]["w"]
-            fTmp_RP = dTmp_Candidate["radiating plane"]["y"] + dTmp_Candidate["radiating plane"]["w"]
-
-            #   STEP 22: If gp W less than rp
-            if (fTmp_GP > fTmp_RP):
-                #   STEP 23: Set W = gp
-                dTmp_Candidate["substrate"]["w"] = fTmp_GP - dTmp_Candidate["substrate"]["y"]
-
-            else:
-                #   STEP 24: Set W = rp
-                dTmp_Candidate["substrate"]["w"] = fTmp_RP - dTmp_Candidate["substrate"]["y"] + 0.05
-
-            #
-            #   endregion
-
-            #   region STEP 25: Get plane slots
-
-            dTmp_Candidate["ground plane"]["slots"] = self.__randSlots__(center=dCenter["ground plane"]["slots"], scalars=dScalars["ground plane"]["slots"], plane=dTmp_Candidate["ground plane"], z=0.0, region=iRegion + 1)
-            dTmp_Candidate["radiating plane"]["slots"] = self.__randSlots__(center=dCenter["radiating plane"]["slots"], scalars=dScalars["radiating plane"]["slots"], plane=dTmp_Candidate["radiating plane"], z=dTmp_Candidate["substrate"]["h"], region=iRegion + 1)
-            
-            #
-            #   endregion
-
-            #   STEP 26: Append new candidate to output list
+            #   STEP 12: Append new candidate to output list
             lOut.append(dTmp_Candidate)
 
-        #   STPE 27: Return
+        #   STEP 13: Outsource - Get slot data
+        lTmp_Slots_GP   = self.__randSlots__(center=dCenter["ground plane"]["slots"],       scalars=dScalars["ground plane"]["slots"],      plane=dTmp_Candidate["ground plane"],       z=0.0,                              region=iRegion + 1, candidates=iCandidates)
+        lTmp_Slots_RP   = self.__randSlots__(center=dCenter["radiating plane"]["slots"],    scalars=dScalars["radiating plane"]["slots"],   plane=dTmp_Candidate["radiating plane"],    z=dTmp_Candidate["substrate"]["h"], region=iRegion + 1, candidates=iCandidates)
+
+        #   STEP 14: Loop through candidates
+        for i in range(0, iCandidates):
+            #   STEP 15: Update - Candidate slots
+            lOut[i]["ground plane"]["slots"]        = lTmp_Slots_GP[i]
+            lOut[i]["radiating plane"]["slots"]    = lTmp_Slots_RP[i]
+
+        #   STPE 16: Return
         return lOut
 
     def __evalFitness__(self, **kwargs) -> list:
@@ -1095,9 +1113,10 @@ class Natalie:
 
             #   STEP 15: Populate output dictionary
             dTmp = {
-                "items":    1,
+                "items":    2,
 
-                "0":        "final",
+                "0":        "area",
+                "1":        "freq",
 
                 "lower":    dFit["lower"]["total"],
                 "desired":  dFit["desired"]["total"],
@@ -1235,7 +1254,7 @@ class Natalie:
         #   STEP 26: Return
         return round(fOut, 3)
 
-    def __randSlots__(self, **kwargs) -> dict:
+    def __randSlots__(self, **kwargs) -> list:
         """
             Description:
 
@@ -1294,14 +1313,19 @@ class Natalie:
 
                 + region    = ( int ) The region for randomization
                     ~ Required
+
+                + candidates    = ( int ) The number of candidate slots to
+                    create
+                    ~ Required
         """
         
         #   STEP 0: Local variables
-        dOut                    = None
+        lOut                    = []
+        dSlot_New               = None
 
         #   STEP 1: Setup - Local variables
         
-        #   region STEP 2->11: Error checking
+        #   region STEP 2->13: Error checking
 
         #   STEP 2: Check if center arg passed
         if ("center" not in kwargs):
@@ -1327,108 +1351,133 @@ class Natalie:
         if ("z" not in kwargs):
             #   STEP 11: Error handling
             raise Exception("An error occured in Natalie.__randSlots__() -> Step 10: No z arg passed")
+        
+        #   STEP 12: Check if candidate arg passed
+        if ("candidates" not in kwargs):
+            #   STEP 13: Error handling
+            raise Exception("An error occured in Natalie.__randSlots__() -> Step 12: No candidates arg passed")
 
         #
         #   endregion
         
-        #   STEP ?? : Update - Local variables
-        dOut = cp.deepcopy(kwargs["center"])
+        #   region STEP 14->15: New slot creation
 
-        #   region STEP 12->16: Slot creation
+        #   STEP 14: Setup - Temp variables
+        fTmp_X =    ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.random()
+        fTmp_Y =    ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.random()
 
-        #   STEP 12: Check for slot creation
-        if (rn.random() < kwargs["scalars"]["create slot"]["default"]["range"]):
-            #   STEP 13: Get temp vars
-            fTmp_X =    ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.random()
-            fTmp_Y =    ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.random()
-
-            #   STEP 14: Populate tmp dictionary
-            dTmp = {
-                "0":
-                {
-                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                    "z": kwargs["z"]
-                },
-                "1":
-                {
-                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                    "z": kwargs["z"]
-                },
-                "2":
-                {
-                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                    "z": kwargs["z"]
-                },
-                "id":   Helga.ticks()
-            }
-
-            #   STEP 15: Add slot to output dictionary
-            dOut[str(dOut["items"])] = dTmp
-
-            #   STEP 16: Increment slots in dictionary
-            dOut["items"] += 1
+        #   STEP 15: Populate tmp dictionary
+        dSlot_New   = {
+            "0":
+            {
+                "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
+                "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
+                "z": kwargs["z"]
+            },
+            "1":
+            {
+                "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
+                "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
+                "z": kwargs["z"]
+            },
+            "2":
+            {
+                "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
+                "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
+                "z": kwargs["z"]
+            },
+            "id":   Helga.ticks()
+        }
 
         #
         #   endregion
 
-        #   region STEP 17->24: Slot removal
+        #   region STEP 16->20: Slot addition
 
-        #   STEP 17: Check for slot removal
-        if (rn.random() < kwargs["scalars"]["remove slot"]["range"]):
-            #   STEP 18: Check that there are slots to remove
-            if (dOut["items"] > 0):
-                #   STEP 19: Pick a random slot
-                iTmp_Index = rn.randint(0, dOut["items"] - 1)
+        #   STEP 16: Loop through candidates
+        for _ in range(0, kwargs["candidates"]):
+            #   STEP 17: Copy - Center
+            dTmp_Candidate  = cp.deepcopy(kwargs["center"])
 
-                #   STEP 20: Decrement slot counter
-                dOut["items"] -= 1
+            #   STEP 18: Check - Slot creation status
+            if (rn.random() < kwargs["scalars"]["create slot"]["default"]["range"]):
+                #   STEP 19: Add slot to new candidate
+                dTmp_Candidate[ str( dTmp_Candidate["items"] ) ]    = cp.deepcopy(dSlot_New)
 
-                #   STEP 21: If slots not zero
-                if (dOut["items"] > 0):
-                    #   STEP 22: Loop through remaining slots
-                    for i in range(iTmp_Index + 1, dOut["items"] + 1):
-                        #   STEP 23: Reposition slot
-                        dOut[str(i - 1)] = dOut[str(i)]
+                dTmp_Candidate["items"] += 1
 
-                #   STEP 24: Delete copy slot in last position
-                del dOut[str(dOut["items"])]
+            #   STEP 20: Append - New candidate to output
+            lOut.append(dTmp_Candidate)
 
         #
         #   endregion
 
-        #   region STEP 25->31: Slot shifting
+        #   region STEP 21->30: Slot removal
 
-        #   STEP 25: Check if change
-        if (rn.random() < kwargs["scalars"]["change slot"]["probability"]["range"]):
-            #   STEP 26: Check if there are any slots to change
-            if (dOut["items"] > 0):
-                #   STEP 27: Loop through slots
-                for _ in range(0, dOut["items"]):
-                    #   STEP 28: Pick a random slot
-                    iTmp_Index = rn.randint(0, dOut["items"] - 1)
+        #   STEP 21: Loop through candidates
+        for i in range(0, kwargs["candidates"]):
+            #   STEP 22: Get current slot
+            dTmp_Candidate  = lOut[i]
 
-                    #   STEP 29: Get tmp slot
-                    dTmp_Slot = dOut[str(iTmp_Index)]
+            #   STEP 23: Check - Slot removal status
+            if (rn.random() < kwargs["scalars"]["remove slot"]["range"]):
+                #   STEP 24: Check that there are slots to remove
+                if (dTmp_Candidate["items"] > 0):
+                    #   STEP 25: Pick a random slot
+                    iTmp_Index = rn.randint(0, dTmp_Candidate["items"] - 1)
 
-                    #   STEP 30: loop through slot co-ordinates
-                    for i in range(0, 3):
-                        #   STEP 31: Adjust coordinates
-                        dTmp_Slot[str(i)]["x"] = self.__randVal__(center=dTmp_Slot[str(i)]["x"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["x"])
-                        dTmp_Slot[str(i)]["y"] = self.__randVal__(center=dTmp_Slot[str(i)]["y"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["y"])
+                    #   STEP 26: Decrement slot counter
+                    dTmp_Candidate["items"] -= 1
+
+                    #   STEP 27: If slots not zero
+                    if (dTmp_Candidate["items"] > 0):
+                        #   STEP 28: Loop through remaining slots
+                        for i in range(iTmp_Index + 1, dTmp_Candidate["items"] + 1):
+                            #   STEP 29: Reposition slot
+                            dTmp_Candidate[str(i - 1)] = dTmp_Candidate[str(i)]
+
+                    #   STEP 30: Delete copy slot in last position
+                    del dTmp_Candidate[str(dTmp_Candidate["items"])]
+        #
+        #   endregion
+
+        #   region STEP 31->39: SLot changing
+
+        #   STEP 31: Loop through candidates
+        for i in range(0, kwargs["candidates"]):
+            #   STEP 32: Get current candidate
+            dTmp_Candidate  = lOut[i]
+            
+            #   STEP 33: Check if change
+            if (rn.random() < kwargs["scalars"]["change slot"]["probability"]["range"]):
+                #   STEP 34: Check if there are any slots to change
+                if (dTmp_Candidate["items"] > 0):
+                    #   STEP 35: Loop through slots
+                    for _ in range(0, dTmp_Candidate["items"]):
+                        #   STEP 36: Pick a random slot
+                        iTmp_Index = rn.randint(0, dTmp_Candidate["items"] - 1)
+
+                        #   STEP 37: Get tmp slot
+                        dTmp_Slot = dTmp_Candidate[str(iTmp_Index)]
+
+                        #   STEP 38: loop through slot co-ordinates
+                        for i in range(0, 3):
+                            #   STEP 39: Adjust coordinates
+                            dTmp_Slot[str(i)]["x"] = self.__randVal__(center=dTmp_Slot[str(i)]["x"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["x"])
+                            dTmp_Slot[str(i)]["y"] = self.__randVal__(center=dTmp_Slot[str(i)]["y"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["y"])
 
         #
         #   endregion
 
-        #   STEP 32: Return
-        return dOut
+        #   STEP 40: Return
+        return lOut
 
     #
     #   endregion
 
     #   region Back-End: Data management
+
+    #       region Back-End-(Data Management): Data molding
 
     def __moldData__(self, **kwargs) -> dict:
         """
@@ -1494,7 +1543,7 @@ class Natalie:
         lOutput = self.__dataRecursion__(data=kwargs["fitness"], template=dTemplate_Fitness, index=0)
 
         #   STEP 8: Set class surrogate template
-        self.__dTRO_Template = dTemplate_Candidate
+        self.__dTemplate    = dTemplate_Candidate
 
         #   STEP 9: Populate output dictionary
         dOut    = {
@@ -1576,7 +1625,7 @@ class Natalie:
 
             #   STEP 13: Loop through candidates
             for j in range(0, len(kwargs["data"])):
-                #   STEP 14: Append child to temp dict
+                #   STEP 14: Append child dictionary from all candidates to temp list for recursion
                 lTmp_Child_In.append(kwargs["data"][j][sTmp_Child])
 
             #   STEP 15: Be safe OwO - Shortcut
@@ -1597,17 +1646,20 @@ class Natalie:
                 lTmp_Child_Out = [lTmp_Child_In]
 
                 #   STEP 22: Update Template dictionary
-                kwargs["template"][sTmp_Child] = iIndex
+                kwargs["template"][sTmp_Child] = "remap-" + str(iIndex)
             
-            #   STEP 23: Update - Local varas
-            lOut.extend(lTmp_Child_Out)
+            #   STEP 23: Check child output status
+            if (lTmp_Child_Out != None):
+                #   STEP 24: Update - Output variables
+                lOut.extend(lTmp_Child_Out)
 
-            iIndex += len(lTmp_Child_Out)
+                #   STEP 25: Increment index
+                iIndex += len(lTmp_Child_Out)
 
-        #   STEP 24: Return
+        #   STEP 26: Return
         return lOut
 
-    def __dataRecursion_Slots__(self, **kwargs) -> list:
+    def __dataRecursion_Slots__(self, **kwargs) -> vars:
         """
             Description:
 
@@ -1638,8 +1690,11 @@ class Natalie:
 
         lSlots_Template         = []
         lSlots_Unique           = []
+        lSlots_Unique_Count     = []
 
         fZ                      = None
+
+        iStep                   = 0
 
         #   STEP 1: Setup - Local variables
 
@@ -1663,127 +1718,493 @@ class Natalie:
         #
         #   endregion
 
-        #   STEP 8: Loop through all candidates
-        for i in range(0, len(kwargs["data"])):
-            #   STEP 9: Get temp candidate dictionary
-            dTmp_Candidate = kwargs["data"][i]
+        try:
+            iStep += 1
+            #   STEP 8: Loop through all candidates
+            for i in range(0, len(kwargs["data"])):
+                #   STEP 9: Get temp candidate dictionary
+                dTmp_Candidate = kwargs["data"][i]
 
-            #   STEP 10: Loop through slots in candidate
-            for j in range(0, dTmp_Candidate["items"]):
-                #   STEP 11: Check if slot not in unique slots list
-                if (dTmp_Candidate[str(j)]["id"] not in lSlots_Unique):
-                    #   STEP 12: Append to list
-                    lSlots_Unique.append(dTmp_Candidate[str(j)]["id"])
+                #   STEP 10: Loop through slots in candidate
+                for j in range(0, dTmp_Candidate["items"]):
+                    #   STEP 11: Check if slot not in unique slots list
+                    if (dTmp_Candidate[str(j)]["id"] not in lSlots_Unique):
+                        #   STEP 12: Append to list
+                        lSlots_Unique.append(dTmp_Candidate[str(j)]["id"])
+                        lSlots_Unique_Count.append(1)
 
-                #   STEP 13: Check if Z-axis has been set
-                if (fZ == None):
-                    #   STEP 14: Update - Local variables
-                    fZ = dTmp_Candidate[str(j)]["0"]["z"]
-        
-        #   STEP 15: Iterate through unique slots
-        for _ in range(0, len(lSlots_Unique)):
-            #   STEP 16: Add 6 fields for each unique slot to output
-            for _ in range(0, 6):
-                #   STEP 17: Append field to output
-                lOut.append([])
+                    #   STEP 13: Not unique
+                    else:
+                        #   STEP 14: Get index in unique list
+                        iTmp_Index = lSlots_Unique.index(dTmp_Candidate[str(j)]["id"])
 
-            #   STEP 18: Append field to template
-            lSlots_Template.append([])
+                        #   STEP 15: Increment counter
+                        lSlots_Unique_Count[iTmp_Index] += 1
 
-        #   STEP 19: Loop through all candidates
-        for i in range(0, len(kwargs["data"])):
-            #   STEP 20: Setup - Temp vars
-            dTmp_Candidate  = kwargs["data"][i]
+                    #   STEP 16: Check if Z-axis has been set
+                    if (fZ == None):
+                        #   STEP 17: Update - Local variables
+                        fZ = dTmp_Candidate[str(j)]["0"]["z"]
 
-            lTmp_Slots_Data = cp.deepcopy(lSlots_Template)
+            iStep += 1
+            if (len(lSlots_Unique_Count) == 0):
+                return
 
-            #   STEP 21: Loop through slots in this candidate
-            for j in range(0, dTmp_Candidate["items"]):
-                #   STEP 22: Get position of unique slot
-                iTmp_Index  = lSlots_Unique.index(dTmp_Candidate[str(j)]["id"])
+            iStep += 1
+            #   STEP 21: Iterate through unique slots
+            for _ in range(0, len( lSlots_Unique ) ):
+                #   STEP 22: Add 6 fields for each unique slot to output
+                for _ in range(0, 6):
+                    #   STEP 23: Append field to output
+                    lOut.append([])
 
-                #   STEP 23: Populate candidate slot dictionary
-                lTmp = []
-                lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
-                lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
-                lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
-                lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
-                lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
-                lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
+                #   STEP 24: Append field to template
+                lSlots_Template.append([])
 
-                lTmp_Slots_Data[iTmp_Index] = lTmp
+            iStep += 1
+            #   STEP 25: Loop through all candidates
+            for i in range(0, len(kwargs["data"])):
+                #   STEP 26: Setup - Temp vars
+                dTmp_Candidate  = kwargs["data"][i]
 
-            #   STEP 24: Loop through candidate
-            for j in range(0, len(lTmp_Slots_Data)):
-                #   STEP 25: Check if empty
-                if (len(lTmp_Slots_Data[j]) == 0):
-                    #   STEP 26: Append empty
-                    lTmp_Slots_Data[j] = [None, None, None, None, None, None]
+                lTmp_Slots_Data = cp.deepcopy(lSlots_Template)
 
-            #   STEP 27: Translate candidate data to output data
-            for j in range(0, len(lTmp_Slots_Data)):
-                #   STEP 28:  Append data to output list
-                lOut[ j * 6 + 0 ].append(lTmp_Slots_Data[j][0])
-                lOut[ j * 6 + 1 ].append(lTmp_Slots_Data[j][1])
-                lOut[ j * 6 + 2 ].append(lTmp_Slots_Data[j][2])
-                lOut[ j * 6 + 3 ].append(lTmp_Slots_Data[j][3])
-                lOut[ j * 6 + 4 ].append(lTmp_Slots_Data[j][4])
-                lOut[ j * 6 + 5 ].append(lTmp_Slots_Data[j][5])
+                #   STEP 27: Loop through slots in this candidate
+                for j in range(0, dTmp_Candidate["items"]):
+                    iTmp_Index  = lSlots_Unique.index(dTmp_Candidate[str(j)]["id"])
+                    #   STEP 28: Check if common
+                    if (iTmp_Index != -1):
+                        #   STEP 30: Populate candidate slot dictionary
+                        lTmp = []
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
+                        
+                        #   STEP 31: Append to output
+                        lTmp_Slots_Data[iTmp_Index] = lTmp
 
-        #   STEP 29: Loop through unique slots
-        for i in range(0, len(lSlots_Unique)):
-            #   STEP 30: Setup - Local variables
-            bTmp_Slot_Found = False
+                    #   STEP 32: Unique slot
+                    else:
+                        #   STEP 33: Set index to end of list
+                        iTmp_Index  = len(lSlots_Unique) - 1
 
+                        #   STEP 34: Populate candidate slot dictionary
+                        lTmp = []
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
+
+                        #   STEP 35: Append to output
+                        lTmp_Slots_Data[iTmp_Index] = lTmp
+
+                #   STEP 36: Loop through candidate
+                for j in range(0, len(lTmp_Slots_Data)):
+                    #   STEP 37: Check if empty
+                    if (len(lTmp_Slots_Data[j]) <= i):
+                        #   STEP 38: Append empty
+                        lTmp_Slots_Data[j] = [None, None, None, None, None, None]
+
+                #   STEP 39: Translate candidate data to output data
+                for j in range(0, len(lTmp_Slots_Data)):
+                    #   STEP 40:  Append data to output list
+                    lOut[ j * 6 + 0 ].append(lTmp_Slots_Data[j][0])
+                    lOut[ j * 6 + 1 ].append(lTmp_Slots_Data[j][1])
+                    lOut[ j * 6 + 2 ].append(lTmp_Slots_Data[j][2])
+                    lOut[ j * 6 + 3 ].append(lTmp_Slots_Data[j][3])
+                    lOut[ j * 6 + 4 ].append(lTmp_Slots_Data[j][4])
+                    lOut[ j * 6 + 5 ].append(lTmp_Slots_Data[j][5])
+
+            iStep += 1
             #   STEP 31: Loop through template slots
-            for j in range(0, kwargs["template"]["items"]):
-                #   STEP 32: Check if slot is unique slot
-                if (kwargs["template"][str(j)]["id"] == lSlots_Unique[i]):
-                    #   STEP 33: Set flag
-                    bTmp_Slot_Found = True
+            for i in range(0, kwargs["template"]["items"]):
+                #   STEP 34: Update - Template
+                kwargs["template"][str(i)]["0"]["x"] = "remap-" + str(kwargs["index"] + i * 6 + 0)
+                kwargs["template"][str(i)]["0"]["y"] = "remap-" + str(kwargs["index"] + i * 6 + 1)
+                kwargs["template"][str(i)]["1"]["x"] = "remap-" + str(kwargs["index"] + i * 6 + 2)
+                kwargs["template"][str(i)]["1"]["y"] = "remap-" + str(kwargs["index"] + i * 6 + 3)
+                kwargs["template"][str(i)]["2"]["x"] = "remap-" + str(kwargs["index"] + i * 6 + 4)
+                kwargs["template"][str(i)]["2"]["y"] = "remap-" + str(kwargs["index"] + i * 6 + 5)
 
-                    #   STEP 34: Update - Template
-                    kwargs["template"][str(j)]["id"]["0"]["x"] = kwargs["index"] + i * 6 + 0
-                    kwargs["template"][str(j)]["id"]["1"]["y"] = kwargs["index"] + i * 6 + 1
-                    kwargs["template"][str(j)]["id"]["2"]["x"] = kwargs["index"] + i * 6 + 2
-                    kwargs["template"][str(j)]["id"]["3"]["y"] = kwargs["index"] + i * 6 + 3
-                    kwargs["template"][str(j)]["id"]["4"]["x"] = kwargs["index"] + i * 6 + 4
-                    kwargs["template"][str(j)]["id"]["5"]["y"] = kwargs["index"] + i * 6 + 5
-
-                    #   STEP 35: Exit loop
-                    break
-
-            #   STEP 35: Check if not found
-            if (bTmp_Slot_Found == False):
+            iStep += 1
+            while (kwargs["template"]["items"] < len(lTmp_Slots_Data)):
                 #   STEP 36: Create temp dict
                 dTmp = {
                     "0":
                     {
-                        "x": kwargs["index"] + i * 6 + 0,
-                        "y": kwargs["index"] + i * 6 + 1,
+                        "x": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 0),
+                        "y": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 1),
                         "z": fZ
                     },
                     "1":
                     {
-                        "x": kwargs["index"] + i * 6 + 2,
-                        "y": kwargs["index"] + i * 6 + 3,
+                        "x": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 2),
+                        "y": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 3),
                         "z": fZ
                     },
                     "2":
                     {
-                        "x": kwargs["index"] + i * 6 + 4,
-                        "y": kwargs["index"] + i * 6 + 5,
+                        "x": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 4),
+                        "y": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 5),
                         "z": fZ
                     },
-                    "id": lSlots_Unique[i]
+                    "id": Helga.time()
                 }
 
                 #   STEP 37: Add to template dictionary
                 kwargs["template"][str(kwargs["template"]["items"])] = dTmp
                 kwargs["template"]["items"] += 1
 
+        except Exception as ex:
+            print("Initial error: ", ex)
+            Helga.nop()
+            Helga.nop()
+            Helga.nop()
+
         #   STEP 38: Return
         return lOut
+
+    #
+    #       endregion
+
+    #       region Back-End-(Data Management): Remapping
+
+    def __remapData__(self, **kwargs) -> dict:
+        """
+            Description:
+
+                Remaps a passed candidate using the template saved during the
+                __moldData__ function.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + candidate = ( list ) A list of the parameters for the antenna
+                    geometry
+                    ~ Required
+        """
+
+        #   STEP 0: Local variables
+        dCandidate_New          = None
+
+        #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->5: Error checking
+
+        #   STEP 2: Check if candidate arg passed
+        if ("candidate" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.__remapData__() -> Step 2: No candidate arg passed")
+
+        #   STEP 4: Check if template exists
+        if (self.__dTemplate == None):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Natalie.__remapData__() -> Step 4: No template exists for remapping")
+        
+        #
+        #   endregion
+        
+        #   STEP 6: Setup - Local variables
+        dCandidate_New  = cp.deepcopy(self.__dTemplate)
+
+        #   STEP 7: Outsource
+        self.__remapData_Recursion__(template=self.__dTemplate, data=kwargs["candidate"], candidate=dCandidate_New)
+
+        #   STEP 8: Remap substrate
+        self.__remapData_Substrate__(candidate=dCandidate_New)
+
+        #   STEP 9: Return
+        return dCandidate_New
+
+    def __remapData_Recursion__(self, **kwargs) -> None:
+        """
+            Description:
+
+                Remaps a passed candidate recursively using the provided
+                template.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + template  = ( dict ) A dictionary containing the parameters
+                    of an antenna geometry
+                    ~ Required
+
+                + data  = ( list ) The list of data to be remapped
+                    ~ Required
+
+                + candidate = ( dict ) The new antenna geometry
+                    ~ Required
+        """
+
+        #   STEP 0: Local variables
+
+        #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->7: Error checking
+
+        #   STEP 2: Check if template arg passed
+        if ("template" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.__remapData_Recursion__() -> Step 2: No template arg passed")
+
+        #   STEP 4: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Natalie.__remapData_Recursion__() -> Step 4: No data arg passed")
+
+        #   STEP 6: Check if candidate arg passed
+        if ("candidate" not in kwargs):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Natalie.__remapData_Recursion__() -> Step 6: No candidate arg passed")
+
+        #
+        #   endregion
+
+        #   STEP 8: Loop through items list
+        for i in range(0, kwargs["template"]["items"]):
+            #   STEP 9: Setup - Scope variables
+            sTmp_Child  = kwargs["template"][str(i)]
+
+            #   STEP 10: Be safe OwO
+            try:
+                #   STEP 11: Check if slots
+                if (sTmp_Child  == "slots"):
+                    #   STEP 12: Outsource
+                    self.__remapData_Slots__(template=kwargs["template"][sTmp_Child], candidate=kwargs["candidate"][sTmp_Child], data=kwargs["data"])
+
+                #   STEP 13: Not slot
+                elif ("items" in kwargs["template"][sTmp_Child]):
+                    #   STEP 14: Recurse this bitch
+                    self.__remapData_Recursion__(template=kwargs["template"][sTmp_Child], candidate=kwargs["candidate"][sTmp_Child], data=kwargs["data"])
+
+                #   STEP 15: Not child field
+                else:
+                    #   STEP 16: Get index
+                    sTmp_Index  = kwargs["template"][sTmp_Child].strip("remap-")
+                    iTmp_Index  = int(sTmp_Index)
+
+                    #   STEP 17: Remap field
+                    kwargs["candidate"][sTmp_Child] = kwargs["data"][iTmp_Index]
+            
+            #   STEP 18: Shortcut to nowhere
+            except:
+                #   STEP 19: Welcome to nowhere
+                Helga.nop()
+
+        #   STEP 18: Return
+        return
+
+    def __remapData_Slots__(self, **kwargs) -> None:
+        """
+            Description:
+
+                Remaps the slots of the template antenna geometry using the
+                provided arguments.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + candidate = ( dict ) The new antenna geometry to which the
+                    input data should be mapped
+                    ~ Required
+
+                + template  = ( dict ) The antenna geometry template to use
+                    during the remapping process
+                    ~ Required
+
+                + data  = ( list ) The new parameters for the antenna geometry
+                    to be used during the remapping process
+                    ~ Required
+        """
+
+        #   STEP 0: Local variables
+
+        #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->7: Error checking
+
+        #   STEP 2: Check if candidate arg passed
+        if ("candidate" not in kwargs):
+            #   STPE 3: Error handling
+            raise Exception("An error occured in Natalie.__remapData_Slots__() -> Step 2: No candidate arg passed")
+
+        #   STEP 4: Check if template arg passed
+        if ("template" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Natalie.__remapData_Slots__() -> Step 4: No template arg passed")
+
+        #   STEP 6: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Natalie.__remapData_Slots__() -> Step 6: No data arg passed")
+
+        #
+        #   endregion
+
+        #   STEP 8: Iterate through items in template
+        for i in range(0, kwargs["template"]["items"]):
+            #   STEP 9: 0-x
+            sTmp_Index  = kwargs["template"][str(i)]["0"]["x"].strip("remap-")
+            iTmp_Index  = int(sTmp_Index)
+
+            kwargs["candidate"][str(i)]["0"]["x"]   = kwargs["data"][iTmp_Index]
+
+            #   STEP 10: 0-y
+            sTmp_Index  = kwargs["template"][str(i)]["0"]["y"].strip("remap-")
+            iTmp_Index  = int(sTmp_Index)
+
+            kwargs["candidate"][str(i)]["0"]["y"]   = kwargs["data"][iTmp_Index]
+
+            #   STEP 11: 1-x
+            sTmp_Index  = kwargs["template"][str(i)]["1"]["x"].strip("remap-")
+            iTmp_Index  = int(sTmp_Index)
+
+            kwargs["candidate"][str(i)]["1"]["x"]   = kwargs["data"][iTmp_Index]
+
+            #   STEP 12: 1-y
+            sTmp_Index  = kwargs["template"][str(i)]["1"]["y"].strip("remap-")
+            iTmp_Index  = int(sTmp_Index)
+
+            kwargs["candidate"][str(i)]["1"]["y"]   = kwargs["data"][iTmp_Index]
+
+            #   STEP 13: 2-x
+            sTmp_Index  = kwargs["template"][str(i)]["2"]["x"].strip("remap-")
+            iTmp_Index  = int(sTmp_Index)
+
+            kwargs["candidate"][str(i)]["2"]["x"]   = kwargs["data"][iTmp_Index]
+
+            #   STEP 13: 2-y
+            sTmp_Index  = kwargs["template"][str(i)]["2"]["y"].strip("remap-")
+            iTmp_Index  = int(sTmp_Index)
+
+            kwargs["candidate"][str(i)]["2"]["y"]   = kwargs["data"][iTmp_Index]
+            
+        #   STEP 14: Return
+        return
+
+    def __remapData_Substrate__(self, **kwargs) -> None:
+        """
+            Description:
+
+                Updates the substrate for this antenna candidate.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + candidate = ( dict ) A dictionary containing the antenna
+                    candidate
+                    ~ Required
+        """
+
+        #   STEP 0: Local variables
+        dCandidate              = None
+
+        #   STEP 1: Setup - Local variables
+        
+        #   STEP 2: Check if candidate arg passed
+        if ("candidate" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.__remapData_Substrate__() -> Step 2: No candidate arg passed")
+        
+        #   STEP 4: Setup - Local variables
+        dCandidate  = kwargs["candidate"]
+
+        #   region STEP 5->7: Setup - Substrate x
+
+        #   STEP 5 if ground plane x less than radiating plane
+        if (dCandidate["ground plane"]["x"] < dCandidate["radiating plane"]['x']):
+            #   STEP 6: Set x = gp[x]
+            dCandidate["substrate"]["x"] = dCandidate["ground plane"]["x"]
+
+        else:
+            #   STEP 7: Set x = rp[x]
+            dCandidate["substrate"]["x"] = dCandidate["radiating plane"]["x"]
+
+        #
+        #   endregion
+
+        #   region STEP 8->10: Get substrate y co-ordinate
+
+        #   STEP 8: If gp y less than rp
+        if (dCandidate["ground plane"]["y"] < dCandidate["radiating plane"]["y"]):
+            #   STEP 9: Set y = gp[y]
+            dCandidate["substrate"]["y"] = dCandidate["ground plane"]["y"]
+
+        else:
+            #   STEP 10: Set y = rp[yu]
+            dCandidate["substrate"]["y"] = dCandidate["radiating plane"]["y"]
+            
+        #
+        #   endregion
+
+        #   region STEP 11->14: Get substrate length
+
+        #   STEP 11: Get furthest on l axis
+        fTmp_GP = dCandidate["ground plane"]["x"] + dCandidate["ground plane"]["l"]
+        fTmp_RP = dCandidate["radiating plane"]["x"] + dCandidate["radiating plane"]["l"]
+
+        #   STEP 12: If gp l less than rp
+        if (fTmp_GP > fTmp_RP):
+            #   STEP 13: Set l = gp
+            dCandidate["substrate"]["l"] = fTmp_GP - dCandidate["substrate"]["x"]
+
+        else:
+            #   STEP 14: Set l = rp
+            dCandidate["substrate"]["l"] = fTmp_RP - dCandidate["substrate"]["x"] + 0.05
+            dCandidate["ground plane"]["l"] = fTmp_RP - dCandidate["ground plane"]["x"] + 0.05
+
+        #
+        #   endregion
+
+        #   region STEP 15->18: Get substrate width
+
+        #   STEP 15: Get furthest on W axis
+        fTmp_GP = dCandidate["ground plane"]["y"] + dCandidate["ground plane"]["w"]
+        fTmp_RP = dCandidate["radiating plane"]["y"] + dCandidate["radiating plane"]["w"]
+
+        #   STEP 16: If gp W less than rp
+        if (fTmp_GP > fTmp_RP):
+            #   STEP 17: Set W = gp
+            dCandidate["substrate"]["w"] = fTmp_GP - dCandidate["substrate"]["y"]
+
+        else:
+            #   STEP 18: Set W = rp
+            dCandidate["substrate"]["w"] = fTmp_RP - dCandidate["substrate"]["y"] + 0.05
+
+        #
+        #   endregion
+
+        #   STEP 19: Return
+        return
+    
+    #
+    #       endregion
 
     #
     #   endregion
@@ -1797,18 +2218,19 @@ class Natalie:
 #region Testing
 
 if (__name__ == "__main__"):
+    
     dAnt = {
         "substrate":
         {
             "permitivitty": 4.4,
-            "loss": 0.02,
-            "name": "FR4",
-            "height": 1.6
+            "loss":         0.02,
+            "name":         "FR4",
+            "height":       1.6
         },
         "frequency":
         {
-            "start": 0.9e9,
-            "end": 0.94e9
+            "start":        0.9e9,
+            "end":          0.94e9
         }
     }
 

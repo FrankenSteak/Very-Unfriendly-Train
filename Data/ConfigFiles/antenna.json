@@ -109,12 +109,12 @@
             "center":
             {
                 "region":   0.0,
-                "range":    1.0
+                "range":    0.5
             },
             "width":
             {
                 "region":   0.9,
-                "range":    0.05
+                "range":    0.025
             }
         },
         "ground plane":
@@ -130,22 +130,22 @@
             "l":
             {
                 "region":   0.3,
-                "range":    4.0
+                "range":    2.0
             },
             "w":
             {
                 "region":   0.3,
-                "range":    4.0
+                "range":    2.0
             },
             "x":
             {
                 "region":   0.0,
-                "range":    0.35
+                "range":    0.5
             },
             "y":
             {
                 "region":   0.0,
-                "range":    0.35
+                "range":    0.5
             },
             "slots":
             {
@@ -166,23 +166,23 @@
                     "default":
                     {
                         "region":   1.0,
-                        "range":    0.0
+                        "range":    0.95
                     },
                     "x":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    6.0
                     },
                     "y":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    6.0
                     }
                 },
                 "remove slot":
                 {
                     "region":   1.0,
-                    "range":    0.0
+                    "range":    0.25
                 },
                 "change slot":
                 {
@@ -195,17 +195,17 @@
                     "probability":
                     {
                         "region":   1.0,
-                        "range":    0.0
+                        "range":    0.925
                     },
                     "x":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    2.256
                     },
                     "y":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    2.256
                     }
                 }
             }
@@ -223,22 +223,22 @@
             "l":
             {
                 "region":   0.3,
-                "range":    2.0
+                "range":    1.0
             },
             "w":
             {
                 "region":   0.3,
-                "range":    2.0
+                "range":    1.0
             },
             "x":
             {
                 "region":   0.3,
-                "range":    1.0
+                "range":    0.4
             },
             "y":
             {
                 "region":   0.3,
-                "range":    1.0
+                "range":    0.4
             },
             "slots":
             {
@@ -259,23 +259,23 @@
                     "default":
                     {
                         "region":   1.0,
-                        "range":    0.0
+                        "range":    0.2
                     },
                     "x":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    0.8
                     },
                     "y":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    0.8
                     }
                 },
                 "remove slot":
                 {
                     "region":   1.0,
-                    "range":    0.0
+                    "range":    0.2
                 },
                 "change slot":
                 {
@@ -288,17 +288,17 @@
                     "probability":
                     {
                         "region":   1.0,
-                        "range":    0.0
+                        "range":    0.75
                     },
                     "x":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    0.8
                     },
                     "y":
                     {
                         "region":   0.0,
-                        "range":    0.0
+                        "range":    0.8
                     }
                 }
             }
@@ -317,7 +317,7 @@
             "l":
             {
                 "region":   0.0,
-                "range":    0.5
+                "range":    0.05
             },
             "w":
             {

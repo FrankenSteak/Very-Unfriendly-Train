@@ -1,14 +1,15 @@
 {
     "parameters":
     {
-        "items": 6,
+        "items":    5,
 
-        "0": "frequency",
-        "1": "mesh",
-        "2": "runt", 
-        "3": "trust region",
-        "4": "surrogates",
-        "5": "data",    
+        "0":        "show output",
+        "1":        "frequency",
+        "2":        "mesh",
+        "3":        "runt", 
+        "4":        "trust region",
+
+        "show output":      true, 
 
         "frequency":
         {
@@ -21,26 +22,26 @@
 
             "lower frequency offset":   0.01e9,
             "upper frequency offset":   0.01e9,
-            "samples":                  2,
-            "accuracy check samples":   2
+            "samples":                  3,
+            "accuracy check samples":   3
         },
         "mesh":
         {
-            "items": 2,
+            "items":    2,
 
-            "0": "wire radius",
-            "1": "size",
+            "0":        "wire radius",
+            "1":        "size",
 
             "wire radius":  0.001,
             "size":         "Coarse"
         },
         "runt":
         {
-            "items": 3,
+            "items":    3,
 
-            "0": "parallel",
-            "1": "run",
-            "2": "interactive",
+            "0":        "parallel",
+            "1":        "run",
+            "2":        "interactive",
 
             "parallel":     true,
             "run":          true,
@@ -49,30 +50,17 @@
 
         "trust region":
         {
-            "items": 4,
+            "items":    4,
+
+            "0":        "iterations",
+            "1":        "candidates",
+            "2":        "algorithm region",
+            "3":        "surrogate region",
 
             "iterations":           75,
-            "candidates":           2,
-            "initial region":       3,
-            "accuracy requirement": 0.9
-        },
-
-        "surrogates":
-        {
-            "items": 1,
-
-            "0": "candidates",
-
-            "candidates": 5
-        },
-
-        "data":
-        {
-            "items": 1,
-            
-            "0": "mold type",
-
-            "mold type":    "absolute"
+            "candidates":           7,
+            "algorithm region":     3,
+            "surrogate region":     3
         }
     },
     "scalars":

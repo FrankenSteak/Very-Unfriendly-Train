@@ -72,14 +72,65 @@ class Sarah:
 
     def mapSurrogate(self, **kwargs) -> dict:
         """
+            Description:
+
+                Maps the passed surrogate using the specified optimizer.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + surrogate = ( vars ) The surrogate to map
+                    ~ Required
+
+                + data  = ( vars ) A Data container that contains the data
+                    for the mapping process
+                    ~ Required
+
+                + optimizer = ( enum ) The optimization algorithm to use during
+                    the mapping process
+                    ~ Required
         """
         
         #   STEP 0: Local variables
+
         #   STEP 1: Setup - Local variables
-        #   STEP 2: ??
-        #   STEP ??: Return
-        print("zap")
-        return {"result": None, "fitness": rn.random()}
+
+        #   region STEP 2->7: Error checking
+
+        #   STEP 2: Check if surrogate arg passed
+        if ("surrogate" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Sarah.mapSurrogate() -> Step 2: No surrogate arg passed")
+
+        #   STEP 4: Check if optimizer arg passed
+        if ("optimizer" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Sarah.mapSurrogate() -> Step 4: No surrogate arg passed")
+        
+        #   STEP 6: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Sarah.mapSurrogate() -> Step 6: No data arg passed")
+
+        #
+        #   endregion
+        
+        #   STEP 8: Check if PSO
+        if (kwargs["optimizer"] == sw.PSO):
+            #   STEP 9: User output
+            if (self.bShowOutput):
+                print("Sarah (map-srg) -> (map-srg-PSO) {" + Helga.time() + "}")
+
+            #   STEP 10: Outsource to pso and return
+            return self.__psoMapping__(surrogate=kwargs["surrogate"], data=kwargs["data"])
+
+        #   STEP 11: Unrecognized optimizer - Error handling
+        raise Exception("An error occured in Sarah.mapSurrogate() -> Step 11: Unrecognized optimizer")
         
     #
     #   endregion
@@ -150,7 +201,7 @@ class Sarah:
                 print("Sarah (train-srg) -> (train-srg-pso) {" + Helga.time() + "}")
 
             #   STEP 12: Outsource pso optimization and return
-            return self.__surrogatePso__(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["password"])
+            return self.__psoTraining__(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["password"])
             
         else:
             #   STEP ??: Error handling
@@ -371,15 +422,17 @@ class Sarah:
 
             #   STEP 4: Populate output dictionary
             dOut = {
-                "iterations":       dTmp["iterations"]["algorithm"]["default"],
-                "iterations-def":   dTmp["iterations"]["back propagation"]["default"],
-                "candidates":       dTmp["candidates"]["default"],
-                "scalar":           dTmp["candidate scalar"]["default"],
-                "check point":      dTmp["acc check point"]["default"],
-                "requirement":      dTmp["acc requirement"]["default"],
-                "phi1":             dTmp["parameters"]["phi 1"]["default"],
-                "phi2":             dTmp["parameters"]["phi 2"]["default"],
-                "eta":              dTmp["parameters"]["eta"]["default"]
+                "iterations":       dTmp["training"]["iterations"]["algorithm"]["default"],
+                "iterations-def":   dTmp["training"]["iterations"]["back propagation"]["default"],
+                "candidates":       dTmp["training"]["candidates"]["default"],
+                "scalar":           dTmp["training"]["candidate scalar"]["default"],
+                "check point":      dTmp["training"]["acc check point"]["default"],
+                "requirement":      dTmp["training"]["acc requirement"]["default"],
+                "phi1":             dTmp["training"]["parameters"]["phi 1"]["default"],
+                "phi2":             dTmp["training"]["parameters"]["phi 2"]["default"],
+                "eta":              dTmp["training"]["parameters"]["eta"]["default"],
+
+                "mapping":          dTmp["mapping"]
             }
 
             #   STEP 5: Return
@@ -393,7 +446,7 @@ class Sarah:
 
     #   region Back-End: Training
 
-    def __surrogatePso__(self, **kwargs) -> dict:
+    def __psoTraining__(self, **kwargs) -> dict:
         """
             Description:
 
@@ -598,6 +651,137 @@ class Sarah:
             dOut["inverse accuracy"] = float(dHold["iterations"] / iAcc)
 
         #   STEP 28: Return
+        return dOut
+
+    #
+    #   endregion
+
+    #   region Back-End: Mapping
+
+    def __psoMapping__(self, **kwargs) -> dict:
+        """
+            Description:
+
+                Maps the passed surrogate using Particle-Swarm Optimization.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + surrogate = ( vars) The surrogate instance to be mapped
+                    ~ Required
+
+                + data  = ( vars ) A Data container that contains the data
+                    for the mapping process
+                    ~ Required
+        """
+
+        #   STEP 0: Local variables
+        vData                   = None
+        vSRG                    = None
+        vSwarm                  = None
+
+        dPSO_Params             = None
+
+        lCandidates             = []
+        lFitness                = []
+
+        #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->5: Error checking
+        
+        #   STEP 2: Check if surrogate arg passed
+        if ("surrogate" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Sarah.__psoMapping__() -> Step 2: No surrogate arg passed")
+
+        #   STEP 4: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Sarah.__psoMapping__() -> Step 4: No data arg passed")
+        
+        #
+        #   endregion
+        
+        #   region STEP 6->11: Setup - Local variables
+
+        #   STEP 6: Update - Local variables
+        vData   = kwargs["data"]
+        vSRG    = kwargs["surrogate"]
+
+        #   STEP 7: Get PSO params
+        dPSO_Params = self.__getParams__(optimizer=sw.PSO)["mapping"]
+        
+        #   STEP 8: Get initial candidate
+        iTmp_Candidate  = vData.getInputWidth()
+        lTmp_Candidate  = []
+
+        for _ in range(0, iTmp_Candidate):
+            lTmp_Candidate.append(0.0)
+
+        lCandidates     = self.__getCandidates__(optimizer=sw.PSO, params=dPSO_Params, initial=lTmp_Candidate)
+
+        vData.reset()
+        for i in range(0, vData.getLen()):
+            lCandidates.append(vData.getRandDNR()["in"])
+
+        dPSO_Params["candidates"] = len(lCandidates)
+
+        #   STEP 9: Loop through candidates
+        for i in range(0, len(lCandidates)):
+            #   STPE 10: Get candidate fitness
+            lFitness.append( vSRG.getPointOutput( lCandidates[i] ) )
+
+
+        #   STEP 11: Setup - Swarm chan
+        vSwarm  = SwarmChan(dPSO_Params["candidates"])
+
+        vSwarm.initPsoPositions(lCandidates)
+        vSwarm.initPsoFitness(lFitness)
+        vSwarm.initPsoParams(dPSO_Params["phi1"], dPSO_Params["phi2"], dPSO_Params["eta"])
+
+        #
+        #   endregion
+        
+        #   STEP 12: User output
+        if (self.bShowOutput):
+            print("Sarah (map-srg-pso) {" + Helga.time() + "} - Starting Particle-Swarm Optimization mapping")
+
+        #   STEP 13: Iterate
+        for i in range(0, dPSO_Params["iterations"] + 1):
+            #   STEP 14: Setup - Local variables
+            lCandidates = []
+            lFitness    = []
+
+            #   STEP 15: Perform swarming
+            vSwarm.pso()
+
+            #   STEP 16: Iterate through candidates
+            for j in range(0, dPSO_Params["candidates"]):
+                #   STPE 17: Get particle fitness
+                lFitness.append( vSRG.getPointOutput( vSwarm.lParticles[j].lCurrPosition ) )
+
+            #   STEP 18: Update swarm fitness
+            vSwarm.setParticleFitness(lFitness)
+
+        #   STEP 19: User output
+        if (self.bShowOutput):
+            print("Sarah (map-srg-PSO) {" + Helga.time() + "} - Particle-Swarm Optimzation mapping completed")
+            print("\tTotal Iterations: " + str(i))
+
+        #   STEP 18: Populate output dictionary
+        dOut    = {
+            "result":       vSwarm.lBestSolution,
+            "fitness":      vSwarm.fBestSolution,
+            "iterations":   i
+        }
+
+        #   STEP 19: Return
         return dOut
 
     #

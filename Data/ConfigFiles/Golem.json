@@ -20,8 +20,8 @@
             "1":    "max",
             "2":    "accuracy requirement",
 
-            "min":  5,
-            "max":  15,
+            "min":  4,
+            "max":  10,
             "accuracy requirement": 0.02
         },
         "bools":
@@ -31,9 +31,9 @@
             "1": "rand surrogate seed",
             "2": "rand surrogate",
     
-            "rand surrogate params": false,
-            "rand surrogate seed": true,
-            "rand surrogate": false
+            "rand surrogate params":    false,
+            "rand surrogate seed":      true,
+            "rand surrogate":           false
         }
     },
     "menus":

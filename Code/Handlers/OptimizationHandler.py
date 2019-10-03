@@ -478,7 +478,7 @@ class Hermione:
         iFittest                = -1
 
         iThread_ID              = 0
-        iThread_Num             = 4
+        iThread_Num             = 16
 
         #   STEP 1: Setup - Local variables
 
@@ -505,7 +505,7 @@ class Hermione:
         #   region STEP 6->10: Setup - Global variables
 
         #   STEP 6: Setup - Stop mapping event
-        eMap_event_stopMapping  = mp.Event()
+        eMap_event_stopMapping  = tr.Event()
         eMap_event_stopMapping.clear()
 
         #   STEP 7: Setup - Mapping events
@@ -523,13 +523,13 @@ class Hermione:
         lMap_list_results       = lTmp
 
         #   STEP 9: Setup - UI variables
-        eUI_event_exit          = mp.Event()
+        eUI_event_exit          = tr.Event()
         eUI_event_exit.clear()
 
         sUI_str_results          = ""
 
         #   STEP 10: Setup - UO lock
-        rlUO_rlock              = mp.RLock()
+        rlUO_rlock              = tr.RLock()
 
         #
         #   endregion
@@ -729,12 +729,10 @@ class Hermione:
         #   STEP 59: Reset globals
         self.__resetGlobals__()
 
-        """
         #   STEP 60: Check if ui thread alive
         if (tTmp_ThreadUI.is_alive()):
             #   STEP 61: Forcefully terminate
-            tTmp_ThreadUI.terminate()
-        """
+            tTmp_ThreadUI._stop()
         
         #   STEP 62: Return
         return lResults[iFittest]
@@ -830,7 +828,7 @@ class Hermione:
         #   endregion
         
         #   STEP 12: Update - Local variables
-        iThread_AppID   = kwargs["id"]
+        iThread_AppID   = kwargs["thread"]
 
         #   region STEP 13->25: Map using provided optimizer
 
