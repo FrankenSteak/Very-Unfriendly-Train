@@ -58,7 +58,7 @@
             "3":        "surrogate region",
 
             "iterations":           75,
-            "candidates":           7,
+            "candidates":           20,
             "algorithm region":     3,
             "surrogate region":     3
         }

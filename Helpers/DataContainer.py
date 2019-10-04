@@ -898,7 +898,7 @@ class Data:
                         fTmp_Sum    += fTmp_Point
 
             #   STEP 15: Root the sum
-            fTmp_Sum    = np.sqrt(fTmp_Sum)
+            fTmp_Sum    = round( np.sqrt(fTmp_Sum), 4 )
 
             #   STEP 16: Append to list
             lOut.append(fTmp_Sum)

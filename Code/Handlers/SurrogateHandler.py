@@ -854,7 +854,7 @@ class Golem:
             elif (fTmp_Fitness < fBest_Fitness):
                 fBest_Fitness   = fTmp_Fitness
                 iBest_Index     = i
-                
+
                 print("#", end="")
 
             else:
@@ -970,13 +970,12 @@ class Golem:
             #   STEP 3: Error handling
             raise Exception("An error occured in Golem.__map_srgOverseer__() -> Step 2: No data arg passed")
 
-        #   STEP 4: User output
-        if (self.bShowOutput):
-            print("\t{" + Helga.time() + "} - Starting surrogate mapping\t\t\t-> ", end="")
-
         #   STEP 5: If optimizer output
         if (optimizer.bShowOutput):
             print("")
+
+        else:
+            print("\t{" + Helga.time() + "} - Starting surrogate mapping\t\t\t-> ", end="")
 
         try:
 
@@ -1025,6 +1024,7 @@ class Golem:
             print("An error occured in Golem.__map_srgOverseer__()")
 
         #   STEP 15: Return
+        print("")
         return
 
     #

@@ -1001,20 +1001,21 @@ class Natalie:
             #   STEP 11: Update - Candidate substrate
             self.__remapData_Substrate__(candidate=dTmp_Candidate)
 
-            #   STEP 12: Append new candidate to output list
+            #   region STEP 12: Get plane slots
+
+            dTmp_Candidate["ground plane"]["slots"] = self.__randSlots__(center=dCenter["ground plane"]["slots"], scalars=dScalars["ground plane"]["slots"], plane=dTmp_Candidate["ground plane"], z=0.0, region=iRegion + 1)
+            dTmp_Candidate["radiating plane"]["slots"] = self.__randSlots__(center=dCenter["radiating plane"]["slots"], scalars=dScalars["radiating plane"]["slots"], plane=dTmp_Candidate["radiating plane"], z=dTmp_Candidate["substrate"]["h"], region=iRegion + 1)
+            
+            #
+            #   endregion
+
+            #   STEP 13: Append new candidate to output list
             lOut.append(dTmp_Candidate)
+            
+        #   STEP 14: Verify slots
+        lOut    = self.__verifyTriangles__(candidates=lOut, region=kwargs["region"])
 
-        #   STEP 13: Outsource - Get slot data
-        lTmp_Slots_GP   = self.__randSlots__(center=dCenter["ground plane"]["slots"],       scalars=dScalars["ground plane"]["slots"],      plane=dTmp_Candidate["ground plane"],       z=0.0,                              region=iRegion + 1, candidates=iCandidates)
-        lTmp_Slots_RP   = self.__randSlots__(center=dCenter["radiating plane"]["slots"],    scalars=dScalars["radiating plane"]["slots"],   plane=dTmp_Candidate["radiating plane"],    z=dTmp_Candidate["substrate"]["h"], region=iRegion + 1, candidates=iCandidates)
-
-        #   STEP 14: Loop through candidates
-        for i in range(0, iCandidates):
-            #   STEP 15: Update - Candidate slots
-            lOut[i]["ground plane"]["slots"]        = lTmp_Slots_GP[i]
-            lOut[i]["radiating plane"]["slots"]    = lTmp_Slots_RP[i]
-
-        #   STPE 16: Return
+        #   STEP 15: Return
         return lOut
 
     def __evalFitness__(self, **kwargs) -> list:
@@ -1115,8 +1116,8 @@ class Natalie:
             dTmp = {
                 "items":    2,
 
-                "0":        "area",
-                "1":        "freq",
+                "0":        "freq",
+                "1":        "area",
 
                 "lower":    dFit["lower"]["total"],
                 "desired":  dFit["desired"]["total"],
@@ -1132,6 +1133,223 @@ class Natalie:
 
         #   STEP 3: Return
         return lOut
+
+    def __verifyTriangles__(self, **kwargs) -> list:
+        """
+            Description:
+
+                ?
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + candidates    = ( list ) A list of candidate antenna geometries
+
+                + region    = ( int )
+
+        """
+
+        #   STEP 0: Local variables
+        lSlots_GP               = []
+        lSlots_RP               = []
+
+        lSlots_Data             = []
+        lSlots_Avg              = []
+
+        lSlots_Template         = []
+        lSlots_Unique           = []
+        lSlots_Unique_Count     = []
+        lSlots_Common           = []
+
+        iRegion                 = None
+
+        #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->5: Error checking
+
+        #   STEP 2: check if candidates arg passed
+        if ("candidates" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.__verifyTriangles__() -> Step 2: No candidates arg passed")
+
+        #   STEP 4: Check if region arg passed
+        if ("region" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Natalie.__verifyTriangles__() -> Step 4: No region arg passed")
+
+        #
+        #   endregion
+
+        #   STEP 6: Update - Local variables
+        iRegion = kwargs["region"]
+
+        #   STEP 7: Loop through candidate
+        for i in range(0, len(kwargs["candidates"])):
+            #   STPE 8: Append slots to lists
+            lSlots_GP.append(kwargs["candidates"][i]["ground plane"]["slots"])
+            lSlots_RP.append(kwargs["candidates"][i]["radiating plane"]["slots"])
+
+        try:
+            #   STEP 8: Loop through all candidates
+            for i in range(0, len(lSlots_GP)):
+                #   STEP 9: Get temp candidate dictionary
+                dTmp_Candidate = lSlots_GP[i]
+
+                #   STEP 10: Loop through slots in candidate
+                for j in range(0, dTmp_Candidate["items"]):
+                    #   STEP 11: Check if slot not in unique slots list
+                    if (dTmp_Candidate[str(j)]["id"] not in lSlots_Unique):
+                        #   STEP 12: Append to list
+                        lSlots_Unique.append(dTmp_Candidate[str(j)]["id"])
+                        lSlots_Unique_Count.append(1)
+
+                    #   STEP 13: Not unique
+                    else:
+                        #   STEP 14: Get index in unique list
+                        iTmp_Index = lSlots_Unique.index(dTmp_Candidate[str(j)]["id"])
+
+                        #   STEP 15: Increment counter
+                        lSlots_Unique_Count[iTmp_Index] += 1
+
+            if (len(lSlots_Unique_Count) == 0):
+                return kwargs["candidates"]
+
+            #   STEP 18: Loop through unique slots
+            for i in range(0, len(lSlots_Unique_Count)):
+                #   STEP 19: Check if not unique
+                if (lSlots_Unique_Count[i] > 1):
+                    #   STEP 20: Append to common list
+                    lSlots_Common.append(lSlots_Unique_Count[i])
+                    
+            #   STEP 21: Iterate through unique slots
+            for _ in range(0, len( lSlots_Common ) + 1 ):
+                #   STEP 22: Add 6 fields for each unique slot to output
+                for _ in range(0, 6):
+                    #   STEP 23: Append field to output
+                    lSlots_Data.append([])
+
+                #   STEP 24: Append field to template
+                lSlots_Template.append([])
+                
+            #   STEP 25: Loop through all candidates
+            for i in range(0, len(lSlots_GP)):
+                #   STEP 26: Setup - Temp vars
+                dTmp_Candidate  = lSlots_GP[i]
+
+                lTmp_Slots_Data = cp.deepcopy(lSlots_Template)
+
+                #   STEP 27: Loop through slots in this candidate
+                for j in range(0, dTmp_Candidate["items"]):
+                    #   STEP 28: Check if common
+                    if (dTmp_Candidate[str(j)]["id"] in lSlots_Common):
+                        #   STEP 29: Get index
+                        iTmp_Index  = lSlots_Common.index(dTmp_Candidate[str(j)]["id"])
+                        
+                        #   STEP 30: Populate candidate slot dictionary
+                        lTmp = []
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
+                        
+                        #   STEP 31: Append to output
+                        lTmp_Slots_Data[iTmp_Index] = lTmp
+
+                    #   STEP 32: Unique slot
+                    else:
+                        #   STEP 33: Set index to end of list
+                        iTmp_Index  = len(lSlots_Template) - 1
+
+                        #   STEP 34: Populate candidate slot dictionary
+                        lTmp = []
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
+                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
+
+                        #   STEP 35: Append to output
+                        lTmp_Slots_Data[iTmp_Index] = lTmp
+
+                #   STEP 36: Loop through candidate
+                for j in range(0, len(lTmp_Slots_Data)):
+                    #   STEP 37: Check if empty
+                    if (len(lTmp_Slots_Data[j]) <= i):
+                        #   STEP 38: Append empty
+                        lTmp_Slots_Data[j] = [None, None, None, None, None, None]
+
+                #   STEP 39: Translate candidate data to output data
+                for j in range(0, len(lTmp_Slots_Data)):
+                    #   STEP 40:  Append data to output list
+                    lSlots_Data[ j * 6 + 0 ].append(lTmp_Slots_Data[j][0])
+                    lSlots_Data[ j * 6 + 1 ].append(lTmp_Slots_Data[j][1])
+                    lSlots_Data[ j * 6 + 2 ].append(lTmp_Slots_Data[j][2])
+                    lSlots_Data[ j * 6 + 3 ].append(lTmp_Slots_Data[j][3])
+                    lSlots_Data[ j * 6 + 4 ].append(lTmp_Slots_Data[j][4])
+                    lSlots_Data[ j * 6 + 5 ].append(lTmp_Slots_Data[j][5])
+
+            #   STPE 41: Loop through slots data
+            for i in range(0, len(lSlots_Data)):
+                #   STEP 42: Setup - Scope variables
+                fSum    = 0.0
+                iSum    = 0
+
+                #   STEP 43: Loop through data in row
+                for j in range(0, len(lSlots_Data[i])):
+                    #   STEP 44: If not none
+                    if (lSlots_Data[i][j] != None):
+                        #   STEP 45: Sum
+                        fSum    += lSlots_Data[i][j]
+                        iSum    += 1
+
+                #   STEP 46: Set average
+                lSlots_Avg.append( fSum / float(iSum) )
+            
+            print(lSlots_Avg)
+
+            for i in range(0, len(lSlots_GP)):
+                #   STEP 26: Setup - Temp vars
+                dTmp_Candidate  = lSlots_GP[i]
+
+                #   STEP 27: Loop through slots in this candidate
+                for j in range(0, dTmp_Candidate["items"]):
+                    #   STEP 28: Check if common
+                    if (dTmp_Candidate[str(j)]["id"] in lSlots_Common):
+                        #   STEP 29: Get index
+                        iTmp_Index  = lSlots_Common.index(dTmp_Candidate[str(j)]["id"])
+                        
+                    #   STEP 32: Unique slot
+                    else:
+                        #   STEP 33: Set index to end of list
+                        iTmp_Index  = len(lSlots_Template) - 1
+
+                    #   STEP 34: Get dif
+                    fTmp_0x     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["0"]["x"] - lSlots_Avg[ iTmp_Index * 6 + 0 ] ) ), 3)
+                    fTmp_0y     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["0"]["y"] - lSlots_Avg[ iTmp_Index * 6 + 1 ] ) ), 3)
+                    fTmp_1x     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["1"]["x"] - lSlots_Avg[ iTmp_Index * 6 + 2 ] ) ), 3)
+                    fTmp_1y     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["1"]["y"] - lSlots_Avg[ iTmp_Index * 6 + 3 ] ) ), 3)
+                    fTmp_2x     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["2"]["x"] - lSlots_Avg[ iTmp_Index * 6 + 4 ] ) ), 3)
+                    fTmp_2y     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["2"]["y"] - lSlots_Avg[ iTmp_Index * 6 + 5 ] ) ), 3)
+
+                    print("\t\t" + str(i) + ":" + str(j), fTmp_0x, fTmp_0y, fTmp_1x, fTmp_1y, fTmp_2x, fTmp_2y, sep="\t")
+
+            Helga.nop()
+        except Exception as ex:
+            print("Initial error: ", ex)
+            Helga.nop()
+            Helga.nop()
+            Helga.nop()
+
+        #   STEP ??: Return
+        return kwargs["candidates"]
 
     #
     #   endregion
@@ -1254,7 +1472,7 @@ class Natalie:
         #   STEP 26: Return
         return round(fOut, 3)
 
-    def __randSlots__(self, **kwargs) -> list:
+    def __randSlots__(self, **kwargs) -> dict:
         """
             Description:
 
@@ -1313,19 +1531,14 @@ class Natalie:
 
                 + region    = ( int ) The region for randomization
                     ~ Required
-
-                + candidates    = ( int ) The number of candidate slots to
-                    create
-                    ~ Required
         """
         
         #   STEP 0: Local variables
-        lOut                    = []
-        dSlot_New               = None
+        dOut                    = None
 
         #   STEP 1: Setup - Local variables
         
-        #   region STEP 2->13: Error checking
+        #   region STEP 2->11: Error checking
 
         #   STEP 2: Check if center arg passed
         if ("center" not in kwargs):
@@ -1351,127 +1564,104 @@ class Natalie:
         if ("z" not in kwargs):
             #   STEP 11: Error handling
             raise Exception("An error occured in Natalie.__randSlots__() -> Step 10: No z arg passed")
-        
-        #   STEP 12: Check if candidate arg passed
-        if ("candidates" not in kwargs):
-            #   STEP 13: Error handling
-            raise Exception("An error occured in Natalie.__randSlots__() -> Step 12: No candidates arg passed")
 
         #
         #   endregion
         
-        #   region STEP 14->15: New slot creation
+        #   STEP ?? : Update - Local variables
+        dOut = cp.deepcopy(kwargs["center"])
 
-        #   STEP 14: Setup - Temp variables
-        fTmp_X =    ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.random()
-        fTmp_Y =    ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.random()
+        #   region STEP 12->16: Slot creation
 
-        #   STEP 15: Populate tmp dictionary
-        dSlot_New   = {
-            "0":
-            {
-                "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                "z": kwargs["z"]
-            },
-            "1":
-            {
-                "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                "z": kwargs["z"]
-            },
-            "2":
-            {
-                "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                "z": kwargs["z"]
-            },
-            "id":   Helga.ticks()
-        }
+        #   STEP 12: Check for slot creation
+        if (rn.random() < kwargs["scalars"]["create slot"]["default"]["range"]):
+            #   STEP 13: Get temp vars
+            fTmp_X =    ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.random()
+            fTmp_Y =    ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.random()
 
-        #
-        #   endregion
+            #   STEP 14: Populate tmp dictionary
+            dTmp = {
+                "0":
+                {
+                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
+                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
+                    "z": kwargs["z"]
+                },
+                "1":
+                {
+                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
+                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
+                    "z": kwargs["z"]
+                },
+                "2":
+                {
+                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
+                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
+                    "z": kwargs["z"]
+                },
+                "id":   Helga.ticks()
+            }
 
-        #   region STEP 16->20: Slot addition
+            #   STEP 15: Add slot to output dictionary
+            dOut[str(dOut["items"])] = dTmp
 
-        #   STEP 16: Loop through candidates
-        for _ in range(0, kwargs["candidates"]):
-            #   STEP 17: Copy - Center
-            dTmp_Candidate  = cp.deepcopy(kwargs["center"])
-
-            #   STEP 18: Check - Slot creation status
-            if (rn.random() < kwargs["scalars"]["create slot"]["default"]["range"]):
-                #   STEP 19: Add slot to new candidate
-                dTmp_Candidate[ str( dTmp_Candidate["items"] ) ]    = cp.deepcopy(dSlot_New)
-
-                dTmp_Candidate["items"] += 1
-
-            #   STEP 20: Append - New candidate to output
-            lOut.append(dTmp_Candidate)
+            #   STEP 16: Increment slots in dictionary
+            dOut["items"] += 1
 
         #
         #   endregion
 
-        #   region STEP 21->30: Slot removal
+        #   region STEP 17->24: Slot removal
 
-        #   STEP 21: Loop through candidates
-        for i in range(0, kwargs["candidates"]):
-            #   STEP 22: Get current slot
-            dTmp_Candidate  = lOut[i]
+        #   STEP 17: Check for slot removal
+        if (rn.random() < kwargs["scalars"]["remove slot"]["range"]):
+            #   STEP 18: Check that there are slots to remove
+            if (dOut["items"] > 0):
+                #   STEP 19: Pick a random slot
+                iTmp_Index = rn.randint(0, dOut["items"] - 1)
 
-            #   STEP 23: Check - Slot removal status
-            if (rn.random() < kwargs["scalars"]["remove slot"]["range"]):
-                #   STEP 24: Check that there are slots to remove
-                if (dTmp_Candidate["items"] > 0):
-                    #   STEP 25: Pick a random slot
-                    iTmp_Index = rn.randint(0, dTmp_Candidate["items"] - 1)
+                #   STEP 20: Decrement slot counter
+                dOut["items"] -= 1
 
-                    #   STEP 26: Decrement slot counter
-                    dTmp_Candidate["items"] -= 1
+                #   STEP 21: If slots not zero
+                if (dOut["items"] > 0):
+                    #   STEP 22: Loop through remaining slots
+                    for i in range(iTmp_Index + 1, dOut["items"] + 1):
+                        #   STEP 23: Reposition slot
+                        dOut[str(i - 1)] = dOut[str(i)]
 
-                    #   STEP 27: If slots not zero
-                    if (dTmp_Candidate["items"] > 0):
-                        #   STEP 28: Loop through remaining slots
-                        for i in range(iTmp_Index + 1, dTmp_Candidate["items"] + 1):
-                            #   STEP 29: Reposition slot
-                            dTmp_Candidate[str(i - 1)] = dTmp_Candidate[str(i)]
-
-                    #   STEP 30: Delete copy slot in last position
-                    del dTmp_Candidate[str(dTmp_Candidate["items"])]
-        #
-        #   endregion
-
-        #   region STEP 31->39: SLot changing
-
-        #   STEP 31: Loop through candidates
-        for i in range(0, kwargs["candidates"]):
-            #   STEP 32: Get current candidate
-            dTmp_Candidate  = lOut[i]
-            
-            #   STEP 33: Check if change
-            if (rn.random() < kwargs["scalars"]["change slot"]["probability"]["range"]):
-                #   STEP 34: Check if there are any slots to change
-                if (dTmp_Candidate["items"] > 0):
-                    #   STEP 35: Loop through slots
-                    for _ in range(0, dTmp_Candidate["items"]):
-                        #   STEP 36: Pick a random slot
-                        iTmp_Index = rn.randint(0, dTmp_Candidate["items"] - 1)
-
-                        #   STEP 37: Get tmp slot
-                        dTmp_Slot = dTmp_Candidate[str(iTmp_Index)]
-
-                        #   STEP 38: loop through slot co-ordinates
-                        for i in range(0, 3):
-                            #   STEP 39: Adjust coordinates
-                            dTmp_Slot[str(i)]["x"] = self.__randVal__(center=dTmp_Slot[str(i)]["x"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["x"])
-                            dTmp_Slot[str(i)]["y"] = self.__randVal__(center=dTmp_Slot[str(i)]["y"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["y"])
+                #   STEP 24: Delete copy slot in last position
+                del dOut[str(dOut["items"])]
 
         #
         #   endregion
 
-        #   STEP 40: Return
-        return lOut
+        #   region STEP 25->31: Slot shifting
 
+        #   STEP 25: Check if change
+        if (rn.random() < kwargs["scalars"]["change slot"]["probability"]["range"]):
+            #   STEP 26: Check if there are any slots to change
+            if (dOut["items"] > 0):
+                #   STEP 27: Loop through slots
+                for _ in range(0, dOut["items"]):
+                    #   STEP 28: Pick a random slot
+                    iTmp_Index = rn.randint(0, dOut["items"] - 1)
+
+                    #   STEP 29: Get tmp slot
+                    dTmp_Slot = dOut[str(iTmp_Index)]
+
+                    #   STEP 30: loop through slot co-ordinates
+                    for i in range(0, 3):
+                        #   STEP 31: Adjust coordinates
+                        dTmp_Slot[str(i)]["x"] = self.__randVal__(center=dTmp_Slot[str(i)]["x"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["x"])
+                        dTmp_Slot[str(i)]["y"] = self.__randVal__(center=dTmp_Slot[str(i)]["y"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["y"])
+
+        #
+        #   endregion
+
+        #   STEP 32: Return
+        return dOut
+    
     #
     #   endregion
 
@@ -1691,6 +1881,7 @@ class Natalie:
         lSlots_Template         = []
         lSlots_Unique           = []
         lSlots_Unique_Count     = []
+        lSlots_Common           = []
 
         fZ                      = None
 
@@ -1719,8 +1910,8 @@ class Natalie:
         #   endregion
 
         try:
-            iStep += 1
             #   STEP 8: Loop through all candidates
+            iStep += 1
             for i in range(0, len(kwargs["data"])):
                 #   STEP 9: Get temp candidate dictionary
                 dTmp_Candidate = kwargs["data"][i]
@@ -1750,9 +1941,17 @@ class Natalie:
             if (len(lSlots_Unique_Count) == 0):
                 return
 
+            #   STEP 18: Loop through unique slots
             iStep += 1
+            for i in range(0, len(lSlots_Unique_Count)):
+                #   STEP 19: Check if not unique
+                if (lSlots_Unique_Count[i] > 1):
+                    #   STEP 20: Append to common list
+                    lSlots_Common.append(lSlots_Unique_Count[i])
+                    
             #   STEP 21: Iterate through unique slots
-            for _ in range(0, len( lSlots_Unique ) ):
+            iStep += 1
+            for _ in range(0, len( lSlots_Common ) + 1 ):
                 #   STEP 22: Add 6 fields for each unique slot to output
                 for _ in range(0, 6):
                     #   STEP 23: Append field to output
@@ -1760,9 +1959,9 @@ class Natalie:
 
                 #   STEP 24: Append field to template
                 lSlots_Template.append([])
-
-            iStep += 1
+                
             #   STEP 25: Loop through all candidates
+            iStep += 1
             for i in range(0, len(kwargs["data"])):
                 #   STEP 26: Setup - Temp vars
                 dTmp_Candidate  = kwargs["data"][i]
@@ -1771,37 +1970,28 @@ class Natalie:
 
                 #   STEP 27: Loop through slots in this candidate
                 for j in range(0, dTmp_Candidate["items"]):
-                    iTmp_Index  = lSlots_Unique.index(dTmp_Candidate[str(j)]["id"])
+                    iStep += 1
                     #   STEP 28: Check if common
-                    if (iTmp_Index != -1):
-                        #   STEP 30: Populate candidate slot dictionary
-                        lTmp = []
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
-                        
-                        #   STEP 31: Append to output
-                        lTmp_Slots_Data[iTmp_Index] = lTmp
+                    if (dTmp_Candidate[str(j)]["id"] in lSlots_Common):
+                        #   STEP 29: Get index
+                        iTmp_Index  = lSlots_Common.index(dTmp_Candidate[str(j)]["id"])
 
                     #   STEP 32: Unique slot
                     else:
                         #   STEP 33: Set index to end of list
-                        iTmp_Index  = len(lSlots_Unique) - 1
+                        iTmp_Index  = len(lSlots_Template) - 1
 
-                        #   STEP 34: Populate candidate slot dictionary
-                        lTmp = []
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
+                    #   STEP 34: Populate candidate slot dictionary
+                    lTmp = []
+                    lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
+                    lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
+                    lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
+                    lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
+                    lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
+                    lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
 
-                        #   STEP 35: Append to output
-                        lTmp_Slots_Data[iTmp_Index] = lTmp
+                    #   STEP 35: Append to output
+                    lTmp_Slots_Data[iTmp_Index] = lTmp
 
                 #   STEP 36: Loop through candidate
                 for j in range(0, len(lTmp_Slots_Data)):
@@ -1837,23 +2027,23 @@ class Natalie:
                 dTmp = {
                     "0":
                     {
-                        "x": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 0),
-                        "y": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 1),
+                        "x": "remap-" + str(kwargs["index"] + kwargs["template"]["items"] * 6 + 0),
+                        "y": "remap-" + str(kwargs["index"] + kwargs["template"]["items"] * 6 + 1),
                         "z": fZ
                     },
                     "1":
                     {
-                        "x": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 2),
-                        "y": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 3),
+                        "x": "remap-" + str(kwargs["index"] + kwargs["template"]["items"] * 6 + 2),
+                        "y": "remap-" + str(kwargs["index"] + kwargs["template"]["items"] * 6 + 3),
                         "z": fZ
                     },
                     "2":
                     {
-                        "x": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 4),
-                        "y": "remap-" + str(kwargs["index"] + ( kwargs["template"]["items"] + 1 ) * 6 + 5),
+                        "x": "remap-" + str(kwargs["index"] + kwargs["template"]["items"] * 6 + 4),
+                        "y": "remap-" + str(kwargs["index"] + kwargs["template"]["items"] * 6 + 5),
                         "z": fZ
                     },
-                    "id": Helga.time()
+                    "id": Helga.ticks()
                 }
 
                 #   STEP 37: Add to template dictionary
