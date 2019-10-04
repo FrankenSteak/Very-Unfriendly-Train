@@ -686,8 +686,72 @@ class Matthew:
         #   STEP 14: Return
         return dOut
 
+    #
+    #       endregion
+
+    #       region Front-End-(Gets): Fitness
+
     @classmethod
-    def getPatch_Json(self, **kwargs) -> list:
+    def getFitness(self, **kwargs) -> dict:
+        """
+            Description:
+
+                Gets the fitness of the specified antenna simulation using the
+                provided arguments.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + dir   = ( str ) The path of the antenna simulationto use
+                    for the fitness evaluation
+                    ~ Required
+
+                + frequency = ( dict ) A dictionary that contains the relevant
+                    information for the fitness evaluation
+                    ~ "desired" : { "start" = ( float ), "end" = ( float ) }
+
+                + params    = ( dict ) A dictionary containing the parameters
+                    the frequency fitness evaluation
+        """
+
+        #   STEP 0: Local variables
+        dOut                    = {}
+
+        #   STEP 1: Setup - Local variables
+
+        #   STEP 2: Check if dir argument passed
+        if ("dir" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Matthew.getFitness() -> Step 2: No dir arg passed")
+
+        #   STEP 4: Check if frequency fitness evaluations needs to be performed
+        if ("frequency" in kwargs):
+            #   STEP 5: Check if params arg passed
+            if ("params" not in kwargs):
+                #   STEP 6: Error handling
+                raise Exception("An error occured in Matthew.getFitness() -> Step 5: No params arg passed")
+
+            #   STEP 7: Append to output
+            dOut["frequency"] = self.__getFitness_Frequency__(dir=kwargs["dir"], frequency=kwargs["frequency"], params=kwargs["params"])
+
+        #   STEP 8: Return
+        return dOut
+
+    #
+    #       endregion
+
+    #
+    #   endregion
+
+    #   region Front-End: Other
+
+    @classmethod
+    def simulateCandidates_Json(self, **kwargs) -> list:
         """
             Description:
 
@@ -817,7 +881,7 @@ class Matthew:
         #   STEP 1: Setup - Local variables
         vConny.load(en.Mathew.value)
         
-        #   region STEP 2->??: ERror checking
+        #   region STEP 2->13: Error checking
 
         #   STEP 2: Check if dir arg passed
         if ("dir" not in kwargs):
@@ -834,326 +898,443 @@ class Matthew:
             #   STEP 7: Error handling
             raise Exception("An error occured in Matthew.getPatch_Json() -> Step 6: Invali ant arg passed")
 
-        #   STEP ??: Check if mesh arg passed
+        #   STEP 8: Check if mesh arg passed
         if ("mesh" not in kwargs):
-            #   STEP ??: Error handling
-            raise Exception("An error occured in Matthew.getPatch_Json() -> Step ??: No mesh arg passed")
+            #   STEP 9: Error handling
+            raise Exception("An error occured in Matthew.getPatch_Json() -> Step 8: No mesh arg passed")
 
-        #   STEP ??: Check if runt arg passed
+        #   STEP 10: Check if runt arg passed
         if ("runt" not in kwargs):
-            #   STEP ??: error handling
-            raise Exception("An error occured in Matthew.getPatch_Json() -> Step ??: No runt arg passed")
+            #   STEP 11: error handling
+            raise Exception("An error occured in Matthew.getPatch_Json() -> Step 10: No runt arg passed")
         
-        #   STEP ??: Check if frequency arg passed
+        #   STEP 12: Check if frequency arg passed
         if ("frequency" not in kwargs):
-            #   STEP ??: Error handling
-            raise Exception("An error occured in Matthew.getPatch_Json() -> Step ??: No frequency arg passed")
+            #   STEP 13: Error handling
+            raise Exception("An error occured in Matthew.getPatch_Json() -> Step 12: No frequency arg passed")
+        
         #
         #   endregion
 
-        #   STEP 8: Update - local variables
+        #   STEP 14: Setup - local variables
         lurkhei = Lana(name=sName, dir=kwargs["dir"], units="Millimetres")
 
-        #   STEP 9: Loop through antenna
+        #   STEP 15: Loop through antenna
         for i in range(0, len(kwargs["ant"])):
-            #   STEP 10: Get antenna
-            dAnt = kwargs["ant"][i]
+            #   STEP 16: Get temp antenna
+            dTmp_Ant    = kwargs["ant"][i]
 
-            iFaces  = 0
+            iTmp_Faces  = 0
 
-            #   STEP 11: Create a new antenna project
+            #   STEP 17: Create a new antenna project
             lurkhei.newAntenna(name=str(i))
 
-            #   region STEP 36->39: Create feed
+            #   region STEP 18->26: Create feed
 
-            #   STEP 36: Create top feed strip
-            fTmp_X  = dAnt["radiating plane"]["x"] + dAnt["radiating plane"]["l"]
-            fTmp_Y  = dAnt["feed"]["center"] - dAnt["feed"]["width"] / 2.0
+            #   STEP 18: Setup - Temp variables
+            fTmp_X  = dTmp_Ant["radiating plane"]["x"]  + dTmp_Ant["radiating plane"]["l"]
+            fTmp_Y  = dTmp_Ant["feed"]["center"]        - dTmp_Ant["feed"]["width"] / 2.0
 
-            dCrn = {
+            #   STEP 19: Setup - Surface corners
+            dTmp_Corner = {
                 "items": 4,
                 "0":
                 {
                     "x": fTmp_X,
                     "y": fTmp_Y,
-                    "z": dAnt["substrate"]["h"]
+                    "z": dTmp_Ant["substrate"]["h"]
                 },
                 "1":
                 {
                     "x": fTmp_X,
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": dAnt["substrate"]["h"]
+                    "y": dTmp_Ant                   + dTmp_Ant["feed"]["width"],
+                    "z": dTmp_Ant["substrate"]["h"]
                 },
                 "2":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": dAnt["substrate"]["h"]
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y                     + dTmp_Ant["feed"]["width"],
+                    "z": dTmp_Ant["substrate"]["h"]
                 },
                 "3":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
                     "y": fTmp_Y,
-                    "z": dAnt["substrate"]["h"]
+                    "z": dTmp_Ant["substrate"]["h"]
                 }
             }
 
-            sFeed_Top = lurkhei.newASurface(surface="Polygon", corner=dCrn, label="Feed_Top")
-            iFaces += 1
+            #   STEP 20: Setup - Create surface and update faces
+            sFeed_Top = lurkhei.newASurface(surface="Polygon", corner=dTmp_Corner, label="Feed_Top")
 
-            #   STEP 37: Create positive feed face
-            dCrn    = {
+            iTmp_Faces += 1
+
+            #   STEP 21: Setup - Create positive feed face corners
+            dTmp_Corner = {
                 "items": 4,
                 "0":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": dAnt["substrate"]["h"]
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y + dTmp_Ant["feed"]["width"],
+                    "z": dTmp_Ant["substrate"]["h"]
                 },
                 "1":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": dAnt["substrate"]["h"] / 2.0
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y + dTmp_Ant["feed"]["width"],
+                    "z": dTmp_Ant["substrate"]["h"] / 2.0
                 },
                 "2":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
                     "y": fTmp_Y,
-                    "z": dAnt["substrate"]["h"] / 2.0
+                    "z": dTmp_Ant["substrate"]["h"] / 2.0
                 },
                 "3":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
                     "y": fTmp_Y,
-                    "z": dAnt["substrate"]["h"]
+                    "z": dTmp_Ant["substrate"]["h"]
                 }
             }
 
-            sFeed_Pos = lurkhei.newASurface(surface="Polygon", corner=dCrn, label="Feed_Pos")
-            iFaces += 1
+            #   STEP 22: Setup - Create surface and update faces
+            sFeed_Pos   = lurkhei.newASurface(surface="Polygon", corner=dTmp_Corner, label="Feed_Pos")
+            
+            iTmp_Faces  += 1
 
-            #   STEP 38: Create negative feed face
-            dCrn    = {
+            #   STEP 23: Setup - Create negative feed face corners
+            dTmp_Corner = {
                 "items": 4,
                 "0":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": 0.0
-                },
-                "1":
-                {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": dAnt["substrate"]["h"] / 2.0
-                },
-                "2":
-                {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y,
-                    "z": dAnt["substrate"]["h"] / 2.0
-                },
-                "3":
-                {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y,
-                    "z": 0.0
-                }
-            }
-
-            sFeed_Neg = lurkhei.newASurface(surface="Polygon", corner=dCrn, label="Feed_Neg")
-            iFaces += 1
-
-            #   STEP 39: Create bot feed strip
-            dCrn = {
-                "items": 4,
-                "0":
-                {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y,
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y + dTmp_Ant["feed"]["width"],
                     "z": 0.0
                 },
                 "1":
                 {
-                    "x": dAnt["substrate"]["l"] + dAnt["substrate"]["x"] + dAnt["substrate"]["h"],
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": 0.0
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y + dTmp_Ant["feed"]["width"],
+                    "z": dTmp_Ant["substrate"]["h"] / 2.0
                 },
                 "2":
                 {
-                    "x": dAnt["ground plane"]["l"] + dAnt["ground plane"]["x"],
-                    "y": fTmp_Y + dAnt["feed"]["width"],
-                    "z": 0.0
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y,
+                    "z": dTmp_Ant["substrate"]["h"] / 2.0
                 },
                 "3":
                 {
-                    "x": dAnt["ground plane"]["l"] + dAnt["ground plane"]["x"],
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
                     "y": fTmp_Y,
                     "z": 0.0
                 }
             }
 
-            sFeed_Bot = lurkhei.newASurface(surface="Polygon", corner=dCrn, label="Feed_Bot")
-            iFaces += 1
+            #   STEP 24: Setup - Create surface and update faces
+            sFeed_Neg   = lurkhei.newASurface(surface="Polygon", corner=dTmp_Corner, label="Feed_Neg")
+            
+            iTmp_Faces  += 1
+
+            #   STEP 25: Setup - Create bot feed strip corners
+            dTmp_Corner = {
+                "items": 4,
+                "0":
+                {
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y,
+                    "z": 0.0
+                },
+                "1":
+                {
+                    "x": dTmp_Ant["substrate"]["l"] + dTmp_Ant["substrate"]["x"] + dTmp_Ant["substrate"]["h"],
+                    "y": fTmp_Y + dTmp_Ant["feed"]["width"],
+                    "z": 0.0
+                },
+                "2":
+                {
+                    "x": dTmp_Ant["ground plane"]["l"] + dTmp_Ant["ground plane"]["x"],
+                    "y": fTmp_Y + dTmp_Ant["feed"]["width"],
+                    "z": 0.0
+                },
+                "3":
+                {
+                    "x": dTmp_Ant["ground plane"]["l"] + dTmp_Ant["ground plane"]["x"],
+                    "y": fTmp_Y,
+                    "z": 0.0
+                }
+            }
+
+            #   STEP 26: Setup - Create surface and update faces
+            sFeed_Bot   = lurkhei.newASurface(surface="Polygon", corner=dTmp_Corner, label="Feed_Bot")
+            
+            iTmp_Faces  += 1
 
             #
             #   endregion
 
-            #   region STEP 12: Create ground plane
+            #   region STEP 27: Create ground plane
 
-            dCrn = {
-                "x":    dAnt["ground plane"]["x"],
-                "y":    dAnt["ground plane"]["y"],
+            dTmp_Corner = {
+                "x":    dTmp_Ant["ground plane"]["x"],
+                "y":    dTmp_Ant["ground plane"]["y"],
                 "z":    0.0
             }
 
-            dDim    = {
-                "l":    dAnt["ground plane"]["l"],
-                "w":    dAnt["ground plane"]["w"]
+            dTmp_Dim    = {
+                "l":    dTmp_Ant["ground plane"]["l"],
+                "w":    dTmp_Ant["ground plane"]["w"]
             }
 
-            sGPlane     = lurkhei.newASurface(surface="Rectangle", corner=dCrn, dimensions=dDim, label="GP")
-            iFaces      += 1
+            sGPlane     = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GP")
+            
+            iTmp_Faces  += 1
 
             #
             #   endregion
             
-            #   region STEP 13->21: Add slots to ground plane
+            #   region STEP 28->46: Add slots to ground plane
 
-            #   STEP 13: Check if there are slots
-            if (dAnt["ground plane"]["slots"]["items"] > 0):
-                #   STEP 14: Get tmp slots
-                dSlots  = dAnt["ground plane"]["slots"]
+            #   STEP 28: Check if there are slots
+            if (dTmp_Ant["ground plane"]["slots"]["items"] > 0):
+                #   STEP 29: Setup - Scope variables
+                dTmp_Slots  = dTmp_Ant["ground plane"]["slots"]
 
                 dSubs   = {
-                    "items": dSlots["items"]
+                    "items": dTmp_Slots["items"]
                 }
 
-                #   STEP 15: Loop through slots
-                for j in range(0, dSlots["items"]):
-                    #   STEP 16: Get curr slot
-                    dSCurr = dSlots[str(j)]
+                #   STEP 30: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 31: Get curr slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
 
-                    #   STEP 17: Create surface corners
-                    dCrn = {
-                        "items": 3,
-                        "0": dSCurr["0"],
-                        "1": dSCurr["1"],
-                        "2": dSCurr["2"]
-                    }
+                    #   STEP 32: Check if square
+                    if (dTmp_CurrSlot["type"]   == "square"):
+                        #   STEP 33: Setup - Square slot top-left corner
+                        dTmp_Corner = {
+                            "x":    dTmp_CurrSlot["x"],
+                            "y":    dTmp_CurrSlot["y"],
+                            "z":    0.0
+                        }
 
-                    #   STEP 18: Create slot surface
-                    sGPSlot = lurkhei.newASurface(surface="Polygon", corner=dCrn, label="GPSlot_" + str(j))
+                        #   STEP 34: Setup - Square slot dimenions
+                        dTmp_Dim    = {
+                            "l":    dTmp_CurrSlot["l"],
+                            "w":    dTmp_CurrSlot["w"]
+                        }
 
-                    #   STEP 19: Append name to list
-                    dSubs[str(j)] = sGPSlot
-                    iFaces          += 1
+                        #   STEP 35: Setup - Create square/rect surface
+                        sTmp_GPSlot     = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(j))
 
-                #   STEP 20: Create parts dictionary
-                dParts = {
+                        dSubs[str(j)]   = sTmp_GPSlot
+
+                        #   STEP 36: Update - Faces
+                        iTmp_Faces      += 1
+
+                    #   STEP 37: Check if circle/ellipse
+                    elif (dTmp_CurrSlot["type"] == "ellipse"):
+                        #   STEP 38: Setup - Elliptical slot center
+                        dTmp_Corner = {
+                            "x":    dTmp_CurrSlot["x"],
+                            "y":    dTmp_CurrSlot["y"],
+                            "z":    0.0
+                        }
+
+                        #   STEP 39: Setup - Elliptical slot dimensions
+                        dTmp_Dim    = {
+                            "l":    dTmp_CurrSlot["l"],
+                            "w":    dTmp_CurrSlot["w"]
+                        }
+
+                        #   STEP 40: Setup - Create elliptical surface
+                        sTmp_GPSlot     = lurkhei.newASurface(surface="Ellipse", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(j))
+
+                        dSubs[str(j)]   = sTmp_GPSlot
+
+                        #   STEP 41: Update - Faces
+                        iTmp_Faces      += 1
+
+                    #   STEP 42: Check if triangle or polygon
+                    elif ((dTmp_CurrSlot["type"] == "triangle") or (dTmp_CurrSlot["type"] == "polygon")):
+                        #   STEP 43: Check that there are at least three points in polygon
+                        if (dTmp_CurrSlot["items"] < 3):
+                            #   STEP 44: Error handling
+                            raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 43: Polygon has less than three corners")
+
+                        #   STEP 45: Setup - Create polygonal surface
+                        sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot))
+
+                        dSubs[str(j)]   = sTmp_GPSlot
+
+                        #   STEP 42: Update - Faces
+                        iTmp_Faces      += 1
+
+                    #   STEP 43: Unrecognized surface type
+                    else:   
+                        #   STEP 44: Error handling
+                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 44: Unrecognized surface type")
+                    
+                #   STEP 45: Create parts dictionary
+                dTmp_Parts = {
                     "target":   sGPlane,
                     "subs":     dSubs
                 }
 
-                #   STEP 21: Perform subtraction
-                sGPlane = lurkhei.newAModification(mod="Subtract", parts=dParts, label="GP_Slotted")
+                #   STEP 46: Perform subtraction
+                sGPlane = lurkhei.newAModification(mod="Subtract", parts=dTmp_Parts, label="GP_Slotted")
 
             #
             #   endregion
 
-            #   region STEP 22->24: Create substrate
+            #   region STEP 47->50: Create substrate
 
-            #   STEP 22: Create new medium
-            lurkhei.newAMedium(label=dAnt["substrate"]["name"], permitivitty=dAnt["substrate"]["permitivitty"], loss=dAnt["substrate"]["loss"])
+            #   STEP 47: Setup - Create new medium
+            lurkhei.newAMedium(label=dTmp_Ant["substrate"]["name"], permitivitty=dTmp_Ant["substrate"]["permitivitty"], loss=dTmp_Ant["substrate"]["loss"])
             
-            #   STEP 23: Creat substrate args
-            dCrn    = {
-                "x": dAnt["substrate"]["x"],
-                "y": dAnt["substrate"]["y"],
+            #   STEP 48: Setup - Substrate args
+            dTmp_Corner = {
+                "x": dTmp_Ant["substrate"]["x"],
+                "y": dTmp_Ant["substrate"]["y"],
                 "z": 0.0
             }
 
-            dDim    = {
-                "l": dAnt["substrate"]["l"],
-                "w": dAnt["substrate"]["w"],
-                "h": dAnt["substrate"]["h"]
+            dTmp_Dim    = {
+                "l": dTmp_Ant["substrate"]["l"],
+                "w": dTmp_Ant["substrate"]["w"],
+                "h": dTmp_Ant["substrate"]["h"]
             }
 
-            #   STEP 24: Create substrate
-            sSubstrate  = lurkhei.newASolid(solid="Cuboid", corner=dCrn, dimensions=dDim, label="Substrate")
-            lurkhei.setASolidMedium(medium=dAnt["substrate"]["name"], solid=sSubstrate)
+            #   STEP 49: Setup - Create substrate
+            sSubstrate  = lurkhei.newASolid(solid="Cuboid", corner=dTmp_Corner, dimensions=dTmp_Dim, label="Substrate")
 
-            iFaces       += 6
+            lurkhei.setASolidMedium(medium=dTmp_Ant["substrate"]["name"], solid=sSubstrate)
+
+            #   STPE 50: Update - Faces
+            iTmp_Faces  += 6
 
             #
             #   endregion
 
-            #   region STEP 25->26: Create radiating plane
+            #   region STEP 51->53: Create radiating plane
 
-            #   STEP 25: Create RPlane atgs
-            dCrn    = {
-                "x":    dAnt["radiating plane"]["x"],
-                "y":    dAnt["radiating plane"]["y"],
-                "z":    dAnt["substrate"]["h"]
+            #   STEP 51: Create RPlane atgs
+            dTmp_Corner = {
+                "x":    dTmp_Ant["radiating plane"]["x"],
+                "y":    dTmp_Ant["radiating plane"]["y"],
+                "z":    dTmp_Ant["substrate"]["h"]
             }
 
-            dDim    = {
-                "l":    dAnt["radiating plane"]["l"],
-                "w":    dAnt["radiating plane"]["w"]
+            dTmp_Dim    = {
+                "l":    dTmp_Ant["radiating plane"]["l"],
+                "w":    dTmp_Ant["radiating plane"]["w"]
             }
 
-            #   STEP 26: Create RPlane
-            sRPlane = lurkhei.newASurface(surface="Rectangle", corner=dCrn, dimensions=dDim, label="RP")
+            #   STEP 52: Create RPlane
+            sRPlane = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="RP")
+
+            #   STEP 53: Update - Faces
             iFaces += 1
 
             #
             #   endregion
 
-            #   region STEP 27->35: Create slotted RPlane
+            #   region STEP 54->76: Create slotted RPlane
 
-            #   STEP 27: Check if there are slots in RPlane
-            if (dAnt["radiating plane"]["slots"]["items"] > 0):
-                #   STEP 28: Get slots
-                dSlots  = dAnt["radiating plane"]["slots"]
+            #   STEP 54: Check if there are slots in RPlane
+            if (dTmp_Ant["radiating plane"]["slots"]["items"] > 0):
+                #   STEP 55: Setup - Scope variables
+                dTmp_Slots  = dTmp_Ant["radiating plane"]["slots"]
 
                 dSubs   = {
-                    "items":    dSlots["items"]
+                    "items":    dTmp_Slots["items"]
                 }
 
-                #   STEP 29: Loop through slots
-                for j in range(0, dSlots["items"]):
-                    #   STEP 30: Get curr slot
-                    dSCurr = dSlots[str(j)]
+                #   STEP 56: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 57: Get curr slot
+                    dTmp_CurrSlot = dTmp_Slots[str(j)]
 
-                    #   STEP 31: Create surface corners
-                    dCrn = {
-                        "items": 3,
-                        "0": dSCurr["0"],
-                        "1": dSCurr["1"],
-                        "2": dSCurr["2"]
-                    }
+                    #   STEP 58: Check if square
+                    if (dTmp_CurrSlot["type"] == "square"):
+                        #   STEP 59: Setup - Square slot top-left corner
+                        dTmp_Corner = {
+                            "x":    dTmp_CurrSlot["x"],
+                            "y":    dTmp_CurrSlot["y"],
+                            "z":    dTmp_Ant["substrate"]["h"]
+                        }
 
-                    #   STEP 32: Create slot surface
-                    sRPSlot = lurkhei.newASurface(surface="Polygon", corner=dCrn, label="RPSlot_" + str(j))
+                        #   STEP 60: Setup - Square slot dimensions
+                        dTmp_Dim    = {
+                            "l":    dTmp_CurrSlot["l"],
+                            "w":    dTmp_CurrSlot["w"]
+                        }
 
-                    #   STEP 33: Append to list
-                    dSubs[str(j)] = sRPSlot
-                    iFaces += 1
+                        #   STPE 61: Setup - Create square/rect surface
+                        sTmp_RPSlot     = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="RPSlot_" + str(j))
 
-                #   STEP 34: Create parts dictionary
-                dParts = {
+                        dSubs[str(j)]   = sTmp_RPSlot
+
+                        #   STEP 62: Update - Faces
+                        iTmp_Faces      += 1
+
+                    #   STEP 63: Check if ellipse
+                    elif (dTmp_CurrSlot["type"] == "ellipse"):
+                        #   STEP 64: Setup - Elliptical slot center
+                        dTmp_Corner = {
+                            "x":    dTmp_CurrSlot["x"],
+                            "y":    dTmp_CurrSlot["y"],
+                            "z":    dTmp_Ant["substrate"]["h"]
+                        }
+
+                        #   STEP 65: Setup - Elliptical slot dimensions
+                        dTmp_Dim    = {
+                            "l":    dTmp_CurrSlot["l"],
+                            "w":    dTmp_CurrSlot["w"]
+                        }
+
+                        #   STEP 66: Setup - Create elliptical surface
+                        sTmp_RPSlot     = lurkhei.newASurface(surface="Ellipse", corner=dTmp_Corner, dimensions=dTmp_Dim, label="RPSlot_" + str(j))
+
+                        dSubs[str(j)]   = sTmp_RPSlot
+
+                        #   STEP 67: Update - Faces
+                        iTmp_Faces      += 1
+
+                    #   STEP 68: Check if triangle or polygon
+                    elif ((dTmp_CurrSlot["type"] == "triangle") or (dTmp_CurrSlot["type"] == "polygon")):
+                        #   STEP 69: Check that there are at least three points in polygon
+                        if (dTmp_CurrSlot["items"] < 3):
+                            #   STEP 70: Error handling
+                            raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Stpe 69: Polygon has less than three corners")
+
+                        #   STEP 71: Setup - Create polygonal surface
+                        sTmp_RPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot))
+
+                        dSubs[str(j)]   = sTmp_RPSlot
+
+                        #   STEP 72: Update - Faces
+                        iTmp_Faces      += 1
+
+                    #   STEP 73: Unrecognized surface type
+                    else:
+                        #   STEP 74: Error handling
+                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 73: Unrecognized surface")
+
+                #   STEP 75: Create parts dictionary
+                dTmp_Parts  = {
                     "target":   sRPlane,
                     "subs":     dSubs
                 }
 
-                #   STEP 35: Perform subtraction
-                sRPlane = lurkhei.newAModification(mod="Subtract", parts=dParts, label="RP_Slotted")
+                #   STEP 76: Perform subtraction
+                sRPlane     = lurkhei.newAModification(mod="Subtract", parts=dParts, label="RP_Slotted")
 
             #
             #   endregion
 
-            #   region STEP 40: Create union
+            #   region STEP 77: Create union
 
             dParts = {
                 "items": 7,
@@ -1171,7 +1352,7 @@ class Matthew:
             #
             #   endregion
 
-            #   region STEP 41: Reset face media
+            #   region STEP 78: Reset face media
 
             lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iFaces + 1), union=sUnion)
             lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iFaces + 2), union=sUnion)
@@ -1180,7 +1361,7 @@ class Matthew:
             #
             #   endregion
 
-            #   region STEP 42: Create new port
+            #   region STEP 79: Create new port
 
             dTmp_Pos = {
                 "items": 1,
@@ -1197,118 +1378,60 @@ class Matthew:
             #
             #   endregion
 
-            #   region STEP 43: Create voltage source
+            #   region STEP 80: Create voltage source
 
             lurkhei.newASource(source="Voltage", port=sPort, label="VoltageSource")
 
             #
             #   endregion
 
-            #   region STEP 44->46: Set frequency and mesh
+            #   region STEP 81->83: Set frequency and mesh
 
-            #   STEP 44: Check if frequency arg passed
+            #   STEP 81: Check if frequency arg passed
             if ("frequency" in kwargs):
-                #   STEP 45: Set frequency
+                #   STEP 82: Set frequency
                 lurkhei.setAFrequency(start=kwargs["frequency"]["start"], end=kwargs["frequency"]["end"], range_type="Linear", samples=kwargs["frequency"]["samples"])
 
-            #   STEP 46: Set mesh
+            #   STEP 83: Set mesh
             lurkhei.setAMesh(wire_radius=kwargs["mesh"]["wire radius"], size=kwargs["mesh"]["size"])
 
             #
             #   endregion
 
-            #   region STEP 47->49: Save and close project
+            #   region STEP 84->86: Save and close project
 
-            #   STEP 47: Save antenna project
+            #   STEP 84: Save antenna project
             lurkhei.saveAntenna(dir=str(i))
 
-            #   STEP 48: Set project to simulate
+            #   STEP 85: Set project to simulate
             lurkhei.simulateAntenna(parallel=kwargs["runt"]["parallel"])
 
-            #   STEP 49: Close project
+            #   STEP 86: Close project
             lurkhei.closeAntenna()
 
             #
             #   endregion
 
-        #   STEP 50: Run script
+        #   STEP 87: Run script
         lurkhei.exportLua(replace=True, run=kwargs["runt"]["run"], interactive=kwargs["runt"]["interactive"])
 
-        #   STEP 51: Loop through antenna
+        #   STEP 88: Loop through antenna
         for i in range(0, len(kwargs["ant"])):
-            #   STEP 52: Get path for this sim
-            sPath = kwargs["dir"] + "\\" + sName + "_" + str(i) + "\\" + str(i) + ".out"
+            #   STEP 89: Get path for this sim
+            #sPath = kwargs["dir"] + "\\" + sName + "_" + str(i) + "\\" + str(i) + ".out"
+            sPath = kwargs["dir"] + sName + "_" + str(i) + "\\" + str(i) + ".out"
 
-            #   STEP 53: Create temp dictionary
+            #   STEP 90: Create temp dictionary
             dTmp = {
                 "dir": sPath,
                 "fitness": Matthew.getFitness(dir=sPath, frequency=kwargs["fitness"], params=vConny.data["parameters"])
             }
 
-            #   STEP 54: Append to output list
+            #   STEP 91: Append to output list
             lOut.append(dTmp)
 
-        #   STEP 55: Return
+        #   STEP 92: Return
         return lOut
-
-    #
-    #       endregion
-
-    #       region Front-End-(Gets): Fitness
-
-    @classmethod
-    def getFitness(self, **kwargs) -> dict:
-        """
-            Description:
-
-                Gets the fitness of the specified antenna simulation using the
-                provided arguments.
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Arguments:
-
-                + dir   = ( str ) The path of the antenna simulationto use
-                    for the fitness evaluation
-                    ~ Required
-
-                + frequency = ( dict ) A dictionary that contains the relevant
-                    information for the fitness evaluation
-                    ~ "desired" : { "start" = ( float ), "end" = ( float ) }
-
-                + params    = ( dict ) A dictionary containing the parameters
-                    the frequency fitness evaluation
-        """
-
-        #   STEP 0: Local variables
-        dOut                    = {}
-
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check if dir argument passed
-        if ("dir" not in kwargs):
-            #   STEP 3: Error handling
-            raise Exception("An error occured in Matthew.getFitness() -> Step 2: No dir arg passed")
-
-        #   STEP 4: Check if frequency fitness evaluations needs to be performed
-        if ("frequency" in kwargs):
-            #   STEP 5: Check if params arg passed
-            if ("params" not in kwargs):
-                #   STEP 6: Error handling
-                raise Exception("An error occured in Matthew.getFitness() -> Step 5: No params arg passed")
-
-            #   STEP 7: Append to output
-            dOut["frequency"] = self.__getFitness_Frequency__(dir=kwargs["dir"], frequency=kwargs["frequency"], params=kwargs["params"])
-
-        #   STEP 8: Return
-        return dOut
-
-    #
-    #       endregion
 
     #
     #   endregion
@@ -1693,486 +1816,484 @@ class Matthew:
 
 #region Testing
 
-"""
-os.system("cls")
+if (__name__ == "__main__"):
+    os.system("cls")
 
-sDir    = "C:\\Users\\project\\0. My Work\\1. Repositories\\0. Unfriendly Train\\Code\\Templates\\Tests\\Lua"
+    sDir    = "C:\\Users\\project\\0. My Work\\1. Repositories\\0. Unfriendly Train\\Code\\Templates\\Tests\\Lua"
 
-dSubstrate = {
-    "name":         "FR4",
-    "height":       1.6,
-    "permitivitty": 4.4,
-    "loss tangent": 0.02
-}
-
-dFrequency = {
-    "center":       0.92e9,
-    "start":        0.88e9,
-    "end":          0.96e9,
-    "samples":      19
-}
-
-dMesh = {
-    "wire radius":  0.001,
-    "size":         "Fine"
-}
-
-dRunt = {
-    "parallel":     True,
-    "run":          True,
-    "interactive":  True
-}
-
-dFitness = {
-    "desired":
-    {
-        "start":    0.9e9,
-        "end":      0.94e9
-    }
-}
-
-lAnt = []
-
-dTmp = {
-    "feed":
-    {
-        "center": 54.37823,
-        "width": 1.6
-    },
-    "ground plane":
-    {
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "slots":
-        {
-            "items": 0
-        }
-    },
-    "radiating plane":
-    {
-        "l": 77.48759,
-        "w": 99.15646,
-        "x": 4.8,
-        "y": 4.8,
-        "slots":
-        {
-            "items": 0
-        }
-    },
-    "substrate":
-    {
-        "h": 1.6,
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
+    dSubstrate = {
+        "name":         "FR4",
+        "height":       1.6,
         "permitivitty": 4.4,
-        "loss": 0.02,
-        "name": "FR4"
+        "loss tangent": 0.02
     }
-}
 
-lAnt.append(dTmp)
+    dFrequency = {
+        "center":       0.92e9,
+        "start":        0.88e9,
+        "end":          0.96e9,
+        "samples":      19
+    }
 
-dTmp = {
-    "feed":
-    {
-        "center": 54.37823,
-        "width": 1.6
-    },
-    "ground plane":
-    {
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "slots":
+    dMesh = {
+        "wire radius":  0.001,
+        "size":         "Fine"
+    }
+
+    dRunt = {
+        "parallel":     True,
+        "run":          True,
+        "interactive":  True
+    }
+
+    dFitness = {
+        "desired":
         {
-            "items": 1,
-            "0":
+            "start":    0.9e9,
+            "end":      0.94e9
+        }
+    }
+
+    lAnt = []
+
+    dTmp = {
+        "feed":
+        {
+            "center": 54.37823,
+            "width": 1.6
+        },
+        "ground plane":
+        {
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "slots":
             {
-                "items": 3,
+                "items": 0
+            }
+        },
+        "radiating plane":
+        {
+            "l": 77.48759,
+            "w": 99.15646,
+            "x": 4.8,
+            "y": 4.8,
+            "slots":
+            {
+                "items": 0
+            }
+        },
+        "substrate":
+        {
+            "h": 1.6,
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "permitivitty": 4.4,
+            "loss": 0.02,
+            "name": "FR4"
+        }
+    }
+
+    lAnt.append(dTmp)
+
+    dTmp = {
+        "feed":
+        {
+            "center": 54.37823,
+            "width": 1.6
+        },
+        "ground plane":
+        {
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "slots":
+            {
+                "items": 1,
                 "0":
                 {
-                    "x": 2.0,
-                    "y": 2.0,
-                    "z": 0.0
-                },
-                "1":
-                {
-                    "x": 4.0,
-                    "y": 4.0,
-                    "z": 0.0
-                },
-                "2":
-                {
-                    "x": 2.0,
-                    "y": 4.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 2.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    }
                 }
             }
-        }
-    },
-    "radiating plane":
-    {
-        "l": 77.48759,
-        "w": 99.15646,
-        "x": 4.8,
-        "y": 4.8,
-        "slots":
+        },
+        "radiating plane":
         {
-            "items": 0
+            "l": 77.48759,
+            "w": 99.15646,
+            "x": 4.8,
+            "y": 4.8,
+            "slots":
+            {
+                "items": 0
+            }
+        },
+        "substrate":
+        {
+            "h": 1.6,
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "permitivitty": 4.4,
+            "loss": 0.02,
+            "name": "FR4"
         }
-    },
-    "substrate":
-    {
-        "h": 1.6,
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "permitivitty": 4.4,
-        "loss": 0.02,
-        "name": "FR4"
     }
-}
 
-lAnt.append(dTmp)
+    lAnt.append(dTmp)
 
-dTmp = {
-    "feed":
-    {
-        "center": 54.37823,
-        "width": 1.6
-    },
-    "ground plane":
-    {
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "slots":
+    dTmp = {
+        "feed":
         {
-            "items": 2,
-            "0":
+            "center": 54.37823,
+            "width": 1.6
+        },
+        "ground plane":
+        {
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "slots":
             {
-                "items": 3,
+                "items": 2,
                 "0":
                 {
-                    "x": 2.0,
-                    "y": 2.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 2.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    }
                 },
                 "1":
                 {
-                    "x": 4.0,
-                    "y": 4.0,
-                    "z": 0.0
-                },
-                "2":
-                {
-                    "x": 2.0,
-                    "y": 4.0,
-                    "z": 0.0
-                }
-            },
-            "1":
-            {
-                "items": 3,
-                "0":
-                {
-                    "x": 12.0,
-                    "y": 12.0,
-                    "z": 0.0
-                },
-                "1":
-                {
-                    "x": 14.0,
-                    "y": 14.0,
-                    "z": 0.0
-                },
-                "2":
-                {
-                    "x": 12.0,
-                    "y": 14.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 12.0,
+                        "y": 12.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 14.0,
+                        "y": 14.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 12.0,
+                        "y": 14.0,
+                        "z": 0.0
+                    }
                 }
             }
-        }
-    },
-    "radiating plane":
-    {
-        "l": 77.48759,
-        "w": 99.15646,
-        "x": 4.8,
-        "y": 4.8,
-        "slots":
+        },
+        "radiating plane":
         {
-            "items": 0
+            "l": 77.48759,
+            "w": 99.15646,
+            "x": 4.8,
+            "y": 4.8,
+            "slots":
+            {
+                "items": 0
+            }
+        },
+        "substrate":
+        {
+            "h": 1.6,
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "permitivitty": 4.4,
+            "loss": 0.02,
+            "name": "FR4"
         }
-    },
-    "substrate":
-    {
-        "h": 1.6,
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "permitivitty": 4.4,
-        "loss": 0.02,
-        "name": "FR4"
     }
-}
 
-lAnt.append(dTmp)
+    lAnt.append(dTmp)
 
-dTmp = {
-    "feed":
-    {
-        "center": 54.37823,
-        "width": 1.6
-    },
-    "ground plane":
-    {
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "slots":
+    dTmp = {
+        "feed":
         {
-            "items": 3,
-            "0":
+            "center": 54.37823,
+            "width": 1.6
+        },
+        "ground plane":
+        {
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "slots":
             {
                 "items": 3,
                 "0":
                 {
-                    "x": 2.0,
-                    "y": 2.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 2.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    }
                 },
                 "1":
                 {
-                    "x": 4.0,
-                    "y": 4.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 12.0,
+                        "y": 12.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 14.0,
+                        "y": 14.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 12.0,
+                        "y": 14.0,
+                        "z": 0.0
+                    }
                 },
                 "2":
                 {
-                    "x": 2.0,
-                    "y": 4.0,
-                    "z": 0.0
-                }
-            },
-            "1":
-            {
-                "items": 3,
-                "0":
-                {
-                    "x": 12.0,
-                    "y": 12.0,
-                    "z": 0.0
-                },
-                "1":
-                {
-                    "x": 14.0,
-                    "y": 14.0,
-                    "z": 0.0
-                },
-                "2":
-                {
-                    "x": 12.0,
-                    "y": 14.0,
-                    "z": 0.0
-                }
-            },
-            "2":
-            {
-                "items": 3,
-                "0":
-                {
-                    "x": 22.0,
-                    "y": 22.0,
-                    "z": 0.0
-                },
-                "1":
-                {
-                    "x": 24.0,
-                    "y": 24.0,
-                    "z": 0.0
-                },
-                "2":
-                {
-                    "x": 22.0,
-                    "y": 24.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 22.0,
+                        "y": 22.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 24.0,
+                        "y": 24.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 22.0,
+                        "y": 24.0,
+                        "z": 0.0
+                    }
                 }
             }
-        }
-    },
-    "radiating plane":
-    {
-        "l": 77.48759,
-        "w": 99.15646,
-        "x": 4.8,
-        "y": 4.8,
-        "slots":
+        },
+        "radiating plane":
         {
-            "items": 0
+            "l": 77.48759,
+            "w": 99.15646,
+            "x": 4.8,
+            "y": 4.8,
+            "slots":
+            {
+                "items": 0
+            }
+        },
+        "substrate":
+        {
+            "h": 1.6,
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "permitivitty": 4.4,
+            "loss": 0.02,
+            "name": "FR4"
         }
-    },
-    "substrate":
-    {
-        "h": 1.6,
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "permitivitty": 4.4,
-        "loss": 0.02,
-        "name": "FR4"
     }
-}
 
-lAnt.append(dTmp)
+    lAnt.append(dTmp)
 
-dTmp = {
-    "feed":
-    {
-        "center": 54.37823,
-        "width": 1.6
-    },
-    "ground plane":
-    {
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "slots":
+    dTmp = {
+        "feed":
         {
-            "items": 3,
-            "0":
+            "center": 54.37823,
+            "width": 1.6
+        },
+        "ground plane":
+        {
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "slots":
             {
                 "items": 3,
                 "0":
                 {
-                    "x": 2.0,
-                    "y": 2.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 2.0,
+                        "y": 4.0,
+                        "z": 0.0
+                    }
                 },
                 "1":
                 {
-                    "x": 4.0,
-                    "y": 4.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 12.0,
+                        "y": 12.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 14.0,
+                        "y": 14.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 12.0,
+                        "y": 14.0,
+                        "z": 0.0
+                    }
                 },
                 "2":
                 {
-                    "x": 2.0,
-                    "y": 4.0,
-                    "z": 0.0
-                }
-            },
-            "1":
-            {
-                "items": 3,
-                "0":
-                {
-                    "x": 12.0,
-                    "y": 12.0,
-                    "z": 0.0
-                },
-                "1":
-                {
-                    "x": 14.0,
-                    "y": 14.0,
-                    "z": 0.0
-                },
-                "2":
-                {
-                    "x": 12.0,
-                    "y": 14.0,
-                    "z": 0.0
-                }
-            },
-            "2":
-            {
-                "items": 3,
-                "0":
-                {
-                    "x": 22.0,
-                    "y": 22.0,
-                    "z": 0.0
-                },
-                "1":
-                {
-                    "x": 24.0,
-                    "y": 24.0,
-                    "z": 0.0
-                },
-                "2":
-                {
-                    "x": 22.0,
-                    "y": 24.0,
-                    "z": 0.0
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 22.0,
+                        "y": 22.0,
+                        "z": 0.0
+                    },
+                    "1":
+                    {
+                        "x": 24.0,
+                        "y": 24.0,
+                        "z": 0.0
+                    },
+                    "2":
+                    {
+                        "x": 22.0,
+                        "y": 24.0,
+                        "z": 0.0
+                    }
                 }
             }
-        }
-    },
-    "radiating plane":
-    {
-        "l": 77.48759,
-        "w": 99.15646,
-        "x": 4.8,
-        "y": 4.8,
-        "slots":
+        },
+        "radiating plane":
         {
-            "items": 1,
-            "0":
+            "l": 77.48759,
+            "w": 99.15646,
+            "x": 4.8,
+            "y": 4.8,
+            "slots":
             {
-                "items": 3,
+                "items": 1,
                 "0":
                 {
-                    "x": 32.0,
-                    "y": 32.0,
-                    "z": 1.6
+                    "items": 3,
+                    "0":
+                    {
+                        "x": 32.0,
+                        "y": 32.0,
+                        "z": 1.6
+                    },
+                    "1":
+                    {
+                        "x": 34.0,
+                        "y": 34.0,
+                        "z": 1.6
+                    },
+                    "2":
+                    {
+                        "x": 32.0,
+                        "y": 34.0,
+                        "z": 1.6
+                    }
                 },
-                "1":
-                {
-                    "x": 34.0,
-                    "y": 34.0,
-                    "z": 1.6
-                },
-                "2":
-                {
-                    "x": 32.0,
-                    "y": 34.0,
-                    "z": 1.6
-                }
-            },
+            }
+        },
+        "substrate":
+        {
+            "h": 1.6,
+            "l": 87.08759,
+            "w": 108.75646,
+            "x": 0.0,
+            "y": 0.0,
+            "permitivitty": 4.4,
+            "loss": 0.02,
+            "name": "FR4"
         }
-    },
-    "substrate":
-    {
-        "h": 1.6,
-        "l": 87.08759,
-        "w": 108.75646,
-        "x": 0.0,
-        "y": 0.0,
-        "permitivitty": 4.4,
-        "loss": 0.02,
-        "name": "FR4"
     }
-}
 
-lAnt.append(dTmp)
+    lAnt.append(dTmp)
 
-lOut =Matthew.getPatch_Json(dir=sDir, ant=lAnt, frequency=dFrequency, mesh=dMesh, runt=dRunt, fitness=dFitness)
+    lOut =Matthew.simulateCandidates_Json(dir=sDir, ant=lAnt, frequency=dFrequency, mesh=dMesh, runt=dRunt, fitness=dFitness)
 
-Helga.nop()
-
-"""
+    Helga.nop()
 
 #
 #endregion

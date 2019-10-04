@@ -176,8 +176,8 @@ class Natalie:
         """
             Description:
 
-                Performs trust-region optimization to find the best patch
-                antenna for the specified frequency.
+                Uses multi-variate optimization to optimize a microstrip
+                patch antenna for the specified frequencies.
 
             |\n
             |\n
@@ -187,387 +187,132 @@ class Natalie:
 
             Arguments:
 
-                + use_surrogate = ( bool ) A flag that states whether or not
-                    surrogate modelling should be used to assist the
-                    the optimization process.
+                + primary   = ( str ) The primary optimizer for the process.
+                    ~ Required
 
-                + save_continuous   = ( bool ) A flag that states whether or
-                    not the algorithm should save after every iteration
+                    ~ Optionse:
+                        - "tro"
+                        - "nm"
 
-                + del_unworthy  = ( bool ) A flag that states whether or not
-                    unworthy candidate directories should be removed after
-                    the iteration has completed
+                + secondary = ( str ) The secondary optimizer for the process.
+                    ~ Required
 
-            ToDo:
+                    ~ Options:
+                        - "tro"
+                        - "nm"
 
-                + retain data arg, will be usefule for surrogate models
-                + revise region update && add separate surrogate region
-                + recount steps
+                + new   = ( bool ) Whether or not a new center microstrip patch
+                    antenna should be simulated at the start of the project
+                    ~ Default   = True
+
+                + cull  = ( bool ) A flag that specifies whether of not
+                    unworthy antenna candidate simulations should be deleted
+                    from the local drive
+                    ~ Default   = True
+                    ~ Note: If this is set to false the simulations could take
+                        up a lot of storage space
+
+                + save  = ( bool ) A flag that specifies whether or not
+                    continuous saving of the best candidate in an algorithm
+                    should be done
+                    ~ Default   = True
+
+                + surrogate = ( bool ) A flag that specifies whether or not a
+                    surrogate model should be used during the optimization 
+                    process
         """
 
-        #   region STEP 0->1: Setup - Initial variable setup
-
         #   STEP 0: Local variables
-        dAnt_Best_Geo           = cp.deepcopy(self.__dAnt_Center)
+        dPrimary_Results        = None
 
-        dAnt_Best_Fit           = {
-                "fitness":      dAnt_Best_Geo["fitness"],
-                "dir":          dAnt_Best_Geo["dir"]
-            }
-
-        sDir                    = self.__sDirectory + "\\" + Helga.ticks()
-
-        iRegion_Algorithm       = cp.deepcopy(self.__iTRO_Region)
-        iRegion_SRG             = cp.deepcopy(self.__iTRO_Region_SRG)
-
-        bUseSurrogate           = False
-        bSaveContinuous         = False
-        bDelUnworthy            = True
+        bNew                    = True
+        bCull                   = True
+        bSave                   = True
+        bSurrogate              = True
 
         #   STEP 1: Setup - Local variables
-        del dAnt_Best_Geo["dir"]
-        del dAnt_Best_Geo["fitness"]
 
-        os.mkdir(sDir)
+        #   region STEP 2->5: Error checking
 
-        #
-        #   endregion
+        #   STEP 2: Check if primary arg passed
+        if ("primary" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.optimizeAntenna() -> Step 2: No primary arg passed")
 
-        #   region STEP 2->7: Setup - Local variables
-
-        #   STEP 2: Check if surrogate use in kwargs
-        if ("use_surrogate" in kwargs):
-            #   STEP 3: Update - Local var
-            bUseSurrogate = kwargs["use_surrogate"]
-
-        #   STEP 4: Check if continuous save in kwargs
-        if ("save_continuous" in kwargs):
-            #   STEP 5: Update - Local var
-            bSaveContinuous = kwargs["save_continuous"]
-
-        #   STEP 6: Check if del unworthy in kwargs
-        if ("del_unworthy" in kwargs):
-            #   STEP 7: Update - Local var
-            bDelUnworthy    = kwargs["del_unworthy"]
-
-        #
-        #   endregion
-
-        #   STEP 8: User output
-        if (self.bShowOutput):
-            print("Natalie (Optimize) {" + Helga.time() + "} - Begining Trust-Region Optimization of patch antenna.")
-
-        #   region STEP 9->74: TRO
-
-        #   STEP 9: Loop through max iterations
-        for j in range(0, self.__iTRO_Iterations):
-            #   STEP 10: Iteration tmp vars
-            iCount          = 0
-            iTmp_Index      = 0
-            iTmp_Fitness    = np.inf
-
-            bTmp_Region     = False
-
-            #   region STEP 11->20: Candidate generation and simulation
-
-            while (True):
-                #   STEP 11: Get candidates
-                lTmp_Candidates = self.__getCandidates__(center=dAnt_Best_Geo, region=iRegion_SRG, candidates=self.__iTRO_Candidates)
-
-                #   STEP 12: User output
-                if (self.bShowOutput):
-                    print("\n\t{" + Helga.time() + "} - Simulating " + str(self.__iTRO_Candidates) + " antenna candidates\n")
-
-                #   STEP 13: Simulate antennas
-                lTmp_Fitness    = Matthew.getPatch_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
-
-                #   STEP 14: Append current best to temp lists
-                lTmp_Candidates.append(dAnt_Best_Geo)
-                lTmp_Fitness.append(dAnt_Best_Fit)
-
-                #   STEP 15: Evaluate overall fitness of all geometries  
-                lTmp_Fitness_Actual = self.__evalFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
-                
-                #   STEP 16: Loop through candidates
-                while (iCount < len(lTmp_Fitness_Actual)):
-                    #   STEP 17: CHeck that default library wasn't returned
-                    if (lTmp_Fitness_Actual[iCount]["desired"] == np.inf):
-                        #   STEP 18: Pop from list
-                        lTmp_Fitness_Actual.pop(iCount)
-                        lTmp_Candidates.pop(iCount)
-
-                    #   STEP 19: Not default library
-                    else:
-                        #   STEP 20: Increment counter
-                        iCount += 1
-
-                if (len(lTmp_Candidates) >= self.__iTRO_Candidates):
-                    break
-
-                else:
-                    Helga.nop()
-
-            #
-            #   endregion
-
-            #   region STEP 21->37: Surrogate stuff
-
-            #   STEP 21: Check surrogate status
-            if (bUseSurrogate):
-                
-                #   region STEP 22->29: Setup - Data container
-
-                #   STEP 22: Setup - Scope variables
-                dTmp_Data               = None
-                dTmp_DataRange          = None
-                dTmp_DataMap            = None
-                dTmp_DataMin            = None
-
-                lTmp_DataMap_In         = []
-                lTmp_DataMap_Out        = []
-
-                #   STEP 23: Setup - New data container
-                dTmp_Data = self.__moldData__(candidates=lTmp_Candidates, fitness=lTmp_Fitness_Actual)
-
-                #   STEP 24: Setup - Final data range
-                dTmp_DataRange      = {
-                    "lower":    -1.0,
-                    "center":   0.0,
-                    "upper":    1.0
-                }
-
-                #   STPE 25: Setup - Data maps
-                for i in range(0, len(dTmp_Data["in"])):
-                    lTmp_DataMap_In.append(i)
-
-                for i in range(0, len(dTmp_Data["out"])):
-                    lTmp_DataMap_Out.append(i)
-
-                dTmp_DataMap        = {
-                    "in":   lTmp_DataMap_In,
-                    "out":  lTmp_DataMap_Out
-                }
-                
-                #   STEP 26: Setup - Data container
-                vData   = Data()
-
-                vData.setData(data=dTmp_Data,           automap=False,          transpose=True)
-                
-                #   STEP 27: Get output minimum
-                fTmp_OutputMin  = vData.getOutputMin(0)
-
-                #   STEP 28: Setup - Data minz
-                dTmp_DataMin        = {
-                    "output":
-                    {
-                        "0":    [fTmp_OutputMin - 0.075]
-                    },
-                    "input":
-                    {
-                        
-                    }
-                }
-
-                #   STEP 29: Map data
-                print("\t\tDistance: ", vData.getInputDistance(1), end="\n\n")
-
-                vData.mapData(mapRange=dTmp_DataRange,  mapSets=dTmp_DataMap,   input=True,         output=True,        min=dTmp_DataMin)
-
-                print("\t\tDistance: ", vData.getInputDistance(1), end="\n\n")
-
-                #
-                #   endregion
-
-                #   region STEP 30->37: Surrogate creation, training, mapping, simulationg, and fitness evaluation
-
-                #   STEP 30: Create new surrogate handler
-                vGolem = Golem(numSurrogates=8)
-
-                #   STEP 31: Update - surrogate handler parameters
-                vGolem.bSRG_Random              = True
-                vGolem.bSRG_RandomParameters    = False
-
-                #   STEP 32: Train and map the surrogates
-                lSRG_Results    = vGolem.trainAndMap(data=vData, region=float(iRegion_Algorithm)/self.__iTRO_Region, rand=True, remap=True)
-                
-                #   STEP 33: Remap - Surrogate candidate
-                lSRG_Candidate  = self.__remapData__(candidate=lSRG_Results["result"])
-
-                #   STEP 34: User output
-                if (self.bShowOutput):
-                    print("\n\t{" + Helga.time() + "} - Simulating surrogate candidate antenna")
-
-                #   STEP 35: Simulate - Surrogate candidate
-                lSRG_Fitness    = Matthew.getPatch_Json(dir=sDir, ant=[lSRG_Candidate], frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
-                lTmp_Fitness.append(lSRG_Fitness[0])
-
-                #   STEP 36: Evaluate   - Surrogate candidate fitness
-                lSRG_Fitness    = self.__evalFitness__(ant=[lSRG_Candidate], fitness=lSRG_Fitness)
-            
-                #   STEP 37: Append - Surrogate candidate
-                lTmp_Candidates.append(lSRG_Candidate)
-                lTmp_Fitness_Actual.append(lSRG_Fitness[0])
-
-                #
-                #   endregion
-
-            #
-            #   endregion
-
-            #   region STEP 38->42: Candidate evaluation
-
-            #   STEP 38: Reset best candidates
-            dAnt_Best_Geo   = None
-            dAnt_Best_Fit   = None
-
-            #   STEP 39: Loop through candidates
-            for i in range(0, len(lTmp_Fitness_Actual)):
-                #   STEP 40: Check if less than current best fitness
-                if (lTmp_Fitness_Actual[i]["final"] < iTmp_Fitness):
-                    #   STEP 41: Update tmp vars
-                    iTmp_Index      = i
-                    iTmp_Fitness    = lTmp_Fitness_Actual[i]["final"]
-
-            #   STEP 42: Set new best candidate
-            dAnt_Best_Geo = lTmp_Candidates[iTmp_Index]
-            dAnt_Best_Fit = lTmp_Fitness[iTmp_Index]
-            
-            #
-            #   endregion
-
-            #   region STEP 43->61: Region update
-
-            #   STEP 43: Check for surrogate use
-            if (bUseSurrogate):
-                #   STEP 44: Check if surrogate candidate
-                if (iTmp_Index == len(lTmp_Candidates) - 1):
-                    #   STEP 45: Update region
-                    iRegion_Algorithm   += 1
-                    iRegion_SRG         += 1
-
-                    bTmp_Region         = True
-
-                    #   STEP 46: User output
-                    if (self.bShowOutput):
-                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region via surrogate -> " + str(iRegion_Algorithm))
-
-                        dHold = lTmp_Fitness_Actual[self.__iTRO_Candidates]
-                        print("\t\t-Initial:", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
-                        
-                        dHold = lTmp_Fitness_Actual[iTmp_Index]
-                        print("\t\t-New:\t", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                        print("")
-
-                elif (iRegion_SRG > 0):
-                    iRegion_SRG     -= 1
-
-            #   STEP 47: Check region update status
-            if (bTmp_Region == False):
-                #   STEP 48: Check if new best
-                if (iTmp_Index != self.__iTRO_Candidates):
-                    #   STEP 49: Update region
-                    iRegion_Algorithm   += 1
-
-                    #   STEP 50: User output
-                    if (self.bShowOutput):
-                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Algorithm))
-
-                #   STEP 51: Not new best
-                else:
-                    #   STEP 52: Check if we lost the surrogate
-                    if (lTmp_Fitness_Actual[ len( lTmp_Fitness_Actual ) - 1 ]["final"] != np.inf):
-                        #   STEP 53: Check if region too small
-                        if (iRegion_Algorithm <= 0):
-                            #   STEP 54: Exit loop
-                            break
-                        
-                        #   STPE 55: Region not too small yet
-                        else:
-                            #   STEP 56: Update - Decrement region
-                            iRegion_Algorithm   -= 1
-                            iRegion_SRG         -= 1
-
-                            #   STEP 57: User output
-                            if (self.bShowOutput):
-                                print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Algorithm))
-
-                    #   STEP 58: Lost surrogate candidate
-                    else:
-                        #   STEP 59: User output
-                        if (self.bShowOutput):
-                            print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") - Surrogate lost, maintaing region -> " + str(iRegion_Algorithm))
-
-                #   STEP 60: User output
-                if (self.bShowOutput):
-                    dHold = lTmp_Fitness_Actual[self.__iTRO_Candidates]
-                    print("\t\t-Initial:", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                    
-                    dHold = lTmp_Fitness_Actual[iTmp_Index]
-                    print("\t\t-New:\t", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-
-                    #   STEP 61: Check for surrogate use status
-                    if (bUseSurrogate):
-                        dHold = lTmp_Fitness_Actual[len(lTmp_Candidates) - 1]
-                        print("\t\t-SRG:\t", "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                        
-                    print("")
-
-            #
-            #   endregion
-
-            #   region STEP 62->68: Continuous save
-
-            #   STEP 62: Check for continuous save
-            if (bSaveContinuous):
-                #   STEP 63: Setup - File location
-                sTmp_File = sDir + "\\" + str(j) + ".json"
-
-                #   STEP 64: Create file
-                vTmp_File   = open(sTmp_File, "a")
-
-                #   STEP 65: Close file
-                vTmp_File.close()
-                vTmp_File = None
-
-                #   STEP 66: Re-open file
-                with open(sTmp_File, "r+") as vTmp_File:
-                    #   STEP 67: Create temp dictionary
-                    dTmp = {
-                        "geometry": dAnt_Best_Geo,
-                        "fitness":  lTmp_Fitness_Actual[iTmp_Index],
-                        "antenna":  self.__cAnt_Default,
-                        "natalie":  self.__cf.data
-                    }
-
-                    #   STEP 68: Dump data
-                    js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
-
-            #
-            #   endregion
+        #   STEP 4: Check if secondary arg passed
+        if ("secondary" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Natalie.optimizeAntenna() -> Step 4: No secondary arg passed")
         
-            #   region STEP 69->74: Cull the unworthy :)
+        #
+        #   endregion
+        
+        #   region STEP 6->13: Update - Local variables
 
-            #   STEP 69: Check culling status
-            if (bDelUnworthy):
-                #   STEP 70: Loop through candidates
-                for i in range(0, len(lTmp_Fitness_Actual)):
-                    #   STEP 71: If not current best and not previous best
-                    if ((i != iTmp_Index) and (i != self.__iTRO_Candidates)):
-                        #   STEP 72: Get path for directory
-                        sTmp_Path = os.path.dirname(lTmp_Fitness[i]["dir"])
+        #   STEP 6: Check if new arg passed
+        if ("new" in kwargs):
+            #   STEP 7: Update - Local variables
+            bNew = kwargs["new"]
 
-                        #   STEP 73: If not center
-                        if ("center" not in sTmp_Path):
-                            #   STEP 74: Delete directory
-                            sh.rmtree(sTmp_Path)
+        #   STEP 8: Check if cull arg passed
+        if ("cull" in kwargs):
+            #   STEP 9: Update - Local variables
+            bCull   = kwargs["cull"]
 
-            #
-            #   endregion
-            
+        #   STEP 10: Check if save arg passed
+        if ("save" in kwargs):
+            #   STEP 11: Update - Local variables
+            bSave   = kwargs["save"]
+
+        #   STEP 12: Check if surrogate arg passed
+        if ("surrogate" in kwargs):
+            #   STEP 13: Update - Local variables
+            bSurrogate  = kwargs["surrogate"]
+
+        #
+        #   endregion
+        
+        #   region STEP 14->19: Primary optimization
+
+        #   STEP 14: Check if primary is tro
+        if (kwargs["primary"] == "tro"):
+            #   STEP 15: Outsource
+            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False)
+
+        #   STEP 16: Check if primary is nm
+        elif (kwargs["primary"] == "nm"):
+            #   STEP 17: Outsource
+            dPrimary_Results    = self.__nm__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False)
+
+        #   STEP 18: Unrecognized optimizer
+        else:
+            #   STEP 19: Error handling
+            raise Exception("An error occured in Natalie.optimizeAntenna() -> Step 18: Unrecognized optimizer")
+
         #
         #   endregion
 
-        #   STEP 75: Return
+        #   region STEP 20->25: Secondary optimization
+
+        #   STEP 20: Check if secondary is tro
+        if (kwargs["secondary"] == "tro"):
+            #   STEP 21: Outsource
+            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
+
+        #   STEP 22: Check if secondary is nm
+        if (kwargs["secondary"] == "nm"):
+            #   STEP 23: Outsource
+            self.__nm__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
+
+        #   STEP 24: Unrecognized optimizer
+        else:
+            #   STEP 25: Error handling
+            raise Exception("An error occured in Natalie.optimizeAntenna() -> Step 24: Unrecognized optimizer")
+
+        #
+        #   endregion
+
+        #   STEP 26: Return
         return
         
     #
@@ -727,8 +472,8 @@ class Natalie:
             #   STEP 7: Set frequency parameters accordingly
             self.__dAnt_Frequency   = {
                 "center":   round(kwargs["ant"]["frequency"]["start"] + ( kwargs["ant"]["frequency"]["end"] - kwargs["ant"]["frequency"]["start"] ) / 2.0, 2),
-                "start":    round(kwargs["ant"]["frequency"]["start"] + ( self.__cf.data["parameters"]["frequency"]["lower frequency offset"] * 0.25 ), 2),
-                "end":      round(kwargs["ant"]["frequency"]["end"] - ( self.__cf.data["parameters"]["frequency"]["upper frequency offset"] * 0.25 ), 2),
+                "start":    round(kwargs["ant"]["frequency"]["start"] + ( self.__cf.data["parameters"]["frequency"]["lower frequency offset"] * 0.375 ), 2),
+                "end":      round(kwargs["ant"]["frequency"]["end"] - ( self.__cf.data["parameters"]["frequency"]["upper frequency offset"] * 0.375 ), 2),
                 "samples":  self.__cf.data["parameters"]["frequency"]["samples"]
             }
 
@@ -750,13 +495,6 @@ class Natalie:
         dFrequency = cp.deepcopy(self.__dAnt_Frequency)
         dFrequency["samples"] = self.__cf.data["parameters"]["frequency"]["accuracy check samples"]
 
-        #   STEP 13: User output
-        if (self.bShowOutput):
-            print("Natalie (init-ant) {" + Helga.time() + "} - Generating initial antenna for specified frequency")
-
-        #   STEP 14: Get default patch
-        self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=self.__sDirectory, substrate=self.__dAnt_Substrate, frequency=dFrequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
-        
         #   STEP 15: Return
         return
 
@@ -1012,13 +750,10 @@ class Natalie:
             #   STEP 13: Append new candidate to output list
             lOut.append(dTmp_Candidate)
             
-        #   STEP 14: Verify slots
-        lOut    = self.__verifyTriangles__(candidates=lOut, region=kwargs["region"])
-
         #   STEP 15: Return
         return lOut
 
-    def __evalFitness__(self, **kwargs) -> list:
+    def __getFitness__(self, **kwargs) -> list:
         """
             Description:
 
@@ -1133,223 +868,6 @@ class Natalie:
 
         #   STEP 3: Return
         return lOut
-
-    def __verifyTriangles__(self, **kwargs) -> list:
-        """
-            Description:
-
-                ?
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Arguments:
-
-                + candidates    = ( list ) A list of candidate antenna geometries
-
-                + region    = ( int )
-
-        """
-
-        #   STEP 0: Local variables
-        lSlots_GP               = []
-        lSlots_RP               = []
-
-        lSlots_Data             = []
-        lSlots_Avg              = []
-
-        lSlots_Template         = []
-        lSlots_Unique           = []
-        lSlots_Unique_Count     = []
-        lSlots_Common           = []
-
-        iRegion                 = None
-
-        #   STEP 1: Setup - Local variables
-
-        #   region STEP 2->5: Error checking
-
-        #   STEP 2: check if candidates arg passed
-        if ("candidates" not in kwargs):
-            #   STEP 3: Error handling
-            raise Exception("An error occured in Natalie.__verifyTriangles__() -> Step 2: No candidates arg passed")
-
-        #   STEP 4: Check if region arg passed
-        if ("region" not in kwargs):
-            #   STEP 5: Error handling
-            raise Exception("An error occured in Natalie.__verifyTriangles__() -> Step 4: No region arg passed")
-
-        #
-        #   endregion
-
-        #   STEP 6: Update - Local variables
-        iRegion = kwargs["region"]
-
-        #   STEP 7: Loop through candidate
-        for i in range(0, len(kwargs["candidates"])):
-            #   STPE 8: Append slots to lists
-            lSlots_GP.append(kwargs["candidates"][i]["ground plane"]["slots"])
-            lSlots_RP.append(kwargs["candidates"][i]["radiating plane"]["slots"])
-
-        try:
-            #   STEP 8: Loop through all candidates
-            for i in range(0, len(lSlots_GP)):
-                #   STEP 9: Get temp candidate dictionary
-                dTmp_Candidate = lSlots_GP[i]
-
-                #   STEP 10: Loop through slots in candidate
-                for j in range(0, dTmp_Candidate["items"]):
-                    #   STEP 11: Check if slot not in unique slots list
-                    if (dTmp_Candidate[str(j)]["id"] not in lSlots_Unique):
-                        #   STEP 12: Append to list
-                        lSlots_Unique.append(dTmp_Candidate[str(j)]["id"])
-                        lSlots_Unique_Count.append(1)
-
-                    #   STEP 13: Not unique
-                    else:
-                        #   STEP 14: Get index in unique list
-                        iTmp_Index = lSlots_Unique.index(dTmp_Candidate[str(j)]["id"])
-
-                        #   STEP 15: Increment counter
-                        lSlots_Unique_Count[iTmp_Index] += 1
-
-            if (len(lSlots_Unique_Count) == 0):
-                return kwargs["candidates"]
-
-            #   STEP 18: Loop through unique slots
-            for i in range(0, len(lSlots_Unique_Count)):
-                #   STEP 19: Check if not unique
-                if (lSlots_Unique_Count[i] > 1):
-                    #   STEP 20: Append to common list
-                    lSlots_Common.append(lSlots_Unique_Count[i])
-                    
-            #   STEP 21: Iterate through unique slots
-            for _ in range(0, len( lSlots_Common ) + 1 ):
-                #   STEP 22: Add 6 fields for each unique slot to output
-                for _ in range(0, 6):
-                    #   STEP 23: Append field to output
-                    lSlots_Data.append([])
-
-                #   STEP 24: Append field to template
-                lSlots_Template.append([])
-                
-            #   STEP 25: Loop through all candidates
-            for i in range(0, len(lSlots_GP)):
-                #   STEP 26: Setup - Temp vars
-                dTmp_Candidate  = lSlots_GP[i]
-
-                lTmp_Slots_Data = cp.deepcopy(lSlots_Template)
-
-                #   STEP 27: Loop through slots in this candidate
-                for j in range(0, dTmp_Candidate["items"]):
-                    #   STEP 28: Check if common
-                    if (dTmp_Candidate[str(j)]["id"] in lSlots_Common):
-                        #   STEP 29: Get index
-                        iTmp_Index  = lSlots_Common.index(dTmp_Candidate[str(j)]["id"])
-                        
-                        #   STEP 30: Populate candidate slot dictionary
-                        lTmp = []
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
-                        
-                        #   STEP 31: Append to output
-                        lTmp_Slots_Data[iTmp_Index] = lTmp
-
-                    #   STEP 32: Unique slot
-                    else:
-                        #   STEP 33: Set index to end of list
-                        iTmp_Index  = len(lSlots_Template) - 1
-
-                        #   STEP 34: Populate candidate slot dictionary
-                        lTmp = []
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["0"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["1"]["y"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["x"])
-                        lTmp.append(dTmp_Candidate[str(j)]["2"]["y"])
-
-                        #   STEP 35: Append to output
-                        lTmp_Slots_Data[iTmp_Index] = lTmp
-
-                #   STEP 36: Loop through candidate
-                for j in range(0, len(lTmp_Slots_Data)):
-                    #   STEP 37: Check if empty
-                    if (len(lTmp_Slots_Data[j]) <= i):
-                        #   STEP 38: Append empty
-                        lTmp_Slots_Data[j] = [None, None, None, None, None, None]
-
-                #   STEP 39: Translate candidate data to output data
-                for j in range(0, len(lTmp_Slots_Data)):
-                    #   STEP 40:  Append data to output list
-                    lSlots_Data[ j * 6 + 0 ].append(lTmp_Slots_Data[j][0])
-                    lSlots_Data[ j * 6 + 1 ].append(lTmp_Slots_Data[j][1])
-                    lSlots_Data[ j * 6 + 2 ].append(lTmp_Slots_Data[j][2])
-                    lSlots_Data[ j * 6 + 3 ].append(lTmp_Slots_Data[j][3])
-                    lSlots_Data[ j * 6 + 4 ].append(lTmp_Slots_Data[j][4])
-                    lSlots_Data[ j * 6 + 5 ].append(lTmp_Slots_Data[j][5])
-
-            #   STPE 41: Loop through slots data
-            for i in range(0, len(lSlots_Data)):
-                #   STEP 42: Setup - Scope variables
-                fSum    = 0.0
-                iSum    = 0
-
-                #   STEP 43: Loop through data in row
-                for j in range(0, len(lSlots_Data[i])):
-                    #   STEP 44: If not none
-                    if (lSlots_Data[i][j] != None):
-                        #   STEP 45: Sum
-                        fSum    += lSlots_Data[i][j]
-                        iSum    += 1
-
-                #   STEP 46: Set average
-                lSlots_Avg.append( fSum / float(iSum) )
-            
-            print(lSlots_Avg)
-
-            for i in range(0, len(lSlots_GP)):
-                #   STEP 26: Setup - Temp vars
-                dTmp_Candidate  = lSlots_GP[i]
-
-                #   STEP 27: Loop through slots in this candidate
-                for j in range(0, dTmp_Candidate["items"]):
-                    #   STEP 28: Check if common
-                    if (dTmp_Candidate[str(j)]["id"] in lSlots_Common):
-                        #   STEP 29: Get index
-                        iTmp_Index  = lSlots_Common.index(dTmp_Candidate[str(j)]["id"])
-                        
-                    #   STEP 32: Unique slot
-                    else:
-                        #   STEP 33: Set index to end of list
-                        iTmp_Index  = len(lSlots_Template) - 1
-
-                    #   STEP 34: Get dif
-                    fTmp_0x     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["0"]["x"] - lSlots_Avg[ iTmp_Index * 6 + 0 ] ) ), 3)
-                    fTmp_0y     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["0"]["y"] - lSlots_Avg[ iTmp_Index * 6 + 1 ] ) ), 3)
-                    fTmp_1x     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["1"]["x"] - lSlots_Avg[ iTmp_Index * 6 + 2 ] ) ), 3)
-                    fTmp_1y     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["1"]["y"] - lSlots_Avg[ iTmp_Index * 6 + 3 ] ) ), 3)
-                    fTmp_2x     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["2"]["x"] - lSlots_Avg[ iTmp_Index * 6 + 4 ] ) ), 3)
-                    fTmp_2y     = round( np.sqrt( np.square( dTmp_Candidate[str(j)]["2"]["y"] - lSlots_Avg[ iTmp_Index * 6 + 5 ] ) ), 3)
-
-                    print("\t\t" + str(i) + ":" + str(j), fTmp_0x, fTmp_0y, fTmp_1x, fTmp_1y, fTmp_2x, fTmp_2y, sep="\t")
-
-            Helga.nop()
-        except Exception as ex:
-            print("Initial error: ", ex)
-            Helga.nop()
-            Helga.nop()
-            Helga.nop()
-
-        #   STEP ??: Return
-        return kwargs["candidates"]
 
     #
     #   endregion
@@ -2399,6 +1917,520 @@ class Natalie:
     #
     #   endregion
 
+    #   region Back-End: Optimization
+
+    def __tro__(self, **kwargs) -> dict:
+        """
+            Description:
+
+                Performs trust-region optimization of the candidate solution.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + stage = ( str ) The current stage of the optimization process
+                    ~ Required
+
+                    ~ Options:
+                        - "Primary"
+                        - "Secondary"
+
+                + center    = ( dict ) The candidate solution to be optimized
+                    ~ Required if <stage="Secondary">
+
+                + new   = ( bool ) Whether or not a new center microstrip patch
+                    antenna should be simulated at the start of the project
+                    ~ Required
+
+                + cull  = ( bool ) A flag that specifies whether of not
+                    unworthy antenna candidate simulations should be deleted
+                    from the local drive
+                    ~ Required
+
+                + save  = ( bool ) A flag that specifies whether or not
+                    continuous saving of the best candidate in an algorithm
+                    should be done
+                    ~ Required
+
+                + surrogate = ( bool ) A flag that specifies whether or not a
+                    surrogate model should be used during the optimization 
+                    process
+                    ~ Required
+
+                + retension = ( bool ) A flag that specifies whether or not
+                    some data from previous iterations should be saved instead
+                    of discarded
+                    ~ Default = True
+        """
+
+        #   STEP 0: Local variables
+        dBest_Geo               = None
+        dBest_Fit               = None
+
+        sDir                    = None
+
+        iRegion_Alg             = None
+        iRegion_Srg             = None
+
+        bCull                   = None
+        bSave                   = None
+        bSurrogate              = None
+        bRetension              = True
+
+        #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->11: Error checking
+
+        #   STEP 2: Check if stage arg passed
+        if ("stage" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.__tro__() -> Step 2: No stage arg passed")
+
+        #   STEP 4: Check if new arg passed
+        if ("new" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Natalie.__tro__() -> Step 4: No new arg passed")
+
+        #   STEP 6: Check if cull arg passed
+        if ("cull" not in kwargs):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Natalie.__tro__() -> Step 6: No cull arg passed")
+
+        #   STEP 8: Check if save arg passed
+        if ("save" not in kwargs):
+            #   STEP 9: Error handling
+            raise Exception("An error occured in Natalie.__tro__() -> Step 8: No save arg passed")
+
+        #   STEP 10: Check if surrogate arg passed
+        if ("surrogate" not in kwargs):
+            #   STEP 11: Error handling
+            raise Exception("An error occured in Natalie.__tro__() -> Step 10: No surrogate arg passed")
+
+        #
+        #   endregion
+
+        #   region STEP 12->20: Setup - Local variables
+
+        #   STEP 12: Setup - Local variables
+        sDir            = self.__sDirectory + "\\" + Helga.ticks() + "_" + kwargs["stage"]
+
+        iRegion_Alg     = cp.deepcopy(self.__iTRO_Region)
+        iRegion_SRG     = cp.deepcopy(self.__iTRO_Region_SRG)
+
+        bCull           = kwargs["cull"]
+        bSave           = kwargs["save"]
+        bSurrogate      = kwargs["surrogate"]
+
+        #   STEP 13: Check if stage is primary
+        if (kwargs["stage"] == "Primary"):
+            #   STEP 14: Check if new center or if center is None
+            if ((kwargs["new"]) or (self.__dAnt_Center == None)):
+                #   STEP 15: User output
+                if (self.bShowOutput):
+                    print("Natalie (tro-" + kwargs["stage"] + ") {" + Helga.time() + "} - Simulating starting antenna geometry")
+
+                #   STEP 16: Outsource
+                self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=self.__sDirectory, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+        
+        #   STEP 17: Setup - Local variables
+        dBest_Geo       = cp.deepcopy(self.__dAnt_Center)
+        dBest_Fit       = {
+            "fitness":  dBest_Geo["fitness"],
+            "dir":      dBest_Geo["dir"]
+        }
+
+        dBest_Fit       = self.__getFitness__( ant=[dBest_Geo], fitness=[dBest_Fit] )[0]
+
+        #   STEP 18: Check if retension arg passed
+        if ("retension" in kwargs):
+            #   STEP 19: Update - Local variables
+            bRetension  = kwargs["retension"]
+
+        #   STEP 20: Setup - Final steps
+        del dBest_Geo["dir"]
+        del dBest_Geo["fitness"]
+
+        os.mkdir(sDir)
+
+        #
+        #   endregion
+        
+        #   STEP 21: User output
+        if (self.bShowOutput):
+            print("Natalie (tro-" + kwargs["stage"] + ") {" + Helga.time() + "} - Begining Trust-Region Optimization.")
+
+        #   STEP 22->??: TRO - Loop through iterations
+        for i in range(0, self.__iTRO_Iterations):
+            #   STEP 23: Setup - Scope variables
+            lCandidates         = []
+            lFitness            = []
+
+            fTmp_Fitness        = np.inf
+
+            iTmp_Candidates     = self.__iTRO_Candidates
+            iTmp_Index          = 0
+            iTmp_Count          = 0
+
+            bTmp_Region         = False
+
+            #   region STEP 24->42: Candidate generations and simulation
+
+            #   STEP 24: Loop till amount of candidates reached
+            while (True):
+                #   STEP 25: Setup - Temp variables
+                lTmp_Candidates = []
+                
+                #   STEP 26: Check if stage is Primary
+                if (kwargs["stage"] == "Primary"):
+                    #   STEP 27: Outsoruce - Get candidates
+                    lTmp_Candidates = self.__getCandidates__(center=dBest_Geo, region=iRegion_Srg, candidates=iTmp_Candidates, slots=True)
+
+                #   STEP 28: Stage is secondary
+                else:
+                    #   STEP 29: Outsource - Get candidates
+                    lTmp_Candidates = self.__getCandidates__(center=dBest_Geo, region=iRegion_Srg, candidates=iTmp_Candidates, slots=False)
+
+                #   STEP 30: User output
+                if (self.bShowOutput):
+                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas.\n")
+
+                #   STEP 31: Simulate antennas
+                lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+
+                #   STEP 32: Evaluate overall fitness of all geometries
+                lTmp_Fitness    = self.__getFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
+
+                #   STEP 33: Loop through all candidates
+                while (iTmp_Count < len( lTmp_Candidates )):
+                    #   STEP 34: Check that default fitness library wasn't returned
+                    if ( lTmp_Fitness[iTmp_Count]["desired"] == np.inf):
+                        #   STEP 35: Pop from list
+                        lTmp_Candidates.pop(iTmp_Count)
+                        lTmp_Fitness.pop(iTmp_Count)
+
+                    #   STEP 36: Not default library
+                    else:
+                        #   STEP 37: Increment counter
+                        iTmp_Count  += 1
+
+                #   STEP 38: Append results and fitnesses to lists
+                lCandidates.extend(lTmp_Candidates)
+                lFitness.extend(lTmp_Fitness)
+
+                #   STEP 39: Check that required number of candidates met
+                if (len( lCandidates ) == self.__iTRO_Candidates):
+                    #   STEP 40: Exit loop
+                    break
+
+                #   STEP 41: Recalculate candidates
+                iTmp_Candidates = self.__iTRO_Candidates - len( lCandidates )
+
+            #   STEP 42: Append current best to lists
+            lCandidates.append(dBest_Geo)
+            lFitness.append(dBest_Fit)
+
+            #
+            #   endregion
+            
+            #   region STEP 43->58: Surrogate stuff
+
+            #   STEP 43: Check surrogate status
+            if (bSurrogate):
+                
+                #   region STEP 44->52: Setup - Data container
+
+                #   STEP 44: Setup - Scope variables
+                dTmp_Data           = self.__moldData__(candidates=lTmp_Candidates, fitness=lFitness)
+                dTmp_DataRange      = None
+                dTmp_DataMap        = None
+                dTmp_DataMin        = None
+
+                lTmp_DataMap_In     = []
+                lTmp_DataMap_Out    = []
+
+                #   STEP 45: Setup - Final data ranges
+                dTmp_DataRange      = {
+                    "lower":        -1.0,
+                    "center":       0.0,
+                    "upper":        1.0
+                }
+
+                #   STEP 46: Setup - Data maps
+                for j in range(0, len( dTmp_Data["in"] ) ):
+                    lTmp_DataMap_In.append(i)
+
+                for j in range(0, len( dTmp_Data["out"] ) ):
+                    lTmp_DataMap_Out.append(i)
+
+                #   STEP 47: Setup - Create new Data container
+                vData   = Data()
+                vData.setData(data=dTmp_Data, automap=False, transpose=True)
+
+                #   STEP 48: Get data minimums
+                fTmp_OutMin_0   = vData.getOutputMin(0)
+                fTmp_OutMin_1   = vData.getOutputMin(1)
+
+                #   STEP 49: Setup - Data minimum dict
+                dTmp_DataMin    = {
+                    "output":
+                    {
+                        "0":    [fTmp_OutMin_0 - 0.075],
+                        "1":    [fTmp_OutMin_1 - 0.075]
+                    },
+                    "input":
+                    {
+
+                    }
+                }
+
+                #   STEP 50: User output
+                if (self.bShowOutput):
+                    print("\t\t- Data Distance (pre-mapping) : ", vData.getInputDistance(0), end="\n\n")
+
+                #   STEP 51: Map data
+                vData.mapData(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=True, output=True, min=dTmp_DataMin)
+
+                #   STEP 52: User output
+                if (self.bShowOutput):
+                    print("\t\t- Data Distance (post-mapping) : ", vData.getInputDistance(0), end="\n\n")
+
+                #
+                #   endregion
+
+                #   region STEP 53->58: Surrogate creation, training, mapping, simulation, and fitness evaluation
+
+                #   STEP 53: Setup - Create new surrogate handler
+                vGolem = Golem(numSurrogates=8)
+
+                #   STEP 54: Update - surrogate handler parameters
+                vGolem.bSRG_Random              = True
+                vGolem.bSRG_RandomParameters    = False
+
+                #   STEP 55: Train and map the surrogates
+                lTmp_SrgResults = vGolem.trainAndMap(data=vData, region=float( iRegion_Srg ) / self.__iTRO_Region_SRG, rand=True, remap=True)
+                
+                #   STEP 54: Remap - Surrogate candidate
+                dTmp_SrgResults = self.__remapData__(candidate=lTmp_SrgResults["result"])
+
+                #   STEP 55: User output
+                if (self.bShowOutput):
+                    print("\n\t{" + Helga.time() + "} - Simulating surrogate candidate.")
+
+                #   STEP 56: Simulate - Surrogate candidate
+                lTmp_SrgFitness = Matthew.simulateCandidates_Json(dir=sDir, ant=[dTmp_SrgResults], frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+
+                #   STEP 57: Evaluate   - Surrogate candidate fitness
+                lTmp_SrgFitness    = self.__getFitness__(ant=[dTmp_SrgResults], fitness=lTmp_SrgFitness)
+            
+                #   STEP 58: Append - Surrogate candidate
+                lCandidates.append(dTmp_SrgResults)
+                lFitness.append(lTmp_SrgFitness[0])
+
+                #
+                #   endregion
+
+            #
+            #   endregion
+
+            #   region STEP 59->62: Candidate evaluation
+
+            #   STEP 59: Loop through candidates
+            for i in range(0, len( lFitness )):
+                #   STEP 60: Check if less than current best fitness
+                if (lFitness[i]["final"] < fTmp_Fitness):
+                    #   STEP 61: Update tmp vars
+                    iTmp_Index      = i
+                    fTmp_Fitness    = lFitness[i]["final"]
+
+            #   STEP 62: Set new best candidate
+            dBest_Geo = lCandidates[iTmp_Index]
+            dBest_Fit = lFitness[iTmp_Index]
+            
+            #
+            #   endregion
+
+            #   region STEP 63->89: Region update
+
+            #   STEP 63: Check surrogate status
+            if (bSurrogate):
+                #   STEP 64: Check if best is surrogate candidates
+                if (iTmp_Index == len(lTmp_Candidates) - 1):
+                    #   STEP 65: Update region
+                    iRegion_Alg         += 1
+                    iRegion_SRG         += 1
+
+                    #   STEP 66: User output
+                    if (self.bShowOutput):
+                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region via surrogate -> " + str(iRegion_Alg))
+
+                        dHold = lFitness[self.__iTRO_Candidates]
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        
+                        dHold = lFitness[iTmp_Index]
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        print("")
+
+                #   STEP 67: Check if new best isn't old best
+                elif (iTmp_Index != self.__iTRO_Candidates):
+                    #   STEP 68: Update region
+                    iRegion_Alg     += 1
+
+                    #   STEP 69: Check if surrogate region not too small
+                    if (iRegion_SRG > 0):
+                        #   STEP 70: Update surrogate region
+                        iRegion_SRG     -= 1
+
+                    #   STEP 71: User output
+                    if (self.bShowOutput):
+                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Alg))
+
+                        dHold = lFitness[self.__iTRO_Candidates]
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        
+                        dHold = lFitness[iTmp_Index]
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        
+                        dHold = lFitness[len(lTmp_Candidates) - 1]
+                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        print("")
+
+                #   STEP 72: Bad region
+                else:
+                    #   STEP 73: Check if alg region not too small
+                    if (iRegion_Alg > 0):
+                        #   STEP 74: Update region
+                        iRegion_Alg     += 1
+
+                        #   STEP 75: Check if surrogate region not too small
+                        if (iRegion_SRG > 0):
+                            #   STEP 76: Update surrogate region
+                            iRegion_SRG     -= 1
+
+                        #   STEP 77: User output
+                        if (self.bShowOutput):
+                            print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Alg))
+
+                            dHold = lFitness[self.__iTRO_Candidates]
+                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                            
+                            dHold = lFitness[iTmp_Index]
+                            print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                            
+                            dHold = lFitness[len(lTmp_Candidates) - 1]
+                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                            print("")
+
+                    #   STEP 78: Region too small
+                    else:
+                        #   STEP 79: Exit loop
+                        break
+
+            #   STEP 80: No surrogate
+            else:
+                #   STEP 81: Check if new best
+                if (iTmp_Index != self.__iTRO_Candidates):
+                    #   STEP 82: Update region
+                    iRegion_Alg += 1
+
+                    #   STEP 83: User output
+                    if (self.bShowOutput):
+                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Alg))
+
+                        dHold = lFitness[self.__iTRO_Candidates]
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        
+                        dHold = lFitness[iTmp_Index]
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+
+                #   STEP 84: Not new best
+                else:
+                    #   STEP 85: Check if region too small
+                    if (iRegion_Alg > 0):
+                        #   STEP 86: Update - Decrement region
+                        iRegion_Alg     -= 1
+
+                        #   STEP 87: User output
+                        if (self.bShowOutput):
+                            print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Alg), end="\n\n")
+                    
+                    #   STPE 88: Region too small
+                    else:
+                        #   STEP 89: Exit loop
+                        break
+
+            #
+            #   endregion
+
+            #   region STEP 90->96: Continuous save
+
+            #   STEP 90: Check for continuous save
+            if (bSave):
+                #   STEP 91: Setup - File location
+                sTmp_File = sDir + "\\" + str(j) + ".json"
+
+                #   STEP 92: Create file
+                vTmp_File   = open(sTmp_File, "a")
+
+                #   STEP 93: Close file
+                vTmp_File.close()
+                vTmp_File = None
+
+                #   STEP 94: Re-open file
+                with open(sTmp_File, "r+") as vTmp_File:
+                    #   STEP 95: Create temp dictionary
+                    dTmp = {
+                        "geometry": dBest_Geo,
+                        "fitness":  dBest_Fit,
+                        "antenna":  self.__cAnt_Default,
+                        "natalie":  self.__cf.data
+                    }
+
+                    #   STEP 96: Dump data
+                    js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
+
+            #
+            #   endregion
+        
+            #   region STEP 97->102: Cull the unworthy :)
+
+            #   STEP 97: Check culling status
+            if (bCull):
+                #   STEP 98: Loop through candidates
+                for i in range(0, len( lFitness ) ):
+                    #   STEP 99: If not current best and not previous best
+                    if ((i != iTmp_Index) and (i != self.__iTRO_Candidates)):
+                        #   STEP 100: Get path for directory
+                        sTmp_Path = os.path.dirname(lTmp_Fitness[i]["dir"])
+
+                        #   STEP 101: If not center
+                        if ("center" not in sTmp_Path):
+                            #   STEP 102: Delete directory
+                            sh.rmtree(sTmp_Path)
+
+            #
+            #   endregion
+
+        #   STEP 103: Return
+        return dBest_Geo
+
+    def __nm__(self, **kwargs) -> dict:
+        """
+        """
+
+        #   STEP 0: Local variables
+        #   STEP 1: Setup - Local variables
+        #   STEP 2: ??
+        #   STEP ??: Return
+        return {}
+
+    #
+    #   endregion
+
     #
     #endregion
 
@@ -2428,7 +2460,7 @@ if (__name__ == "__main__"):
         os.system("cls")
 
         nat = Natalie(ant=dAnt)
-        nat.optimizeAntenna(use_surrogate=True, save_continuous=True, del_unworthy=True)
+        nat.optimizeAntenna(primary="nm", secondary="tro", surrogate=True)
 
 #
 #endregion

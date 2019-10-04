@@ -149,63 +149,307 @@
             },
             "slots":
             {
-                "items": 3,
+                "items":    4,
 
-                "0": "create slot",
-                "1": "remove slot",
-                "2": "change slot",
+                "0":        "square",
+                "1":        "ellipse",
+                "2":        "triangle",
+                "4":        "polygon",
 
-                "create slot":
+                "square":
                 {
-                    "items": 3,
-                    
-                    "0": "default",
-                    "1": "x",
-                    "2": "y",
-                    
-                    "default":
+                    "items":    4,
+
+                    "0":        "probability",
+                    "1":        "create slot",
+                    "2":        "remove slot",
+                    "3":        "change slot",
+
+                    "probability":  0.44,
+
+                    "create slot":
                     {
-                        "region":   1.0,
-                        "range":    0.95
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        },
+                        "l":
+                        {
+                            "region":   1.0,
+                            "range":    6.0
+                        },
+                        "w":
+                        {
+                            "region":   1.0,
+                            "range":    6.0
+                        }
                     },
-                    "x":
+                    "remove slot":
                     {
-                        "region":   0.0,
-                        "range":    6.0
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.25
                     },
-                    "y":
+                    "change slot":
                     {
-                        "region":   0.0,
-                        "range":    6.0
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "l":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "w":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        }
                     }
                 },
-                "remove slot":
+                "ellipse":
                 {
-                    "region":   1.0,
-                    "range":    0.25
-                },
-                "change slot":
-                {
-                    "items": 3,
-                    
-                    "0": "probability",
-                    "1": "x",
-                    "2": "y",
+                    "items":    4,
 
-                    "probability":
+                    "0":        "probability",
+                    "1":        "create slot",
+                    "2":        "remove slot",
+                    "3":        "change slot",
+
+                    "probability":  0.44,
+
+                    "create slot":
                     {
-                        "region":   1.0,
-                        "range":    0.925
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        },
+                        "l":
+                        {
+                            "region":   1.0,
+                            "range":    6.0
+                        },
+                        "w":
+                        {
+                            "region":   1.0,
+                            "range":    6.0
+                        }
                     },
-                    "x":
+                    "remove slot":
                     {
-                        "region":   0.0,
-                        "range":    2.256
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.25
                     },
-                    "y":
+                    "change slot":
                     {
-                        "region":   0.0,
-                        "range":    2.256
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "l":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "w":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        }
+                    }
+                },
+                "triangle":
+                {
+                    "items":    4,
+
+                    "0":        "probability",
+                    "1":        "create slot",
+                    "2":        "remove slot",
+                    "3":        "change slot",
+
+                    "probability":  0.1,
+
+                    "create slot":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        }
+                    },
+                    "remove slot":
+                    {
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.25
+                    },
+                    "change slot":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        }
+                    }
+
+                },
+                "polygon":
+                {
+                    "items":    4,
+
+                    "0":        "probability",
+                    "1":        "create point",
+                    "2":        "remove point",
+                    "3":        "change point",
+
+                    "probability":  0.02,
+
+                    "create point":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    6.0
+                        }
+                    },
+                    "remove point":
+                    {
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.25
+                    },
+                    "change point":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    2.256
+                        }
                     }
                 }
             }
@@ -242,63 +486,307 @@
             },
             "slots":
             {
-                "items": 3,
+                "items":    4,
 
-                "0": "create slot",
-                "1": "remove slot",
-                "2": "change slot",
+                "0":        "square",
+                "1":        "ellipse",
+                "2":        "triangle",
+                "4":        "polygon",
 
-                "create slot":
+                "square":
                 {
-                    "items": 3,
-                    
-                    "0": "default",
-                    "1": "x",
-                    "2": "y",
+                    "items":    4,
 
-                    "default":
+                    "0":        "probability",
+                    "1":        "create slot",
+                    "2":        "remove slot",
+                    "3":        "change slot",
+
+                    "probability":  0.44,
+
+                    "create slot":
                     {
-                        "region":   1.0,
-                        "range":    0.2
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.25,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        },
+                        "l":
+                        {
+                            "region":   1.0,
+                            "range":    1.6
+                        },
+                        "w":
+                        {
+                            "region":   1.0,
+                            "range":    1.6
+                        }
                     },
-                    "x":
+                    "remove slot":
                     {
-                        "region":   0.0,
-                        "range":    0.8
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.2
                     },
-                    "y":
+                    "change slot":
                     {
-                        "region":   0.0,
-                        "range":    0.8
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "l":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "w":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        }
                     }
                 },
-                "remove slot":
+                "ellipse":
                 {
-                    "region":   1.0,
-                    "range":    0.2
-                },
-                "change slot":
-                {
-                    "items": 3,
-                    
-                    "0": "probability",
-                    "1": "x",
-                    "2": "y",
+                    "items":    4,
 
-                    "probability":
+                    "0":        "probability",
+                    "1":        "create slot",
+                    "2":        "remove slot",
+                    "3":        "change slot",
+
+                    "probability":  0.44,
+
+                    "create slot":
                     {
-                        "region":   1.0,
-                        "range":    0.75
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.25,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        },
+                        "l":
+                        {
+                            "region":   1.0,
+                            "range":    1.6
+                        },
+                        "w":
+                        {
+                            "region":   1.0,
+                            "range":    1.6
+                        }
                     },
-                    "x":
+                    "remove slot":
                     {
-                        "region":   0.0,
-                        "range":    0.8
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.2
                     },
-                    "y":
+                    "change slot":
                     {
-                        "region":   0.0,
-                        "range":    0.8
+                        "items":    5,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        "3":        "l",
+                        "4":        "w",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "l":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "w":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        }
+                    }
+                },
+                "triangle":
+                {
+                    "items":    4,
+
+                    "0":        "probability",
+                    "1":        "create slot",
+                    "2":        "remove slot",
+                    "3":        "change slot",
+
+                    "probability":  0.1,
+
+                    "create slot":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+                        
+
+                        "probability":  0.25,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        }
+                    },
+                    "remove slot":
+                    {
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.2
+                    },
+                    "change slot":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+
+                        "probability":  0.95,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        }
+                    }
+
+                },
+                "polygon":
+                {
+                    "items":    4,
+
+                    "0":        "probability",
+                    "1":        "create point",
+                    "2":        "remove point",
+                    "3":        "change point",
+
+                    "probability":  0.02,
+
+                    "create point":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+
+                        "probability":  0.25,
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.8
+                        }
+                    },
+                    "remove point":
+                    {
+                        "items":    1,
+
+                        "0":        "probability",
+
+                        "probability":  0.22
+                    },
+                    "change point":
+                    {
+                        "items":    3,
+
+                        "0":        "probability",
+                        "1":        "x",
+                        "2":        "y",
+
+                        "x":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        },
+                        "y":
+                        {
+                            "region":   0.0,
+                            "range":    0.512
+                        }
                     }
                 }
             }
