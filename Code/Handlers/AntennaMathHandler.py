@@ -1164,7 +1164,7 @@ class Matthew:
                             raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 43: Polygon has less than three corners")
 
                         #   STEP 45: Setup - Create polygonal surface
-                        sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot))
+                        sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="GPSlot_" + str(j))
 
                         dSubs[str(j)]   = sTmp_GPSlot
 
@@ -1310,7 +1310,7 @@ class Matthew:
                             raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Stpe 69: Polygon has less than three corners")
 
                         #   STEP 71: Setup - Create polygonal surface
-                        sTmp_RPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot))
+                        sTmp_RPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="RPSlot_" + str(j))
 
                         dSubs[str(j)]   = sTmp_RPSlot
 

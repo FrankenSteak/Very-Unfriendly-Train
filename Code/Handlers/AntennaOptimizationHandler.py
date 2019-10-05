@@ -1221,6 +1221,7 @@ class Natalie:
                     dTmp_Slot   = {
                         "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
                         "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
+                        "z":    kwargs["z"],
                         "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"], lw=True),
                         "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"], lw=True),
 
@@ -1248,6 +1249,7 @@ class Natalie:
                     dTmp_Slot   = {
                         "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
                         "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
+                        "z":    kwargs["z"],
                         "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"], lw=True),
                         "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"], lw=True),
 
@@ -1264,7 +1266,7 @@ class Natalie:
                     continue
 
                 #   STEP 60: Update - Local variables
-                fTmp_Prob    += kwargs["scalars"]["triangle"]["create slot"]
+                fTmp_Prob    += kwargs["scalars"]["triangle"]["probability"]
 
                 #   STEP 61->69: Check if triangular slot
                 if (fTmp_Rand < fTmp_Prob):
@@ -1283,7 +1285,8 @@ class Natalie:
                         #   STEP 65: Create corner
                         dTmp_Corner = {
                             "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
-                            "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"])
+                            "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
+                            "z":    kwargs["z"]
                         }
 
                         #   STEP 66: Add to triangle
@@ -1299,7 +1302,7 @@ class Natalie:
                     continue
                     
                 #   STEP 70: Update - local variables
-                fTmp_Prob    += kwargs["scalars"]["polygon"]["create point"]
+                fTmp_Prob    += kwargs["scalars"]["polygon"]["probability"]
 
                 #   STEP 71->78: Check if polygonal slot
                 if (fTmp_Rand < fTmp_Prob):
@@ -1318,7 +1321,8 @@ class Natalie:
                         #   STEP 75: Create corner
                         dTmp_Corner = {
                             "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
-                            "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"])
+                            "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
+                            "z":    kwargs["z"]
                         }
 
                         #   STEP 76: Add to polygon
