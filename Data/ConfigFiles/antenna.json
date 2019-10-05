@@ -165,7 +165,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.44,
+                    "probability":  0.5,
 
                     "create slot":
                     {
@@ -251,7 +251,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.44,
+                    "probability":  0.5,
 
                     "create slot":
                     {
@@ -337,7 +337,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.1,
+                    "probability":  0.0,
 
                     "create slot":
                     {
@@ -401,7 +401,7 @@
                     "2":        "remove point",
                     "3":        "change point",
 
-                    "probability":  0.02,
+                    "probability":  0.0,
 
                     "create point":
                     {
@@ -502,7 +502,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.44,
+                    "probability":  0.5,
 
                     "create slot":
                     {
@@ -588,7 +588,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.44,
+                    "probability":  0.5,
 
                     "create slot":
                     {
@@ -674,7 +674,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.1,
+                    "probability":  0.0,
 
                     "create slot":
                     {
@@ -738,7 +738,7 @@
                     "2":        "remove point",
                     "3":        "change point",
 
-                    "probability":  0.02,
+                    "probability":  0.0,
 
                     "create point":
                     {

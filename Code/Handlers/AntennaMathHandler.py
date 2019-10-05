@@ -1111,7 +1111,7 @@ class Matthew:
                     dTmp_CurrSlot   = dTmp_Slots[str(j)]
 
                     #   STEP 32: Check if square
-                    if (dTmp_CurrSlot["type"]   == "square"):
+                    if (dTmp_CurrSlot["type"] == "square"):
                         #   STEP 33: Setup - Square slot top-left corner
                         dTmp_Corner = {
                             "x":    dTmp_CurrSlot["x"],

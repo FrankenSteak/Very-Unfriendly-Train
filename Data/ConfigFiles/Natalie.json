@@ -52,15 +52,19 @@
         {
             "items":    4,
 
-            "0":        "iterations",
-            "1":        "candidates",
-            "2":        "algorithm region",
-            "3":        "surrogate region",
+            "0":        "primary iterations",
+            "1":        "secondary iterations",
+            "2":        "candidates",
+            "3":        "algorithm region",
+            "4":        "surrogate region",
+            "5":        "retension fall off",
 
-            "iterations":           75,
-            "candidates":           20,
+            "primary iterations":   15,
+            "secondary iterations": 75,
+            "candidates":           6,
             "algorithm region":     3,
-            "surrogate region":     3
+            "surrogate region":     3,
+            "retension fall off":   3
         }
     },
     "scalars":

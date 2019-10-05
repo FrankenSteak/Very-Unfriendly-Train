@@ -109,7 +109,8 @@ class Natalie:
 
         #   region  STEP 1.2: TRO Params
 
-        self.__iTRO_Iterations  = None
+        self.__iTRO_Iterations_Primary      = None
+        self.__iTRO_Iterations_Secondary    = None
         self.__iTRO_Candidates  = None
 
         self.__iTRO_Region      = None
@@ -297,7 +298,7 @@ class Natalie:
         #   STEP 20: Check if secondary is tro
         if (kwargs["secondary"] == "tro"):
             #   STEP 21: Outsource
-            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
+            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate, retension=True)
 
         #   STEP 22: Check if secondary is nm
         if (kwargs["secondary"] == "nm"):
@@ -381,10 +382,12 @@ class Natalie:
             "interactive":      self.__cf.data["parameters"]["runt"]["interactive"]
         }
 
-        self.__iTRO_Iterations  = self.__cf.data["parameters"]["trust region"]["iterations"]
-        self.__iTRO_Candidates  = self.__cf.data["parameters"]["trust region"]["candidates"]
-        self.__iTRO_Region      = self.__cf.data["parameters"]["trust region"]["algorithm region"]
-        self.__iTRO_Region_SRG  = self.__cf.data["parameters"]["trust region"]["surrogate region"]
+        self.__iTRO_Iterations_Primary      = self.__cf.data["parameters"]["trust region"]["primary iterations"]
+        self.__iTRO_Iterations_Secondary    = self.__cf.data["parameters"]["trust region"]["secondary iterations"]
+        self.__iTRO_Candidates              = self.__cf.data["parameters"]["trust region"]["candidates"]
+        self.__iTRO_Region                  = self.__cf.data["parameters"]["trust region"]["algorithm region"]
+        self.__iTRO_Region_SRG              = self.__cf.data["parameters"]["trust region"]["surrogate region"]
+        self.__iTRO_Retension_FallOff       = self.__cf.data["parameters"]["trust region"]["retension fall off"]
 
         #   region STEP 9->11: Retrieve default ant config
 
@@ -495,7 +498,7 @@ class Natalie:
         dFrequency = cp.deepcopy(self.__dAnt_Frequency)
         dFrequency["samples"] = self.__cf.data["parameters"]["frequency"]["accuracy check samples"]
 
-        #   STEP 15: Return
+        #   STEP 13: Return
         return
 
     #
@@ -596,162 +599,6 @@ class Natalie:
     #   endregion
     
     #   region Back-End: Gets
-
-    def __getCandidates__(self, **kwargs) -> list:
-        """
-            Description:
-            
-                Generates the specified amount of candidates withing the trust
-                Region as specified in the provided arguments.
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Arguments:
-
-                + center    = ( dict ) Dictionary containing a patch geometry
-                    ~ Required
-
-                + region    = ( int ) The region for random value generation
-                    ~ Required
-
-                + candidates    = ( int ) The number of candidates required
-                    ~ Required
-        """
-
-        #   STEP 0: Local variables
-        dCenter                 = None
-        dScalars                = None
-
-        lOut                    = []
-
-        iCandidates             = None
-        iRegion                 = None
-
-        #   STEP 1: Setup - Local variables
-        
-        #   region STEP 2->7: Error checking
-
-        #   STEP 2: Check if center arg passed
-        if ("center" not in kwargs):
-            #   STEP 3: Error handling
-            raise Exception("An error occured in Natalie.__getCandidates__() -> Step 2: No center arg passed")
-
-        #   STEP 4: Check if region arg passed
-        if ("region" not in kwargs):
-            #   STEP 5: Error handling
-            raise Exception("An error occured in Natalie.__getCandidates__() -> Step 4: No region arg passed")
-
-        #   STEP 6: Check if candidates arg passed
-        if ("candidates" not in kwargs):
-            #   STEP 7: Error handling
-            raise Exception("An error occured in Natalie.__getCandidates__() -> Stpe 6: No candidates arg passed")
-
-        #
-        #   endregion
-
-        #   STEP 8: Update - Local variables
-        dCenter     = kwargs["center"]
-        dScalars    = self.__cAnt_Default["scalars"]
-
-        iCandidates = kwargs["candidates"]
-        iRegion     = kwargs["region"]
-
-        #   STEP 9: Loop for required number of candidates
-        for _ in range(0, iCandidates):
-            #   STEP 10: Create new candidate
-            dTmp_Candidate = {
-                "items":    3,
-                
-                "0":        "feed",
-                "1":        "ground plane",
-                "2":        "radiating plane",
-                "3":        "substrate",
-
-                "feed":
-                {
-                    "items":    2,
-                    
-                    "0":        "center",
-                    "1":        "width",
-
-                    "center":   self.__randVal__(center=dCenter["feed"]["center"], scalars=dScalars["feed"]["center"], region=iRegion),
-                    "width":    self.__randVal__(center=dCenter["feed"]["width"], scalars=dScalars["feed"]["width"], region=iRegion)
-                },
-                "ground plane":
-                {
-                    "items":    5,
-
-                    "0":        "l",
-                    "1":        "w",
-                    "2":        "x",
-                    "3":        "y",
-                    "4":        "slots",
-
-                    "l":        self.__randVal__(center=dCenter["ground plane"]["l"], scalars=dScalars["ground plane"]["l"], region=iRegion),
-                    "w":        self.__randVal__(center=dCenter["ground plane"]["w"], scalars=dScalars["ground plane"]["w"], region=iRegion),
-                    "x":        self.__randVal__(center=dCenter["ground plane"]["x"], scalars=dScalars["ground plane"]["x"], region=iRegion),
-                    "y":        self.__randVal__(center=dCenter["ground plane"]["y"], scalars=dScalars["ground plane"]["y"], region=iRegion),
-
-                    "slots":    None
-                },
-                "radiating plane":
-                {
-                    "items":    5,
-
-                    "0":        "l",
-                    "1":        "w",
-                    "2":        "x",
-                    "3":        "y",
-                    "4":        "slots",
-                    
-                    "l":        self.__randVal__(center=dCenter["radiating plane"]["l"], scalars=dScalars["radiating plane"]["l"], region=iRegion),
-                    "w":        self.__randVal__(center=dCenter["radiating plane"]["w"], scalars=dScalars["radiating plane"]["w"], region=iRegion),
-                    "x":        self.__randVal__(center=dCenter["radiating plane"]["x"], scalars=dScalars["radiating plane"]["x"], region=iRegion),
-                    "y":        self.__randVal__(center=dCenter["radiating plane"]["y"], scalars=dScalars["radiating plane"]["y"], region=iRegion),
-
-                    "slots":    None
-                },
-                "substrate":
-                {
-                    "items":    4,
-
-                    "0":        "l",
-                    "1":        "w",
-                    "2":        "x",
-                    "3":        "h",
-                    
-                    "l":        0.0,
-                    "w":        0.0,
-                    "h":        self.__randVal__(center=dCenter["substrate"]["h"], scalars=dScalars["substrate"]["h"], region=iRegion),
-                    "x":        0.0,
-                    "y":        0.0,
-
-                    "permitivitty": dCenter["substrate"]["permitivitty"],
-                    "loss":         dCenter["substrate"]["loss"],
-                    "name":         dCenter["substrate"]["name"]
-                }
-            }
-
-            #   STEP 11: Update - Candidate substrate
-            self.__remapData_Substrate__(candidate=dTmp_Candidate)
-
-            #   region STEP 12: Get plane slots
-
-            dTmp_Candidate["ground plane"]["slots"] = self.__randSlots__(center=dCenter["ground plane"]["slots"], scalars=dScalars["ground plane"]["slots"], plane=dTmp_Candidate["ground plane"], z=0.0, region=iRegion + 1)
-            dTmp_Candidate["radiating plane"]["slots"] = self.__randSlots__(center=dCenter["radiating plane"]["slots"], scalars=dScalars["radiating plane"]["slots"], plane=dTmp_Candidate["radiating plane"], z=dTmp_Candidate["substrate"]["h"], region=iRegion + 1)
-            
-            #
-            #   endregion
-
-            #   STEP 13: Append new candidate to output list
-            lOut.append(dTmp_Candidate)
-            
-        #   STEP 15: Return
-        return lOut
 
     def __getFitness__(self, **kwargs) -> list:
         """
@@ -869,12 +716,179 @@ class Natalie:
         #   STEP 3: Return
         return lOut
 
-    #
-    #   endregion
+    def __getCandidates__(self, **kwargs) -> list:
+        """
+            Description:
+            
+                Generates the specified amount of candidates withing the trust
+                Region as specified in the provided arguments.
 
-    #   region Back-End: Random functions
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
 
-    def __randVal__(self, **kwargs) -> float:
+            Arguments:
+
+                + center    = ( dict ) Dictionary containing a patch geometry
+                    ~ Required
+
+                + region    = ( int ) The region for random value generation
+                    ~ Required
+
+                + candidates    = ( int ) The number of candidates required
+                    ~ Required
+
+                + slots = ( bool ) A flag that indicates whether or not slots
+                    should be created and removed. If fals then slots will
+                    only be changed
+                    ~ Required
+        """
+
+        #   STEP 0: Local variables
+        dCenter                 = None
+        dScalars                = None
+
+        lOut                    = []
+
+        iCandidates             = None
+        fRegion                 = None
+
+        #   STEP 1: Setup - Local variables
+        
+        #   region STEP 2->9: Error checking
+
+        #   STEP 2: Check if center arg passed
+        if ("center" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.__getCandidates__() -> Step 2: No center arg passed")
+
+        #   STEP 4: Check if region arg passed
+        if ("region" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Natalie.__getCandidates__() -> Step 4: No region arg passed")
+
+        #   STEP 6: Check if candidates arg passed
+        if ("candidates" not in kwargs):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Natalie.__getCandidates__() -> Stpe 6: No candidates arg passed")
+
+        #   STEP 8: Check if slots arg passed
+        if ("slots" not in kwargs):
+            #   STEP 9: Error handling
+            raise Exception("An error occured in Natalie.__getCandidates__() -> Step 8: No slots arg passed")
+
+        #
+        #   endregion
+
+        #   STEP 10: Update - Local variables
+        dCenter     = kwargs["center"]
+        dScalars    = self.__cAnt_Default["scalars"]
+
+        iCandidates = kwargs["candidates"]
+
+        #   STEP 11: Check region not 0
+        if (kwargs["region"] == 0.0):
+            #   STEP 12: Update - Local variables
+            fRegion     = 0.01
+        
+        #   STEP 13: Region not 0
+        else:
+            #   STEP 14: Update - Local variables
+            fRegion     = kwargs["region"]
+        
+
+        #   STEP 15: Loop for required number of candidates
+        for _ in range(0, iCandidates):
+            #   STEP 16: Create new candidate
+            dTmp_Candidate = {
+                "items":    3,
+                
+                "0":        "feed",
+                "1":        "ground plane",
+                "2":        "radiating plane",
+                "3":        "substrate",
+
+                "feed":
+                {
+                    "items":    2,
+                    
+                    "0":        "center",
+                    "1":        "width",
+
+                    "center":   self.__getRandVal__(center=dCenter["feed"]["center"],  scalars=dScalars["feed"]["center"],     region=fRegion),
+                    "width":    self.__getRandVal__(center=dCenter["feed"]["width"],   scalars=dScalars["feed"]["width"],      region=fRegion)
+                },
+                "ground plane":
+                {
+                    "items":    5,
+
+                    "0":        "l",
+                    "1":        "w",
+                    "2":        "x",
+                    "3":        "y",
+                    "4":        "slots",
+
+                    "l":        self.__getRandVal__(center=dCenter["ground plane"]["l"], scalars=dScalars["ground plane"]["l"], region=fRegion),
+                    "w":        self.__getRandVal__(center=dCenter["ground plane"]["w"], scalars=dScalars["ground plane"]["w"], region=fRegion),
+                    "x":        self.__getRandVal__(center=dCenter["ground plane"]["x"], scalars=dScalars["ground plane"]["x"], region=fRegion),
+                    "y":        self.__getRandVal__(center=dCenter["ground plane"]["y"], scalars=dScalars["ground plane"]["y"], region=fRegion),
+
+                    "slots":    None
+                },
+                "radiating plane":
+                {
+                    "items":    5,
+
+                    "0":        "l",
+                    "1":        "w",
+                    "2":        "x",
+                    "3":        "y",
+                    "4":        "slots",
+                    
+                    "l":        self.__getRandVal__(center=dCenter["radiating plane"]["l"], scalars=dScalars["radiating plane"]["l"], region=fRegion),
+                    "w":        self.__getRandVal__(center=dCenter["radiating plane"]["w"], scalars=dScalars["radiating plane"]["w"], region=fRegion),
+                    "x":        self.__getRandVal__(center=dCenter["radiating plane"]["x"], scalars=dScalars["radiating plane"]["x"], region=fRegion),
+                    "y":        self.__getRandVal__(center=dCenter["radiating plane"]["y"], scalars=dScalars["radiating plane"]["y"], region=fRegion),
+
+                    "slots":    None
+                },
+                "substrate":
+                {
+                    "items":    4,
+
+                    "0":        "l",
+                    "1":        "w",
+                    "2":        "x",
+                    "3":        "h",
+                    
+                    "l":        0.0,
+                    "w":        0.0,
+                    "h":        self.__getRandVal__(center=dCenter["substrate"]["h"], scalars=dScalars["substrate"]["h"], region=fRegion),
+                    "x":        0.0,
+                    "y":        0.0,
+
+                    "permitivitty": dCenter["substrate"]["permitivitty"],
+                    "loss":         dCenter["substrate"]["loss"],
+                    "name":         dCenter["substrate"]["name"]
+                }
+            }
+
+            #   STEP 17: Update - Candidate substrate
+            self.__remapData_Substrate__(candidate=dTmp_Candidate)
+
+            #   STEP 18: Get plane slots
+            dTmp_Candidate["ground plane"]["slots"]     = self.__getSlots__(center=dCenter["ground plane"]["slots"],       scalars=dScalars["ground plane"]["slots"],      plane=dTmp_Candidate["ground plane"],       z=0.0,                              region=fRegion, slots=kwargs["slots"])
+            dTmp_Candidate["radiating plane"]["slots"]  = self.__getSlots__(center=dCenter["radiating plane"]["slots"],    scalars=dScalars["radiating plane"]["slots"],   plane=dTmp_Candidate["radiating plane"],    z=dTmp_Candidate["substrate"]["h"], region=fRegion, slots=kwargs["slots"])
+            
+            #   STEP 19: Append new candidate to output list
+            lOut.append(dTmp_Candidate)
+            
+        #   STEP 20: Return
+        return lOut
+
+    def __getRandVal__(self, **kwargs) -> float:
         """
             Description:
 
@@ -990,7 +1004,7 @@ class Natalie:
         #   STEP 26: Return
         return round(fOut, 3)
 
-    def __randSlots__(self, **kwargs) -> dict:
+    def __getSlots__(self, **kwargs) -> dict:
         """
             Description:
 
@@ -1044,11 +1058,19 @@ class Natalie:
                     ~ "x"   = ( float )
                     ~ "y"   = ( float )
 
-                + z = ( int ) The z value for the plane
+                + z         = ( int ) The z value for the plane
                     ~ Required
 
                 + region    = ( int ) The region for randomization
                     ~ Required
+
+                + slots     = ( bool ) A flag that indicates whether or not
+                    slots may be created and removed
+                    ~ Required
+
+                + force     = ( int ) Force creates slots until the specified
+                    number of slots is met
+                    ~ only viable if <slots=True>
         """
         
         #   STEP 0: Local variables
@@ -1056,128 +1078,344 @@ class Natalie:
 
         #   STEP 1: Setup - Local variables
         
-        #   region STEP 2->11: Error checking
+        #   region STEP 2->13: Error checking
 
         #   STEP 2: Check if center arg passed
         if ("center" not in kwargs):
             #   STEP 3: Error handling
-            raise Exception("An error occured in Natalie.__randSlots__() -> Step 2: No center arg passed")
+            raise Exception("An error occured in Natalie.__getSlots__() -> Step 2: No center arg passed")
 
         #   STEP 4: check if scalars arg passed
         if ("scalars" not in kwargs):
             #   STEP 5: Error handling
-            raise Exception("An error occured in Natalie.__randSLots__() -> Step 4: No scalars arg passed")
+            raise Exception("An error occured in Natalie.__getSlots__() -> Step 4: No scalars arg passed")
         
         #   STEP 6: Check if plane arg passed
         if ("plane" not in kwargs):
             #   STPE 7: Error handling
-            raise Exception("An error occured in Natalie.__randSlots__() -> Step 6: No plane arg passed")
+            raise Exception("An error occured in Natalie.__getSlots__() -> Step 6: No plane arg passed")
 
         #   STPE 8: Check if region arg passed
         if ("region" not in kwargs):
             #   STEP 9: Error handling
-            raise Exception("An error occured in Natalie.__randSlots__() -> Step 8: No region arg passed")
+            raise Exception("An error occured in Natalie.__getSlots__() -> Step 8: No region arg passed")
         
         #   STEP 10: Check if z arg passed
         if ("z" not in kwargs):
             #   STEP 11: Error handling
-            raise Exception("An error occured in Natalie.__randSlots__() -> Step 10: No z arg passed")
+            raise Exception("An error occured in Natalie.__getSlots__() -> Step 10: No z arg passed")
+        
+        #   STEP 12: Check if slots arg passed
+        if ("slots" not in kwargs):
+            #   STEP 13: Error handling
+            raise Exception("An error occured in Natalie.__getSlots__() -> Step 12: No slots arg passed")
 
         #
         #   endregion
         
-        #   STEP ?? : Update - Local variables
+        #   STEP 14: Update - Local variables
         dOut = cp.deepcopy(kwargs["center"])
+        
+        #   STEP 15->41: Loop through current slots
+        for i in range(0, dOut["items"]):
+            #   STEP 16: Setup - Scope variables
+            dTmp_Slot   = dOut[str(i)]
 
-        #   region STEP 12->16: Slot creation
+            #   STEP 17: Check if square slot
+            if (dTmp_Slot["type"] == "square"):
+                #   STEP 18: Check probability of change
+                if (rn.random() < kwargs["scalars"]["square"]["change slot"]["probability"]):
+                    #   STEP 19: Setup - Tmp scalar dictionary
+                    dTmp_Scalar = kwargs["scalars"]["square"]["change slot"]
 
-        #   STEP 12: Check for slot creation
-        if (rn.random() < kwargs["scalars"]["create slot"]["default"]["range"]):
-            #   STEP 13: Get temp vars
-            fTmp_X =    ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.random()
-            fTmp_Y =    ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.random()
+                    #   STEP 20: Outsource - Slot parameter randomization
+                    dTmp_Slot["x"]  = self.__getRandVal__(center=dTmp_Slot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                    dTmp_Slot["y"]  = self.__getRandVal__(center=dTmp_Slot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
+                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"])
+                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"])
 
-            #   STEP 14: Populate tmp dictionary
-            dTmp = {
-                "0":
-                {
-                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                    "z": kwargs["z"]
-                },
-                "1":
-                {
-                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                    "z": kwargs["z"]
-                },
-                "2":
-                {
-                    "x": self.__randVal__(center=fTmp_X, scalars=kwargs["scalars"]["create slot"]["x"], region=kwargs["region"]),
-                    "y": self.__randVal__(center=fTmp_Y, scalars=kwargs["scalars"]["create slot"]["y"], region=kwargs["region"]),
-                    "z": kwargs["z"]
-                },
-                "id":   Helga.ticks()
-            }
+            #   STEP 21: Check if elliptical slot
+            elif (dTmp_Slot["type"] == "ellipse"):
+                #   STEP 22: Check probability of change
+                if (rn.random() < kwargs["scalars"]["ellipse"]["change slot"]["probability"]):
+                    #   STEP 23: Setup - Tmp scalar dictionary
+                    dTmp_Scalar = kwargs["scalars"]["ellipse"]["change slot"]
 
-            #   STEP 15: Add slot to output dictionary
-            dOut[str(dOut["items"])] = dTmp
+                    #   STEP 24: Outsource - Slot parameter randomization
+                    dTmp_Slot["x"]  = self.__getRandVal__(center=dTmp_Slot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                    dTmp_Slot["y"]  = self.__getRandVal__(center=dTmp_Slot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
+                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"])
+                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"])
 
-            #   STEP 16: Increment slots in dictionary
-            dOut["items"] += 1
+            #   STEP 25: Check if trianular slot
+            elif (dTmp_Slot["type"] == "triangle"):
+                #   STEP 26: Check probability of change
+                if (rn.random() < kwargs["scalars"]["triangle"]["change slot"]["probability"]):
+                    #   STEP 27: Check that triangle has at least three corners
+                    if (dTmp_Slot["items"] < 3):
+                        #   STEP 28: Error handling
+                        raise Exception("An error occured in Natalie.__getSlots__() -> Step 27: Triangle must have three points")
+                    
+                    #   STEP 29: Setup - Tmp scalar dictionary
+                    dTmp_Scalar = kwargs["scalars"]["triangle"]["change slot"]
 
-        #
-        #   endregion
+                    #   STEP 30: Loop through points in slot
+                    for j in range(0, dTmp_Slot["items"]):
+                        #   STEP 31: Outsource slot parameter randomization
+                        dTmp_Slot[str(j)]["x"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                        dTmp_Slot[str(j)]["y"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
 
-        #   region STEP 17->24: Slot removal
+            #   STEP 32: Check if polygon
+            elif (dTmp_Slot["type"] == "polygon"):
+                #   STEP 33: Check probability of change
+                if (rn.random() < kwargs["scalars"]["polygon"]["change point"]["probability"]):
+                    #   STEP 34: Check that polygon has at least three corners
+                    if (dTmp_Slot["items"] < 3):
+                        #   STEP 35: Error handling
+                        raise Exception("An error occured in Natalie.__getSLots__() -> Step 34: Polygon must have three or more points")
 
-        #   STEP 17: Check for slot removal
-        if (rn.random() < kwargs["scalars"]["remove slot"]["range"]):
-            #   STEP 18: Check that there are slots to remove
-            if (dOut["items"] > 0):
-                #   STEP 19: Pick a random slot
-                iTmp_Index = rn.randint(0, dOut["items"] - 1)
+                    #   STEP 37: Setup - Tmp scalar dictionary
+                    dTmp_Scalar = kwargs["scalars"]["polygon"]["change point"]
 
-                #   STEP 20: Decrement slot counter
-                dOut["items"] -= 1
+                    #   STEP 38: Loop through points in slot
+                    for j in range(0, dTmp_Slot["items"]):
+                        #   STEP 39: Outsource - Slot parameter randomization
+                        dTmp_Slot[str(j)]["x"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                        dTmp_Slot[str(j)]["y"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
 
-                #   STEP 21: If slots not zero
+            #   STEP 40: Unrecognized slot
+            else:
+                #   STEP 41: Error handling
+                raise Exception("An error occured in Natalie.__getSlots__() -> Step 41: Unrecognized slot type")
+        
+        #   STEP 42->115: Check - Slot creation and removal status
+        if (kwargs["slots"]):
+            #   STEP 43: Setup - Temp Variables
+            iTmp_CreationIterations = 1
+
+            #   STEP 44: Check if force arg passed
+            if ("force" in kwargs):
+                #   STEP 45: Update - Tmp variables
+                iTmp_CreationIterations = kwargs["force"]
+
+            #   STEP 45->78: Force create slots
+            for i in range(0, iTmp_CreationIterations):
+                #   STEP 46: Setup - Tmp variable
+                fTmp_Prob   = kwargs["scalars"]["square"]["probability"]
+                fTmp_Rand   = rn.random()
+
+                fTmp_X =    ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.random()
+                fTmp_Y =    ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.random()
+
+                #   STEP 47->52: Check if square slot
+                if (fTmp_Rand < fTmp_Prob):
+                    #   STEP 48: Setup - Scope variables
+                    dTmp_Scalar = kwargs["scalars"]["square"]["create slot"]
+
+                    #   STEP 49: Creat slot
+                    dTmp_Slot   = {
+                        "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
+                        "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
+                        "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"]),
+                        "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"]),
+
+                        "type": "square"
+                    }
+
+                    #   STEP 50: Add slot to center
+                    dOut[ str( dOut["items"] ) ] = dTmp_Slot
+
+                    #   STEP 51: Increment items
+                    dOut["items"] += 1
+
+                    #   STEP 52: *Clap Clap* Next iteration
+                    continue
+                
+                #   STEP 53: Update - Local variables
+                fTmp    += kwargs["scalars"]["ellipse"]["probability"]
+
+                #   STEP 54->59: Check if elliptical slot
+                if (fTmp_Rand < fTmp_Prob):
+                    #   STEP 55: Setup - Scope variables
+                    dTmp_Scalar = kwargs["scalars"]["ellipse"]["create slot"]
+
+                    #   STEP 56: Creat slot
+                    dTmp_Slot   = {
+                        "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
+                        "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
+                        "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"]),
+                        "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"]),
+
+                        "type": "ellipse"
+                    }
+
+                    #   STEP 57: Add slot to center
+                    dOut[ str( dOut["items"] ) ] = dTmp_Slot
+
+                    #   STEP 58: Increment items
+                    dOut["items"] += 1
+
+                    #   STEP 59: *Clap Clap* Next iteration
+                    continue
+
+                #   STEP 60: Update - Local variables
+                fTmp    += kwargs["scalars"]["triangle"]["create slot"]
+
+                #   STEP 61->69: Check if triangular slot
+                if (fTmp_Rand < fTmp_Prob):
+                    #   STEP 62: Setup - Scope variables
+                    dTmp_Scalar = kwargs["scalars"]["triangle"]["create slot"]
+
+                    #   STEP 63: Create slot
+                    dTmp_Slot   = {
+                        "items":    3,
+
+                        "type":     "triangle"
+                    }
+
+                    #   STEP 64: Loop through required corners
+                    for j in range(0, 3):
+                        #   STEP 65: Create corner
+                        dTmp_Corner = {
+                            "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
+                            "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"])
+                        }
+
+                        #   STEP 66: Add to triangle
+                        dTmp_Slot[str(j)] = dTmp_Corner
+
+                    #   STEP 67: Add slot to center
+                    dOut[ str( dOut["items"] ) ]    = dTmp_Slot
+
+                    #   STEP 68: Increment items
+                    dOut["items"] += 1
+
+                    #   STEP 69: *Clap Clap* Next iteration
+                    continue
+                    
+                #   STEP 70: Update - local variables
+                fTmp    += kwargs["scalars"]["polygon"]["create point"]
+
+                #   STEP 71->78: Check if polygonal slot
+                if (fTmp_Rand < fTmp_Prob):
+                    #   STPE 72: Setup - Scope variables
+                    dTmp_Scalar = kwargs["scalars"]["polygon"]["create point"]
+
+                    #   STEP 73: Create slot
+                    dTmp_Slot   = {
+                        "items":    rn.randint(4, max(6, int(25.0 * rn.random() ) ) ),
+
+                        "type":     "polygon"
+                    }
+
+                    #   STEP 74: Loop through requried corners
+                    for j in range(0, dTmp_Slot["items"]):
+                        #   STEP 75: Create corner
+                        dTmp_Corner = {
+                            "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
+                            "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"])
+                        }
+
+                        #   STEP 76: Add to polygon
+                        dTmp_Slot[str(j)]   = dTmp_Corner
+
+                    #   STEP 77: Add slot to center
+                    dOut[ str( dOut["items"] ) ]    = dTmp_Slot
+
+                    #   STPE 78: Increment items
+                    dOut["items"] += 1
+
+            #   STEP 79->115: Check if force not in kwargs
+            if ("force" not in kwargs):
+                #   STEP 80->115: Check that there are slots to remove
                 if (dOut["items"] > 0):
-                    #   STEP 22: Loop through remaining slots
-                    for i in range(iTmp_Index + 1, dOut["items"] + 1):
-                        #   STEP 23: Reposition slot
-                        dOut[str(i - 1)] = dOut[str(i)]
+                    #   STEP 81: Get a random slot
+                    iTmp_Index  = rn.randint(0, dOut["items"] - 1)
 
-                #   STEP 24: Delete copy slot in last position
-                del dOut[str(dOut["items"])]
+                    #   STEP 82->88: Check if square
+                    if (dOut[iTmp_Index]["type"] == "square"):
+                        #   STEP 83: Check - Removal status
+                        if (rn.random() < kwargs["scalars"]["square"]["remove slot"]["probability"]):
+                            #   STEP 84: Decrement slots
+                            dOut["items"]   -= 1
 
-        #
-        #   endregion
+                            #   STEP 85: If slots not zero
+                            if (dOut["items"] > 0):
+                                #   STEP 86: Loop through remaining slots
+                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
+                                    #   STEP 87: Shift slot
+                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
 
-        #   region STEP 25->31: Slot shifting
+                            #   STEP 88: Delete slot at end of list
+                            del dOut[ str( dOut["items"] ) ]
 
-        #   STEP 25: Check if change
-        if (rn.random() < kwargs["scalars"]["change slot"]["probability"]["range"]):
-            #   STEP 26: Check if there are any slots to change
-            if (dOut["items"] > 0):
-                #   STEP 27: Loop through slots
-                for _ in range(0, dOut["items"]):
-                    #   STEP 28: Pick a random slot
-                    iTmp_Index = rn.randint(0, dOut["items"] - 1)
+                    #   STEP 89->95: Check if ellipse
+                    elif (dOut[iTmp_Index]["type"] == "ellipse"):
+                        #   STEP 90: Check - Removal status
+                        if (rn.random() < kwargs["scalars"]["ellipse"]["remove slot"]["probability"]):
+                            #   STEP 91: Decrement slots
+                            dOut["items"]   -= 1
 
-                    #   STEP 29: Get tmp slot
-                    dTmp_Slot = dOut[str(iTmp_Index)]
+                            #   STEP 92: If slots not zero
+                            if (dOut["items"] > 0):
+                                #   STEP 93: Loop through remaining slots
+                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
+                                    #   STEP 94: Shift slot
+                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
 
-                    #   STEP 30: loop through slot co-ordinates
-                    for i in range(0, 3):
-                        #   STEP 31: Adjust coordinates
-                        dTmp_Slot[str(i)]["x"] = self.__randVal__(center=dTmp_Slot[str(i)]["x"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["x"])
-                        dTmp_Slot[str(i)]["y"] = self.__randVal__(center=dTmp_Slot[str(i)]["y"], region=kwargs["region"], scalars=kwargs["scalars"]["change slot"]["y"])
+                            #   STEP 95: Delete slot at end of list
+                            del dOut[ str( dOut["items"] ) ]
 
-        #
-        #   endregion
+                    #   STEP 96->102: Check if triangle
+                    elif (dOut[iTmp_Index]["type"] == "triangle"):
+                        #   STEP 97: Check - Removal status
+                        if (rn.random() < kwargs["scalars"]["triangle"]["remove slot"]["probability"]):
+                            #   STEP 98: Decrement slots
+                            dOut["items"]   -= 1
 
-        #   STEP 32: Return
+                            #   STEP 99: If slots not zero
+                            if (dOut["items"] > 0):
+                                #   STEP 100: Loop through remaining slots
+                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
+                                    #   STEP 101: Shift slots
+                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
+
+                            #   STEP 102: Delete slot at end of list
+                            del dOut[ str( dOut["items"] ) ]
+
+                    #   STEP 103->115: Check if polygon
+                    elif (dOut[iTmp_Index]["type"] == "polygon"):
+                        #   STEP 104: Check - Slot removal status
+                        if (rn.random() < kwargs["scalars"]["polygon"]["remove point"]["probability"]):
+                            #   STEP 105: Decrement slots
+                            dOut["items"]   -= 1
+
+                            #   STEP 106: If slots not zero
+                            if (dOut["items"] > 0):
+                                #   STEP 107: Loop through remaining slots
+                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
+                                    #   STEP 108: Shift slots
+                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
+
+                            #   STEP 109: Delete slot at end of list
+                            del dOut[ str( dOut["items"] ) ]
+
+                        #   STEP 110: Check - point removal
+                        elif (rn.random() < kwargs["scalars"]["polygon"]["remove point"]["probability"]):
+                            #   STEP 111: Check that there are more than 4 points
+                            if (dOut[iTmp_Index]["items"] > 4):
+                                #   STEP 112: Decrement points
+                                dOut[iTmp_Index]["items"] -= 1
+
+                                #   STEP 113: Loop though remaining points
+                                for i in range(iTmp_Index + 1, dOut[iTmp_Index]["items"] + 1):
+                                    #   STEP 114: Shift point
+                                    dOut[iTmp_Index][ str(i - 1) ] = dOut[ str(i) ]
+
+                                #   STEP 115: Delete point at end of list
+                                del dOut[iTmp_Index][ str( dOut["items"] ) ]
+
+        #   STEP 116: Return
         return dOut
     
     #
@@ -1972,10 +2210,15 @@ class Natalie:
         dBest_Geo               = None
         dBest_Fit               = None
 
+        lRetension_Geo          = []
+        lRetension_Fit          = []
+
         sDir                    = None
 
         iRegion_Alg             = None
         iRegion_Srg             = None
+
+        iIterations             = None
 
         bCull                   = None
         bSave                   = None
@@ -2025,9 +2268,12 @@ class Natalie:
         bCull           = kwargs["cull"]
         bSave           = kwargs["save"]
         bSurrogate      = kwargs["surrogate"]
+        bRetension      = kwargs["retension"]
 
         #   STEP 13: Check if stage is primary
         if (kwargs["stage"] == "Primary"):
+            iIterations = self.__iTRO_Iterations_Primary
+
             #   STEP 14: Check if new center or if center is None
             if ((kwargs["new"]) or (self.__dAnt_Center == None)):
                 #   STEP 15: User output
@@ -2037,6 +2283,9 @@ class Natalie:
                 #   STEP 16: Outsource
                 self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=self.__sDirectory, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
         
+        else:
+            iIterations = self.__iTRO_Iterations_Secondary
+
         #   STEP 17: Setup - Local variables
         dBest_Geo       = cp.deepcopy(self.__dAnt_Center)
         dBest_Fit       = {
@@ -2064,8 +2313,8 @@ class Natalie:
         if (self.bShowOutput):
             print("Natalie (tro-" + kwargs["stage"] + ") {" + Helga.time() + "} - Begining Trust-Region Optimization.")
 
-        #   STEP 22->??: TRO - Loop through iterations
-        for i in range(0, self.__iTRO_Iterations):
+        #   STEP 22->116: TRO - Loop through iterations
+        for i in range(0, iIterations):
             #   STEP 23: Setup - Scope variables
             lCandidates         = []
             lFitness            = []
@@ -2076,106 +2325,130 @@ class Natalie:
             iTmp_Index          = 0
             iTmp_Count          = 0
 
-            bTmp_Region         = False
+            iTmp_Region         = 0
 
-            #   region STEP 24->42: Candidate generations and simulation
+            #   STEP 24: Check - Surrogate status
+            if (bSurrogate):
+                #   STEP 25: Update - Scope variables
+                iTmp_Region     = float(iRegion_Srg + iRegion_Alg) / float(self.__iTRO_Region_SRG + self.__iTRO_Region)
 
-            #   STEP 24: Loop till amount of candidates reached
+            #   STEP 26: No surrogate
+            else:
+                #   STEP 27: Update - Scope variables
+                iTmp_Region     = float(iRegion_Alg) / float(self.__iTRO_Region)
+
+            #   region STEP 28->48: Candidate generations and simulation
+
+            #   STEP 28: Loop till amount of candidates reached
             while (True):
-                #   STEP 25: Setup - Temp variables
+                #   STEP 29: Setup - Temp variables
                 lTmp_Candidates = []
                 
-                #   STEP 26: Check if stage is Primary
+                #   STEP 30: Check if stage is Primary
                 if (kwargs["stage"] == "Primary"):
-                    #   STEP 27: Outsoruce - Get candidates
-                    lTmp_Candidates = self.__getCandidates__(center=dBest_Geo, region=iRegion_Srg, candidates=iTmp_Candidates, slots=True)
+                    #   STEP 31: Outsoruce - Get candidates
+                    lTmp_Candidates = self.__getCandidates__(center=dBest_Geo, region=iTmp_Region, candidates=iTmp_Candidates, slots=True)
 
-                #   STEP 28: Stage is secondary
+                #   STEP 32: Stage is secondary
                 else:
-                    #   STEP 29: Outsource - Get candidates
-                    lTmp_Candidates = self.__getCandidates__(center=dBest_Geo, region=iRegion_Srg, candidates=iTmp_Candidates, slots=False)
+                    #   STEP 33: Outsource - Get candidates
+                    lTmp_Candidates = self.__getCandidates__(center=dBest_Geo, region=iTmp_Region, candidates=iTmp_Candidates, slots=False)
 
-                #   STEP 30: User output
+                #   STEP 34: User output
                 if (self.bShowOutput):
                     print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas.\n")
 
-                #   STEP 31: Simulate antennas
+                #   STEP 35: Simulate antennas
                 lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
 
-                #   STEP 32: Evaluate overall fitness of all geometries
+                #   STEP 36: Evaluate overall fitness of all geometries
                 lTmp_Fitness    = self.__getFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
 
-                #   STEP 33: Loop through all candidates
+                #   STEP 37: Loop through all candidates
                 while (iTmp_Count < len( lTmp_Candidates )):
-                    #   STEP 34: Check that default fitness library wasn't returned
+                    #   STEP 38: Check that default fitness library wasn't returned
                     if ( lTmp_Fitness[iTmp_Count]["desired"] == np.inf):
-                        #   STEP 35: Pop from list
+                        #   STEP 39: Pop from list
                         lTmp_Candidates.pop(iTmp_Count)
                         lTmp_Fitness.pop(iTmp_Count)
 
-                    #   STEP 36: Not default library
+                    #   STEP 40: Not default library
                     else:
-                        #   STEP 37: Increment counter
+                        #   STEP 41: Increment counter
                         iTmp_Count  += 1
 
-                #   STEP 38: Append results and fitnesses to lists
+                #   STEP 42: Append results and fitnesses to lists
                 lCandidates.extend(lTmp_Candidates)
                 lFitness.extend(lTmp_Fitness)
 
-                #   STEP 39: Check that required number of candidates met
+                #   STEP 43: Check that required number of candidates met
                 if (len( lCandidates ) == self.__iTRO_Candidates):
-                    #   STEP 40: Exit loop
+                    #   STEP 44: Exit loop
                     break
 
-                #   STEP 41: Recalculate candidates
+                #   STEP 45: Recalculate candidates
                 iTmp_Candidates = self.__iTRO_Candidates - len( lCandidates )
 
-            #   STEP 42: Append current best to lists
+            #   STEP 46: Append current best to lists
             lCandidates.append(dBest_Geo)
             lFitness.append(dBest_Fit)
+
+            #   STEP 47: Check - Retension status
+            if (bRetension):
+                #   STEP 48: Append to lists
+                lRetension_Geo.extend(lCandidates)
+                lRetension_Fit.extend(lFitness)
 
             #
             #   endregion
             
-            #   region STEP 43->58: Surrogate stuff
-
-            #   STEP 43: Check surrogate status
+            #   STEP 49->72: Check surrogate status
             if (bSurrogate):
                 
-                #   region STEP 44->52: Setup - Data container
+                #   region STEP 50->62: Setup - Data container
 
-                #   STEP 44: Setup - Scope variables
-                dTmp_Data           = self.__moldData__(candidates=lTmp_Candidates, fitness=lFitness)
+                #   STEP 50: Setup - Scope variables
+                dTmp_Data           = None
                 dTmp_DataRange      = None
                 dTmp_DataMap        = None
                 dTmp_DataMin        = None
 
                 lTmp_DataMap_In     = []
                 lTmp_DataMap_Out    = []
+                
+                #   STEP 51: Check - Retension status
+                if (bRetension):
+                    #   STEP 52: Update - Data dictionary
+                    dTmp_Data       = self.__moldData__(candidates=lRetension_Geo, fitness=lRetension_Fit)
 
-                #   STEP 45: Setup - Final data ranges
+                #   STEP 53: Not retension
+                else:
+                    #   STEP 54: Update - Data dictionary
+                    dTmp_Data       = self.__moldData__(candidates=lTmp_Candidates, fitness=lFitness)
+
+                #   STEP 55: Setup - Final data ranges
                 dTmp_DataRange      = {
                     "lower":        -1.0,
                     "center":       0.0,
                     "upper":        1.0
                 }
 
-                #   STEP 46: Setup - Data maps
+                #   STEP 56: Setup - Data maps
                 for j in range(0, len( dTmp_Data["in"] ) ):
                     lTmp_DataMap_In.append(i)
 
                 for j in range(0, len( dTmp_Data["out"] ) ):
                     lTmp_DataMap_Out.append(i)
 
-                #   STEP 47: Setup - Create new Data container
+                #   STEP 57: Setup - Create new Data container
                 vData   = Data()
                 vData.setData(data=dTmp_Data, automap=False, transpose=True)
 
-                #   STEP 48: Get data minimums
+                #   STEP 58: Get data minimums
                 fTmp_OutMin_0   = vData.getOutputMin(0)
                 fTmp_OutMin_1   = vData.getOutputMin(1)
 
-                #   STEP 49: Setup - Data minimum dict
+                #   STEP 59: Setup - Data minimum dict
                 dTmp_DataMin    = {
                     "output":
                     {
@@ -2188,83 +2461,86 @@ class Natalie:
                     }
                 }
 
-                #   STEP 50: User output
+                #   STEP 60: User output
                 if (self.bShowOutput):
                     print("\t\t- Data Distance (pre-mapping) : ", vData.getInputDistance(0), end="\n\n")
 
-                #   STEP 51: Map data
+                #   STEP 61: Map data
                 vData.mapData(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=True, output=True, min=dTmp_DataMin)
 
-                #   STEP 52: User output
+                #   STEP 62: User output
                 if (self.bShowOutput):
                     print("\t\t- Data Distance (post-mapping) : ", vData.getInputDistance(0), end="\n\n")
 
                 #
                 #   endregion
 
-                #   region STEP 53->58: Surrogate creation, training, mapping, simulation, and fitness evaluation
+                #   region STEP 63->72: Surrogate creation, training, mapping, simulation, and fitness evaluation
 
-                #   STEP 53: Setup - Create new surrogate handler
+                #   STEP 63: Setup - Create new surrogate handler
                 vGolem = Golem(numSurrogates=8)
 
-                #   STEP 54: Update - surrogate handler parameters
+                #   STEP 64: Update - surrogate handler parameters
                 vGolem.bSRG_Random              = True
                 vGolem.bSRG_RandomParameters    = False
 
-                #   STEP 55: Train and map the surrogates
+                #   STEP 65: Train and map the surrogates
                 lTmp_SrgResults = vGolem.trainAndMap(data=vData, region=float( iRegion_Srg ) / self.__iTRO_Region_SRG, rand=True, remap=True)
                 
-                #   STEP 54: Remap - Surrogate candidate
+                #   STEP 66: Remap - Surrogate candidate
                 dTmp_SrgResults = self.__remapData__(candidate=lTmp_SrgResults["result"])
 
-                #   STEP 55: User output
+                #   STEP 67: User output
                 if (self.bShowOutput):
                     print("\n\t{" + Helga.time() + "} - Simulating surrogate candidate.")
 
-                #   STEP 56: Simulate - Surrogate candidate
+                #   STEP 68: Simulate - Surrogate candidate
                 lTmp_SrgFitness = Matthew.simulateCandidates_Json(dir=sDir, ant=[dTmp_SrgResults], frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
 
-                #   STEP 57: Evaluate   - Surrogate candidate fitness
+                #   STEP 69: Evaluate   - Surrogate candidate fitness
                 lTmp_SrgFitness    = self.__getFitness__(ant=[dTmp_SrgResults], fitness=lTmp_SrgFitness)
             
-                #   STEP 58: Append - Surrogate candidate
+                #   STEP 70: Append - Surrogate candidate
                 lCandidates.append(dTmp_SrgResults)
                 lFitness.append(lTmp_SrgFitness[0])
+
+                #   STEP 71: Check - Retension status
+                if (bRetension):
+                    #   STEP 72: Extend retension lists
+                    lRetension_Geo.extend([dTmp_SrgResults])
+                    lRetension_Fit.extend(lTmp_SrgFitness)
 
                 #
                 #   endregion
 
-            #
-            #   endregion
+            #   region STEP 73->76: Candidate evaluation
 
-            #   region STEP 59->62: Candidate evaluation
-
-            #   STEP 59: Loop through candidates
+            #   STEP 73: Loop through candidates
             for i in range(0, len( lFitness )):
-                #   STEP 60: Check if less than current best fitness
+                #   STEP 74: Check if less than current best fitness
                 if (lFitness[i]["final"] < fTmp_Fitness):
-                    #   STEP 61: Update tmp vars
+                    #   STEP 75: Update tmp vars
                     iTmp_Index      = i
                     fTmp_Fitness    = lFitness[i]["final"]
 
-            #   STEP 62: Set new best candidate
+            #   STEP 76: Set new best candidate
             dBest_Geo = lCandidates[iTmp_Index]
             dBest_Fit = lFitness[iTmp_Index]
             
             #
             #   endregion
 
-            #   region STEP 63->89: Region update
+            #   region STEP 77->99: Region update
 
-            #   STEP 63: Check surrogate status
+            #   STEP 77: Check surrogate status
             if (bSurrogate):
-                #   STEP 64: Check if best is surrogate candidates
+                #   STEP 78: Check if best is surrogate candidates
                 if (iTmp_Index == len(lTmp_Candidates) - 1):
-                    #   STEP 65: Update region
+                    #   STEP 79: Update region
                     iRegion_Alg         += 1
                     iRegion_SRG         += 1
 
-                    #   STEP 66: User output
+                    #   STEP 80: User output
                     if (self.bShowOutput):
                         print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region via surrogate -> " + str(iRegion_Alg))
 
@@ -2275,17 +2551,17 @@ class Natalie:
                         print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         print("")
 
-                #   STEP 67: Check if new best isn't old best
+                #   STEP 81: Check if new best isn't old best
                 elif (iTmp_Index != self.__iTRO_Candidates):
-                    #   STEP 68: Update region
+                    #   STEP 82: Update region
                     iRegion_Alg     += 1
 
-                    #   STEP 69: Check if surrogate region not too small
+                    #   STEP 83: Check if surrogate region not too small
                     if (iRegion_SRG > 0):
-                        #   STEP 70: Update surrogate region
+                        #   STEP 84: Update surrogate region
                         iRegion_SRG     -= 1
 
-                    #   STEP 71: User output
+                    #   STEP 85: User output
                     if (self.bShowOutput):
                         print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Alg))
 
@@ -2299,19 +2575,19 @@ class Natalie:
                         print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         print("")
 
-                #   STEP 72: Bad region
+                #   STEP 86: Bad region
                 else:
-                    #   STEP 73: Check if alg region not too small
+                    #   STEP 87: Check if alg region not too small
                     if (iRegion_Alg > 0):
-                        #   STEP 74: Update region
+                        #   STEP 88: Update region
                         iRegion_Alg     += 1
 
-                        #   STEP 75: Check if surrogate region not too small
+                        #   STEP 89: Check if surrogate region not too small
                         if (iRegion_SRG > 0):
-                            #   STEP 76: Update surrogate region
+                            #   STEP 90: Update surrogate region
                             iRegion_SRG     -= 1
 
-                        #   STEP 77: User output
+                        #   STEP 91: User output
                         if (self.bShowOutput):
                             print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Alg))
 
@@ -2325,19 +2601,19 @@ class Natalie:
                             print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                             print("")
 
-                    #   STEP 78: Region too small
+                    #   STEP 92: Region too small
                     else:
-                        #   STEP 79: Exit loop
+                        #   STEP 93: Exit loop
                         break
 
-            #   STEP 80: No surrogate
+            #   STEP 94: No surrogate
             else:
-                #   STEP 81: Check if new best
+                #   STEP 95: Check if new best
                 if (iTmp_Index != self.__iTRO_Candidates):
-                    #   STEP 82: Update region
+                    #   STEP 96: Update region
                     iRegion_Alg += 1
 
-                    #   STEP 83: User output
+                    #   STEP 97: User output
                     if (self.bShowOutput):
                         print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Alg))
 
@@ -2347,42 +2623,42 @@ class Natalie:
                         dHold = lFitness[iTmp_Index]
                         print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
-                #   STEP 84: Not new best
+                #   STEP 98: Not new best
                 else:
-                    #   STEP 85: Check if region too small
+                    #   STEP 99: Check if region too small
                     if (iRegion_Alg > 0):
-                        #   STEP 86: Update - Decrement region
+                        #   STEP 100: Update - Decrement region
                         iRegion_Alg     -= 1
 
-                        #   STEP 87: User output
+                        #   STEP 101: User output
                         if (self.bShowOutput):
                             print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Alg), end="\n\n")
                     
-                    #   STPE 88: Region too small
+                    #   STPE 102: Region too small
                     else:
-                        #   STEP 89: Exit loop
+                        #   STEP 103: Exit loop
                         break
 
             #
             #   endregion
 
-            #   region STEP 90->96: Continuous save
+            #   region STEP 104->110: Continuous save
 
-            #   STEP 90: Check for continuous save
+            #   STEP 104: Check for continuous save
             if (bSave):
-                #   STEP 91: Setup - File location
+                #   STEP 105: Setup - File location
                 sTmp_File = sDir + "\\" + str(j) + ".json"
 
-                #   STEP 92: Create file
+                #   STEP 106: Create file
                 vTmp_File   = open(sTmp_File, "a")
 
-                #   STEP 93: Close file
+                #   STEP 107: Close file
                 vTmp_File.close()
                 vTmp_File = None
 
-                #   STEP 94: Re-open file
+                #   STEP 108: Re-open file
                 with open(sTmp_File, "r+") as vTmp_File:
-                    #   STEP 95: Create temp dictionary
+                    #   STEP 109: Create temp dictionary
                     dTmp = {
                         "geometry": dBest_Geo,
                         "fitness":  dBest_Fit,
@@ -2390,32 +2666,48 @@ class Natalie:
                         "natalie":  self.__cf.data
                     }
 
-                    #   STEP 96: Dump data
+                    #   STEP 110: Dump data
                     js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
 
             #
             #   endregion
         
-            #   region STEP 97->102: Cull the unworthy :)
+            #   region STEP 111->116: Cull the unworthy :)
 
-            #   STEP 97: Check culling status
+            #   STEP 111: Check culling status
             if (bCull):
-                #   STEP 98: Loop through candidates
+                #   STEP 112: Loop through candidates
                 for i in range(0, len( lFitness ) ):
-                    #   STEP 99: If not current best and not previous best
+                    #   STEP 113: If not current best and not previous best
                     if ((i != iTmp_Index) and (i != self.__iTRO_Candidates)):
-                        #   STEP 100: Get path for directory
+                        #   STEP 114: Get path for directory
                         sTmp_Path = os.path.dirname(lTmp_Fitness[i]["dir"])
 
-                        #   STEP 101: If not center
+                        #   STEP 115: If not center
                         if ("center" not in sTmp_Path):
-                            #   STEP 102: Delete directory
+                            #   STEP 116: Delete directory
                             sh.rmtree(sTmp_Path)
 
             #
             #   endregion
 
-        #   STEP 103: Return
+            #   region STEP 117->120: Retension - Drop off
+
+            #   STEP 117: Check - Retension status
+            if (bRetension):
+                #   STEP 118: Loop for fall off
+                for j in range(0, self.__iTRO_Retension_FallOff):
+                    #   STEP 119: Get random index
+                    iTmp_Index  = rn.randint(0, len(lRetension_Geo) - 1)
+
+                    #   STEP 120: Pop candidates from retension list
+                    lRetension_Geo.pop(iTmp_Index)
+                    lRetension_Fit.pop(iTmp_Index)
+
+            #
+            #   endregion
+
+        #   STEP 121: Return
         return dBest_Geo
 
     def __nm__(self, **kwargs) -> dict:
