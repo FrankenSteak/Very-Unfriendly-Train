@@ -109,12 +109,12 @@
             "center":
             {
                 "region":   0.0,
-                "range":    0.5
+                "range":    1.0
             },
             "width":
             {
                 "region":   0.9,
-                "range":    0.025
+                "range":    0.05
             }
         },
         "ground plane":
@@ -130,22 +130,22 @@
             "l":
             {
                 "region":   0.3,
-                "range":    2.0
+                "range":    4.0
             },
             "w":
             {
                 "region":   0.3,
-                "range":    2.0
+                "range":    4.0
             },
             "x":
             {
-                "region":   0.0,
-                "range":    0.5
+                "region":   0.25,
+                "range":    0.4
             },
             "y":
             {
-                "region":   0.0,
-                "range":    0.5
+                "region":   0.25,
+                "range":    0.4
             },
             "slots":
             {
@@ -165,7 +165,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.5,
+                    "probability":  0.33,
 
                     "create slot":
                     {
@@ -181,23 +181,23 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.5,
+                            "range":    12.5
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.5,
+                            "range":    12.5
                         },
                         "l":
                         {
                             "region":   1.0,
-                            "range":    6.0
+                            "range":    12.5
                         },
                         "w":
                         {
                             "region":   1.0,
-                            "range":    6.0
+                            "range":    12.5
                         }
                     },
                     "remove slot":
@@ -222,23 +222,23 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         },
                         "l":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         },
                         "w":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         }
                     }
                 },
@@ -251,7 +251,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.5,
+                    "probability":  0.33,
 
                     "create slot":
                     {
@@ -267,23 +267,23 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.5,
+                            "range":    12.5
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.55,
+                            "range":    12.5
                         },
                         "l":
                         {
                             "region":   1.0,
-                            "range":    6.0
+                            "range":    12.5
                         },
                         "w":
                         {
                             "region":   1.0,
-                            "range":    6.0
+                            "range":    12.5
                         }
                     },
                     "remove slot":
@@ -308,23 +308,23 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         },
                         "l":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         },
                         "w":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         }
                     }
                 },
@@ -337,7 +337,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.0,
+                    "probability":  0.33,
 
                     "create slot":
                     {
@@ -352,13 +352,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.5,
+                            "range":    12.5
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.5,
+                            "range":    12.5
                         }
                     },
                     "remove slot":
@@ -381,13 +381,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    2.256
+                            "region":   0.5,
+                            "range":    4.256
                         }
                     }
 
@@ -415,13 +415,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.5,
+                            "range":    12.5
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    6.0
+                            "region":   0.5,
+                            "range":    12.5
                         }
                     },
                     "remove point":
@@ -443,12 +443,12 @@
                         "x":
                         {
                             "region":   0.0,
-                            "range":    2.256
+                            "range":    4.256
                         },
                         "y":
                         {
                             "region":   0.0,
-                            "range":    2.256
+                            "range":    4.256
                         }
                     }
                 }
@@ -467,22 +467,22 @@
             "l":
             {
                 "region":   0.3,
-                "range":    1.0
+                "range":    1.75
             },
             "w":
             {
                 "region":   0.3,
-                "range":    1.0
+                "range":    1.75
             },
             "x":
             {
                 "region":   0.3,
-                "range":    0.4
+                "range":    0.75
             },
             "y":
             {
                 "region":   0.3,
-                "range":    0.4
+                "range":    0.75
             },
             "slots":
             {
@@ -502,7 +502,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.5,
+                    "probability":  0.125,
 
                     "create slot":
                     {
@@ -518,13 +518,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "l":
                         {
@@ -559,23 +559,23 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "l":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "w":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         }
                     }
                 },
@@ -588,7 +588,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.5,
+                    "probability":  0.125,
 
                     "create slot":
                     {
@@ -604,13 +604,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "l":
                         {
@@ -645,23 +645,23 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "l":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "w":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         }
                     }
                 },
@@ -674,7 +674,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.0,
+                    "probability":  0.25,
 
                     "create slot":
                     {
@@ -689,13 +689,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         }
                     },
                     "remove slot":
@@ -718,13 +718,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         }
                     }
 
@@ -752,13 +752,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.8
+                            "region":   0.5,
+                            "range":    1.6
                         }
                     },
                     "remove point":
@@ -779,13 +779,13 @@
 
                         "x":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         },
                         "y":
                         {
-                            "region":   0.0,
-                            "range":    0.512
+                            "region":   0.5,
+                            "range":    1.6
                         }
                     }
                 }

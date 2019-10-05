@@ -278,7 +278,7 @@ class Natalie:
         #   STEP 14: Check if primary is tro
         if (kwargs["primary"] == "tro"):
             #   STEP 15: Outsource
-            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False)
+            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False, retension=True)
 
         #   STEP 16: Check if primary is nm
         elif (kwargs["primary"] == "nm"):
@@ -298,7 +298,7 @@ class Natalie:
         #   STEP 20: Check if secondary is tro
         if (kwargs["secondary"] == "tro"):
             #   STEP 21: Outsource
-            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate, retension=True)
+            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
 
         #   STEP 22: Check if secondary is nm
         if (kwargs["secondary"] == "nm"):
@@ -692,7 +692,7 @@ class Natalie:
 
             #   STEP 14: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area_Tot * 8.0  - 6.0 ) 
-            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.8 * fTmp_Freq_Tot  + 0.8 * fTmp_Fitness
+            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  1.0 * fTmp_Freq_Tot  + 0.5 * fTmp_Fitness
 
             #   STEP 15: Populate output dictionary
             dTmp = {
@@ -707,7 +707,9 @@ class Natalie:
 
                 "area":     fTmp_Area_Tot,
                 "freq":     fTmp_Freq_Tot,
-                "final":    fTmp_Fitness
+                "final":    fTmp_Fitness,
+
+                "dir":      kwargs["fitness"][i]["dir"]
             }
 
             #   STEP 16: Append to output
@@ -990,7 +992,7 @@ class Natalie:
         #   endregion
 
         #   STEP 22: Get offset
-        fOffset = rn.random() * kwargs["scalars"]["range"] * float( kwargs["region"] / self.__iTRO_Region )
+        fOffset = rn.random() * kwargs["scalars"]["range"] * kwargs["region"]
 
         #   STEP 23: Caluclate output
         if (bRegion):
@@ -1001,8 +1003,11 @@ class Natalie:
             #   STEP 25: Subtract offset from center
             fOut = kwargs["center"] - fOffset
 
-        #   STEP 26: Return
-        return round(fOut, 3)
+        #   STEP 26: Check if lw arg passed
+        if ("lw" in kwargs):
+            return abs( round( fOut, 3 ) )
+        
+        return round( fOut, 3 )
 
     def __getSlots__(self, **kwargs) -> dict:
         """
@@ -1131,8 +1136,8 @@ class Natalie:
                     #   STEP 20: Outsource - Slot parameter randomization
                     dTmp_Slot["x"]  = self.__getRandVal__(center=dTmp_Slot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
                     dTmp_Slot["y"]  = self.__getRandVal__(center=dTmp_Slot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
-                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"])
-                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"])
+                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"], lw=True)
+                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"], lw=True)
 
             #   STEP 21: Check if elliptical slot
             elif (dTmp_Slot["type"] == "ellipse"):
@@ -1144,8 +1149,8 @@ class Natalie:
                     #   STEP 24: Outsource - Slot parameter randomization
                     dTmp_Slot["x"]  = self.__getRandVal__(center=dTmp_Slot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
                     dTmp_Slot["y"]  = self.__getRandVal__(center=dTmp_Slot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
-                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"])
-                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"])
+                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"], lw=True)
+                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"], lw=True)
 
             #   STEP 25: Check if trianular slot
             elif (dTmp_Slot["type"] == "triangle"):
@@ -1216,8 +1221,8 @@ class Natalie:
                     dTmp_Slot   = {
                         "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
                         "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
-                        "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"]),
-                        "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"]),
+                        "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"], lw=True),
+                        "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"], lw=True),
 
                         "type": "square"
                     }
@@ -1232,7 +1237,7 @@ class Natalie:
                     continue
                 
                 #   STEP 53: Update - Local variables
-                fTmp    += kwargs["scalars"]["ellipse"]["probability"]
+                fTmp_Prob    += kwargs["scalars"]["ellipse"]["probability"]
 
                 #   STEP 54->59: Check if elliptical slot
                 if (fTmp_Rand < fTmp_Prob):
@@ -1243,8 +1248,8 @@ class Natalie:
                     dTmp_Slot   = {
                         "x":    self.__getRandVal__(center=fTmp_X,  scalars=dTmp_Scalar["x"], region=kwargs["region"]),
                         "y":    self.__getRandVal__(center=fTmp_Y,  scalars=dTmp_Scalar["y"], region=kwargs["region"]),
-                        "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"]),
-                        "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"]),
+                        "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"], lw=True),
+                        "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"], lw=True),
 
                         "type": "ellipse"
                     }
@@ -1259,7 +1264,7 @@ class Natalie:
                     continue
 
                 #   STEP 60: Update - Local variables
-                fTmp    += kwargs["scalars"]["triangle"]["create slot"]
+                fTmp_Prob    += kwargs["scalars"]["triangle"]["create slot"]
 
                 #   STEP 61->69: Check if triangular slot
                 if (fTmp_Rand < fTmp_Prob):
@@ -1294,7 +1299,7 @@ class Natalie:
                     continue
                     
                 #   STEP 70: Update - local variables
-                fTmp    += kwargs["scalars"]["polygon"]["create point"]
+                fTmp_Prob    += kwargs["scalars"]["polygon"]["create point"]
 
                 #   STEP 71->78: Check if polygonal slot
                 if (fTmp_Rand < fTmp_Prob):
@@ -1333,7 +1338,7 @@ class Natalie:
                     iTmp_Index  = rn.randint(0, dOut["items"] - 1)
 
                     #   STEP 82->88: Check if square
-                    if (dOut[iTmp_Index]["type"] == "square"):
+                    if (dOut[str(iTmp_Index)]["type"] == "square"):
                         #   STEP 83: Check - Removal status
                         if (rn.random() < kwargs["scalars"]["square"]["remove slot"]["probability"]):
                             #   STEP 84: Decrement slots
@@ -1350,7 +1355,7 @@ class Natalie:
                             del dOut[ str( dOut["items"] ) ]
 
                     #   STEP 89->95: Check if ellipse
-                    elif (dOut[iTmp_Index]["type"] == "ellipse"):
+                    elif (dOut[str(iTmp_Index)]["type"] == "ellipse"):
                         #   STEP 90: Check - Removal status
                         if (rn.random() < kwargs["scalars"]["ellipse"]["remove slot"]["probability"]):
                             #   STEP 91: Decrement slots
@@ -1367,7 +1372,7 @@ class Natalie:
                             del dOut[ str( dOut["items"] ) ]
 
                     #   STEP 96->102: Check if triangle
-                    elif (dOut[iTmp_Index]["type"] == "triangle"):
+                    elif (dOut[str(iTmp_Index)]["type"] == "triangle"):
                         #   STEP 97: Check - Removal status
                         if (rn.random() < kwargs["scalars"]["triangle"]["remove slot"]["probability"]):
                             #   STEP 98: Decrement slots
@@ -1384,7 +1389,7 @@ class Natalie:
                             del dOut[ str( dOut["items"] ) ]
 
                     #   STEP 103->115: Check if polygon
-                    elif (dOut[iTmp_Index]["type"] == "polygon"):
+                    elif (dOut[str(iTmp_Index)]["type"] == "polygon"):
                         #   STEP 104: Check - Slot removal status
                         if (rn.random() < kwargs["scalars"]["polygon"]["remove point"]["probability"]):
                             #   STEP 105: Decrement slots
@@ -2260,7 +2265,8 @@ class Natalie:
         #   region STEP 12->20: Setup - Local variables
 
         #   STEP 12: Setup - Local variables
-        sDir            = self.__sDirectory + "\\" + Helga.ticks() + "_" + kwargs["stage"]
+        sDir            = self.__sDirectory + Helga.ticks() + "_" + kwargs["stage"]
+        os.mkdir(sDir)
 
         iRegion_Alg     = cp.deepcopy(self.__iTRO_Region)
         iRegion_SRG     = cp.deepcopy(self.__iTRO_Region_SRG)
@@ -2268,7 +2274,9 @@ class Natalie:
         bCull           = kwargs["cull"]
         bSave           = kwargs["save"]
         bSurrogate      = kwargs["surrogate"]
-        bRetension      = kwargs["retension"]
+
+        if ("retension" in kwargs):
+            bRetension  = kwargs["retension"]
 
         #   STEP 13: Check if stage is primary
         if (kwargs["stage"] == "Primary"):
@@ -2281,7 +2289,7 @@ class Natalie:
                     print("Natalie (tro-" + kwargs["stage"] + ") {" + Helga.time() + "} - Simulating starting antenna geometry")
 
                 #   STEP 16: Outsource
-                self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=self.__sDirectory, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+                self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=sDir, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
         
         else:
             iIterations = self.__iTRO_Iterations_Secondary
@@ -2304,7 +2312,6 @@ class Natalie:
         del dBest_Geo["dir"]
         del dBest_Geo["fitness"]
 
-        os.mkdir(sDir)
 
         #
         #   endregion
@@ -2356,7 +2363,7 @@ class Natalie:
 
                 #   STEP 34: User output
                 if (self.bShowOutput):
-                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas.\n")
+                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas")
 
                 #   STEP 35: Simulate antennas
                 lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
@@ -2369,6 +2376,12 @@ class Natalie:
                     #   STEP 38: Check that default fitness library wasn't returned
                     if ( lTmp_Fitness[iTmp_Count]["desired"] == np.inf):
                         #   STEP 39: Pop from list
+                        Helga.nop()
+                        Helga.nop()
+                        Helga.nop()
+                        
+                        sh.rmtree(os.path.dirname(lTmp_Fitness[iTmp_Count]["dir"]))
+
                         lTmp_Candidates.pop(iTmp_Count)
                         lTmp_Fitness.pop(iTmp_Count)
 
@@ -2435,10 +2448,10 @@ class Natalie:
 
                 #   STEP 56: Setup - Data maps
                 for j in range(0, len( dTmp_Data["in"] ) ):
-                    lTmp_DataMap_In.append(i)
+                    lTmp_DataMap_In.append(j)
 
                 for j in range(0, len( dTmp_Data["out"] ) ):
-                    lTmp_DataMap_Out.append(i)
+                    lTmp_DataMap_Out.append(j)
 
                 #   STEP 57: Setup - Create new Data container
                 vData   = Data()
@@ -2516,12 +2529,12 @@ class Natalie:
             #   region STEP 73->76: Candidate evaluation
 
             #   STEP 73: Loop through candidates
-            for i in range(0, len( lFitness )):
+            for j in range(0, len( lFitness )):
                 #   STEP 74: Check if less than current best fitness
-                if (lFitness[i]["final"] < fTmp_Fitness):
+                if (lFitness[j]["final"] < fTmp_Fitness):
                     #   STEP 75: Update tmp vars
-                    iTmp_Index      = i
-                    fTmp_Fitness    = lFitness[i]["final"]
+                    iTmp_Index      = j
+                    fTmp_Fitness    = lFitness[j]["final"]
 
             #   STEP 76: Set new best candidate
             dBest_Geo = lCandidates[iTmp_Index]
@@ -2532,24 +2545,25 @@ class Natalie:
 
             #   region STEP 77->99: Region update
 
-            #   STEP 77: Check surrogate status
+            #   STEP 77->93: Check surrogate status
             if (bSurrogate):
                 #   STEP 78: Check if best is surrogate candidates
                 if (iTmp_Index == len(lTmp_Candidates) - 1):
                     #   STEP 79: Update region
                     iRegion_Alg         += 1
-                    iRegion_SRG         += 1
+                    iRegion_Srg         += 1
+
+                    iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
 
                     #   STEP 80: User output
                     if (self.bShowOutput):
-                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region via surrogate -> " + str(iRegion_Alg))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(i) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
-                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                        print("")
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 81: Check if new best isn't old best
                 elif (iTmp_Index != self.__iTRO_Candidates):
@@ -2561,9 +2575,11 @@ class Natalie:
                         #   STEP 84: Update surrogate region
                         iRegion_SRG     -= 1
 
+                    iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+
                     #   STEP 85: User output
                     if (self.bShowOutput):
-                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Alg))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(i) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
@@ -2572,8 +2588,7 @@ class Natalie:
                         print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
                         dHold = lFitness[len(lTmp_Candidates) - 1]
-                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                        print("")
+                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 86: Bad region
                 else:
@@ -2587,9 +2602,11 @@ class Natalie:
                             #   STEP 90: Update surrogate region
                             iRegion_SRG     -= 1
 
+                        iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+
                         #   STEP 91: User output
                         if (self.bShowOutput):
-                            print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Alg))
+                            print("\t{" + Helga.time() + "} - Iteration (" + str(i) + ") : Decreasing region -> " + str(iTmp_Region))
 
                             dHold = lFitness[self.__iTRO_Candidates]
                             print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
@@ -2598,24 +2615,25 @@ class Natalie:
                             print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                             
                             dHold = lFitness[len(lTmp_Candidates) - 1]
-                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                            print("")
+                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                     #   STEP 92: Region too small
                     else:
                         #   STEP 93: Exit loop
                         break
 
-            #   STEP 94: No surrogate
+            #   STEP 94->103: No surrogate
             else:
                 #   STEP 95: Check if new best
                 if (iTmp_Index != self.__iTRO_Candidates):
                     #   STEP 96: Update region
                     iRegion_Alg += 1
 
+                    iTmp_Region = round( float(iRegion_Alg) / float(self.__iTRO_Region ), 3)
+
                     #   STEP 97: User output
                     if (self.bShowOutput):
-                        print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Increasing region -> " + str(iRegion_Alg))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(i) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
@@ -2630,9 +2648,11 @@ class Natalie:
                         #   STEP 100: Update - Decrement region
                         iRegion_Alg     -= 1
 
+                        iTmp_Region = round( float(iRegion_Alg) / float(self.__iTRO_Region ), 3)
+
                         #   STEP 101: User output
                         if (self.bShowOutput):
-                            print("\n\t{" + Helga.time() + "} - Iteration (" + str(j) + ") : Decreasing region -> " + str(iRegion_Alg), end="\n\n")
+                            print("\t{" + Helga.time() + "} - Iteration (" + str(i) + ") : Decreasing region -> " + str(iTmp_Region), end="\n\n")
                     
                     #   STPE 102: Region too small
                     else:
@@ -2647,7 +2667,7 @@ class Natalie:
             #   STEP 104: Check for continuous save
             if (bSave):
                 #   STEP 105: Setup - File location
-                sTmp_File = sDir + "\\" + str(j) + ".json"
+                sTmp_File = sDir + "\\" + str(i) + ".json"
 
                 #   STEP 106: Create file
                 vTmp_File   = open(sTmp_File, "a")
@@ -2677,11 +2697,11 @@ class Natalie:
             #   STEP 111: Check culling status
             if (bCull):
                 #   STEP 112: Loop through candidates
-                for i in range(0, len( lFitness ) ):
+                for j in range(0, len( lFitness ) ):
                     #   STEP 113: If not current best and not previous best
-                    if ((i != iTmp_Index) and (i != self.__iTRO_Candidates)):
+                    if ((j != iTmp_Index) and (j != self.__iTRO_Candidates)):
                         #   STEP 114: Get path for directory
-                        sTmp_Path = os.path.dirname(lTmp_Fitness[i]["dir"])
+                        sTmp_Path = os.path.dirname(lFitness[j]["dir"])
 
                         #   STEP 115: If not center
                         if ("center" not in sTmp_Path):
@@ -2696,13 +2716,10 @@ class Natalie:
             #   STEP 117: Check - Retension status
             if (bRetension):
                 #   STEP 118: Loop for fall off
-                for j in range(0, self.__iTRO_Retension_FallOff):
-                    #   STEP 119: Get random index
-                    iTmp_Index  = rn.randint(0, len(lRetension_Geo) - 1)
-
+                for _ in range(0, self.__iTRO_Retension_FallOff):
                     #   STEP 120: Pop candidates from retension list
-                    lRetension_Geo.pop(iTmp_Index)
-                    lRetension_Fit.pop(iTmp_Index)
+                    lRetension_Geo.pop(0)
+                    lRetension_Fit.pop(0)
 
             #
             #   endregion
@@ -2752,7 +2769,7 @@ if (__name__ == "__main__"):
         os.system("cls")
 
         nat = Natalie(ant=dAnt)
-        nat.optimizeAntenna(primary="nm", secondary="tro", surrogate=True)
+        nat.optimizeAntenna(primary="tro", secondary="tro", surrogate=True)
 
 #
 #endregion

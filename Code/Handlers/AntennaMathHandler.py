@@ -947,7 +947,7 @@ class Matthew:
                 "1":
                 {
                     "x": fTmp_X,
-                    "y": dTmp_Ant                   + dTmp_Ant["feed"]["width"],
+                    "y": fTmp_Y                     + dTmp_Ant["feed"]["width"],
                     "z": dTmp_Ant["substrate"]["h"]
                 },
                 "2":
@@ -1121,8 +1121,8 @@ class Matthew:
 
                         #   STEP 34: Setup - Square slot dimenions
                         dTmp_Dim    = {
-                            "l":    dTmp_CurrSlot["l"],
-                            "w":    dTmp_CurrSlot["w"]
+                            "l":    abs( dTmp_CurrSlot["l"] ),
+                            "w":    abs( dTmp_CurrSlot["w"] )
                         }
 
                         #   STEP 35: Setup - Create square/rect surface
@@ -1144,8 +1144,8 @@ class Matthew:
 
                         #   STEP 39: Setup - Elliptical slot dimensions
                         dTmp_Dim    = {
-                            "l":    dTmp_CurrSlot["l"],
-                            "w":    dTmp_CurrSlot["w"]
+                            "l":    abs( dTmp_CurrSlot["l"] ),
+                            "w":    abs( dTmp_CurrSlot["w"] )
                         }
 
                         #   STEP 40: Setup - Create elliptical surface
@@ -1235,7 +1235,7 @@ class Matthew:
             sRPlane = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="RP")
 
             #   STEP 53: Update - Faces
-            iFaces += 1
+            iTmp_Faces  += 1
 
             #
             #   endregion
@@ -1329,7 +1329,7 @@ class Matthew:
                 }
 
                 #   STEP 76: Perform subtraction
-                sRPlane     = lurkhei.newAModification(mod="Subtract", parts=dParts, label="RP_Slotted")
+                sRPlane     = lurkhei.newAModification(mod="Subtract", parts=dTmp_Parts, label="RP_Slotted")
 
             #
             #   endregion
@@ -1354,9 +1354,9 @@ class Matthew:
 
             #   region STEP 78: Reset face media
 
-            lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iFaces + 1), union=sUnion)
-            lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iFaces + 2), union=sUnion)
-            lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iFaces + 3), union=sUnion)
+            lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iTmp_Faces + 1), union=sUnion)
+            lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iTmp_Faces + 2), union=sUnion)
+            lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iTmp_Faces + 3), union=sUnion)
 
             #
             #   endregion
@@ -1418,8 +1418,8 @@ class Matthew:
         #   STEP 88: Loop through antenna
         for i in range(0, len(kwargs["ant"])):
             #   STEP 89: Get path for this sim
-            #sPath = kwargs["dir"] + "\\" + sName + "_" + str(i) + "\\" + str(i) + ".out"
-            sPath = kwargs["dir"] + sName + "_" + str(i) + "\\" + str(i) + ".out"
+            sPath = kwargs["dir"] + "\\" + sName + "_" + str(i) + "\\" + str(i) + ".out"
+            #sPath = kwargs["dir"] + sName + "_" + str(i) + "\\" + str(i) + ".out"
 
             #   STEP 90: Create temp dictionary
             dTmp = {
