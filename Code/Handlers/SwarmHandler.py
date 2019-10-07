@@ -653,6 +653,16 @@ class Sarah:
         #   STEP 28: Return
         return dOut
 
+    def __nmTraining__(self, **kwargs) -> dict:
+        """
+        """
+
+        #   STEP 0: Local variables
+        #   STEP 1: Setup - Local variables
+        #   STEP 2: ??
+        #   STEP ??: Return
+        return {}
+
     #
     #   endregion
 
@@ -783,7 +793,17 @@ class Sarah:
 
         #   STEP 19: Return
         return dOut
+        
+    def __nmMapping__(self, **kwargs) -> dict:
+        """
+        """
 
+        #   STEP 0: Local variables
+        #   STEP 1: Setup - Local variables
+        #   STEP 2: ??
+        #   STEP ??: Return
+        return {}
+        
     #
     #   endregion
 

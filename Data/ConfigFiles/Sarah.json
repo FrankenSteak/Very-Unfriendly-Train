@@ -16,8 +16,10 @@
         },        
         "algorithms":
         {
-            "items": 1,
-            "0": "pso",
+            "items":    1,
+
+            "0":        "pso",
+            "1":        "nm",
             
             "pso":
             {
@@ -39,6 +41,7 @@
                     "iterations":
                     {
                         "items": 2,
+
                         "0": "algorithm",
                         "1": "back propagation",
 
@@ -110,6 +113,78 @@
                     "phi1":         0.1,
                     "phi2":         40.0,
                     "eta":          0.25
+                }
+            },
+            "nm":
+            {
+                "items":    2,
+
+                "0":        "training",
+                "1":        "mapping",
+
+                "training":
+                {
+                    "items":    5,
+
+                    "0":        "iterations",
+                    "1":        "candidate scalar",
+                    "2":        "acc check point",
+                    "3":        "acc requirement",
+                    "4":        "parameters",
+
+                    "iterations":
+                    {
+                        "items":    2,
+
+                        "0":        "algorithm",
+                        "1":        "back propagation",
+
+                        "algorithm":        40,
+                        "back propagation": 15
+                    },
+                    "candidate scalar":     9.0,
+                    "acc check point":      5,
+                    "acc requirement":      0.75,
+                    "parameters":
+                    {
+                        "items":    4,
+
+                        "0":        "alpha",
+                        "1":        "beta",
+                        "2":        "gamma",
+                        "3":        "delta",
+
+                        "alpha":    1.0,
+                        "beta":     2.0,
+                        "gamma":    0.5,
+                        "delta":    0.5
+                    }
+                },
+                "mapping":
+                {
+                    "items":    3,
+
+                    "0":        "iterations",
+                    "1":        "candidate scalar",
+                    "2":        "parameters",
+
+                    "iterations":           55,
+                    "candidate scalar":     9.0,
+                    "parameters":
+                    {
+                        "items":    4,
+
+                        "0":        "alpha",
+                        "1":        "beta",
+                        "2":        "gamma",
+                        "3":        "delta",
+
+                        "alpha":    1.0,
+                        "beta":     2.0,
+                        "gamma":    0.5,
+                        "delta":    0.5
+                    }
+
                 }
             }
         }

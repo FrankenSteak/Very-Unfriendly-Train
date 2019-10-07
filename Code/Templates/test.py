@@ -1,10 +1,52 @@
+import multiprocessing  as mp
+import queue            as qu
+import sys
 
 
-Distance =  [3.924024592175741, 0.0, 3.315349001236516, 4.392978175714062]
+def x(eUI):
 
-Distance =  [5.4152365584302355, 0.0, 5.100860178689354, 4.543459512724521]
+    print("x1")
+    if (eUI.is_set() == False):
+        eUI.wait()
+
+    print("bitch don't kill my vibe")
+
+    eUI.clear()
+    
+    print("x2")
+
+    return
+
+def y(q, eGlobal, eUI, stdin):
+
+    a = stdin.read(1)
+
+    eGlobal.set()
+    eUI.set()
+
+    q.put(a)
+
+    return
 
 
-Distance =  [3.295946146404699, 0.0, 3.6679148027182986, 1.0615402829379645]
+if (__name__ == "__main__"):
 
-Distance:  [5.848682938512687, 0.0, 4.517796433856189, 4.552685208985082]
+    eGlobal = mp.Event()
+    eGlobal.clear()
+
+    eUI     = mp.Event()
+    eUI.clear()
+
+    q       = mp.Queue()
+
+    pY  = mp.Process(target=y, args=(q, eGlobal, eUI, sys.stdin))
+
+    pY.start()
+
+    pY.join()
+
+    b = q.get()
+
+    print("")
+    print("")
+    print("")

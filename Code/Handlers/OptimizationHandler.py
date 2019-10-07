@@ -1016,7 +1016,7 @@ class Hermione:
         iFittest                    = -1
 
         iThreadID                   = 0
-        iNumThreads                 = 16
+        iNumThreads                 = 6
 
         #   region STEP 2: Setup - Global variables
 

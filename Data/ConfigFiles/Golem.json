@@ -21,8 +21,8 @@
             "2":    "accuracy requirement",
 
             "min":  4,
-            "max":  10,
-            "accuracy requirement": 0.02
+            "max":  9,
+            "accuracy requirement": 0.5
         },
         "bools":
         {

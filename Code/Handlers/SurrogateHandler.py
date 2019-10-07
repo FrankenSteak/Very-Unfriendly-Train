@@ -774,7 +774,7 @@ class Golem:
 
         #   STEP 1: Setup - Local variables
 
-        #   region STEP 2->?11: Error checking
+        #   region STEP 2->11: Error checking
 
         #   STEP 2: Check if data arg passed
         if ("data" not in kwargs):
@@ -818,7 +818,7 @@ class Golem:
             vSRG.bShowOutput = False
 
             #   STEP 16: Train surrogate
-            vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=False)
+            vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=False)
 
             #   STEP 17: Get accuracy and fitness
             fTmp_Fitness    = float ( vSRG.getAFitness(data=vData) / vData.getLen() )
@@ -830,7 +830,7 @@ class Golem:
                 "params":           dSRG["params"],
                 "enum":             dSRG["enum"],
 
-                "fitness":          fTmp_Fitness,
+                "fitness":          fTmp_Fitness * (1.1 - fTmp_Accuracy["percent accuracy"]) * 100.0,
 
                 "accuracy":         fTmp_Accuracy["percent accuracy"]
             }
@@ -839,7 +839,7 @@ class Golem:
             thread_lTR_Results[i] = dTmp_Results
 
             #   STEP 20: Check if fittest surrogate so far
-            if ((fTmp_Fitness < fBest_Fitness) and (fTmp_Accuracy["percent accuracy"] == 1.0)):
+            if ((dTmp_Results["fitness"] < fBest_Fitness) and (fTmp_Accuracy["percent accuracy"] == 1.0)):
                 #   STEP 21: Update - Local variables
                 fBest_Fitness   = fTmp_Fitness
                 iBest_Index     = i
@@ -851,8 +851,8 @@ class Golem:
                 #   STEP 23: Minimal output
                 print(":", end="")
 
-            elif (fTmp_Fitness < fBest_Fitness):
-                fBest_Fitness   = fTmp_Fitness
+            elif (dTmp_Results["fitness"] < fBest_Fitness):
+                fBest_Fitness   = dTmp_Results["fitness"]
                 iBest_Index     = i
 
                 print("#", end="")

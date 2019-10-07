@@ -737,7 +737,7 @@ class Matthew:
                 raise Exception("An error occured in Matthew.getFitness() -> Step 5: No params arg passed")
 
             #   STEP 7: Append to output
-            dOut["frequency"] = self.__getFitness_Frequency__(dir=kwargs["dir"], frequency=kwargs["frequency"], params=kwargs["params"])
+            dOut["frequency"] = self.__getFitness_Frequency__(dir=kwargs["dir"], frequency=kwargs["frequency"], params=kwargs["params"], hard=True)#, bias=0.15)
 
         #   STEP 8: Return
         return dOut
@@ -1515,6 +1515,7 @@ class Matthew:
         lData                   = None
 
         dOut                    = None
+        lTmp_Data               = None
 
         fDesired_Lower          = None
         fDesired_Upper          = None
@@ -1646,12 +1647,26 @@ class Matthew:
 
             #   STEP 24: Update - Local variables
             fResonant_Fitness   = np.inf
+            iTmp_Len            = len( lData_Actual )
+
+            lTmp_Data           = {
+                "items":        iTmp_Len    
+            }
+
 
             #   STEP 25: Loop through actual data
-            for i in range(0, len(lData_Actual)):
+            for i in range(0, iTmp_Len):
                 #   STEP 26: Get tmp var
                 dTmp            = lData_Actual[i]
                 fTmp_Fitness    = vActivations.logistic( ( dTmp["fitness"] + kwargs["params"]["offset"] ) / kwargs["params"]["divisor"] )
+
+                #   STEP ??: Check if bias arg passed
+                if ("bias" in kwargs):
+                    fTmp_Scalar = float( ( iTmp_Len - i ) / iTmp_Len )
+                    fTmp_Scalar = fTmp_Scalar * 2.0 - 1.0
+                    fTmp_Scalar = vActivations.logistic( fTmp_Scalar )
+
+                    fTmp_Fitness = fTmp_Fitness * ( ( 1.0 - kwargs["bias"] ) + kwargs["bias"] * fTmp_Scalar )
 
                 #   STEP 27: Check if frequency in lower
                 if (dTmp["frequency"] < fDesired_Lower):
@@ -1676,6 +1691,11 @@ class Matthew:
                     #   STEP 34: Set new Fr
                     fResonant_Frequency = dTmp["frequency"]
                     fResonant_Fitness   = dTmp["fitness"]
+
+                #   STEP ??: Check if hard arg passed
+                if ("hard" in kwargs):
+                    #   STEP ??: Populate temp dictionary
+                    lTmp_Data[ str( i ) ] = fTmp_Fitness
             
             #
             #   endregion
@@ -1735,8 +1755,7 @@ class Matthew:
                 vFile = None
 
         #   STEP 44: Populate output var
-        Helga.nop()
-        dOut ={
+        dOut = {
             "lower":
             {
                 "sum":      fLower_Sum,
@@ -1757,6 +1776,11 @@ class Matthew:
             },
             "resonant frequency": fResonant_Frequency
         }
+
+        #   STEP ??: Check if hard arg passed
+        if ("hard" in kwargs):
+            #   STEP ??: Add hard data to output
+            dOut["hard"]    = lTmp_Data
 
         #   STEP 45: Return
         return dOut

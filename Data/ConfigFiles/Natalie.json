@@ -1,13 +1,14 @@
 {
     "parameters":
     {
-        "items":    5,
+        "items":    6,
 
         "0":        "show output",
         "1":        "frequency",
         "2":        "mesh",
         "3":        "runt", 
         "4":        "trust region",
+        "5":        "nelder mead",
 
         "show output":      true, 
 
@@ -50,7 +51,7 @@
 
         "trust region":
         {
-            "items":    4,
+            "items":    6,
 
             "0":        "primary iterations",
             "1":        "secondary iterations",
@@ -59,12 +60,21 @@
             "4":        "surrogate region",
             "5":        "retension fall off",
 
-            "primary iterations":   12,
+            "primary iterations":   25,
             "secondary iterations": 75,
             "candidates":           6,
-            "algorithm region":     3,
-            "surrogate region":     3,
-            "retension fall off":   3
+            "algorithm region":     5,
+            "surrogate region":     5,
+            "retension fall off":   2
+        },
+        "nelder mead":
+        {
+            "items":    0,
+
+            "0":"primary iterations",
+            "1":"secondary iterations",
+            "2":"time"
+
         }
     },
     "scalars":

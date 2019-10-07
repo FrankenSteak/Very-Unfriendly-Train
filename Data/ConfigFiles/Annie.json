@@ -29,7 +29,7 @@
         "weight range":         1.0,
         "learning":             0.05,
 
-        "accuracy margin":      0.0875,
+        "accuracy margin":      0.095,
         "accuracy sample size": 150,
         "fitness sample size":  15,
 
@@ -110,7 +110,7 @@
                 "1": "batch size",
                 "2": "acc requirement",
 
-                "epochs":           10,
+                "epochs":           15,
                 "batch size":       20,
                 "acc requirement":  0.985
             }

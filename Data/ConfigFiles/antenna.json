@@ -165,7 +165,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.33,
+                    "probability":  0.3,
 
                     "create slot":
                     {
@@ -251,7 +251,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.33,
+                    "probability":  0.0,
 
                     "create slot":
                     {
@@ -337,7 +337,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.33,
+                    "probability":  0.7,
 
                     "create slot":
                     {
@@ -502,7 +502,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.125,
+                    "probability":  0.25,
 
                     "create slot":
                     {
@@ -588,7 +588,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.125,
+                    "probability":  0.0,
 
                     "create slot":
                     {

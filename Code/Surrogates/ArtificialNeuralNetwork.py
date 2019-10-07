@@ -1925,17 +1925,17 @@ class Annie:
 		iBatch_Iterations	= int( np.ceil( _dData.getLen() / iBatch_Size ) )
 
 		#	STEP 2: Check for small dataset
-		if (_dData.getLen() < iBatch_Size):
+		if (_dData.getLen() < 2 * iBatch_Size):
 			#	STEP 3: Update - Batch size
-			iBatch_Size 	+= min( _dData.getLen() * _dData.getInputWidth(), 2 * iBatch_Size )
+			iBatch_Size = 5 * _dData.getLen()
 
 		#	STEP 2: User Output
 		if (self.bShowOutput):
 			print("Annie (def-training) {" + Helga.time() + "} - Starting default training")
-			print("\t~ Epochs: " + str(self.__iEpochs))
+			print("\t~ Epochs: " 			+ str(self.__iEpochs))
 			print("\t~ Batches per Epoch: " + str(iBatch_Iterations))
-			print("\t~ Batch size: " + str(iBatch_Size))
-			print("\t~ Dataset size: " + str(_dData.getLen()) + "\n")
+			print("\t~ Batch size: " 		+ str(iBatch_Size))
+			print("\t~ Dataset size: " 		+ str(_dData.getLen()) + "\n")
 
 		#	STEP 3: Iterate for epochs
 		for i in range(0, self.__iEpochs):
