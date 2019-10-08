@@ -169,7 +169,7 @@
                     "2":        "parameters",
 
                     "iterations":           55,
-                    "candidate scalar":     9.0,
+                    "candidate scalar":     1.0,
                     "parameters":
                     {
                         "items":    4,
@@ -249,7 +249,7 @@
                     "scalar":
                     {
                         "region": 0.9,
-                        "range": 9.0
+                        "range": 0.0
                     }
                 },
                 "acc check point":

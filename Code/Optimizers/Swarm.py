@@ -25,20 +25,21 @@ class SwarmChan:
     #region Init
 
     """
-        - **Description**::
+        Description:
 
-        This class are very kawai :3
+            This class are very kawai :3
         
         |\n
         |\n
         |\n
         |\n
         |\n
-        - **Parameters**::
+        
+        Parameters:
 
-            :param _iParticles: >> (int) The number of particles in the swarm
+            :param _iParticles: = ( int ) The number of particles in the swarm
 
-        - **Return**::
+        Returns:
 
             :return: >> (None)
     """
@@ -65,6 +66,7 @@ class SwarmChan:
 
         self.__bPsoState            = [False, False, False, False]
         self.__bBeeState            = [False, False, False, False]
+        self.__bNemState            = [False, False, False, False]
 
         #   endregion
 
@@ -103,13 +105,26 @@ class SwarmChan:
 
         #   endregion
 
-        #   region STEP 2.4: BEE
+        #   region STEP 2.3: BEE
 
             #idk       
 
         #   endregion
 
-        #   region STEP 2.3: Bools
+        #   region STEP 2.4: Nelder-Mead
+
+        self.NM_Alpha               = None
+        self.NM_Beta                = None
+        self.NM_Gamma               = None
+        self.NM_Sigma               = None
+
+        self.NM_State               = None
+        self.NM_lGetFitness         = None
+
+        #
+        #   endregion
+
+        #   region STEP 2.5: Bools
 
         self.bShowOutPut            = self.__cf.data["parameters"]["show output"]
         

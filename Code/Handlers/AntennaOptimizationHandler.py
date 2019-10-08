@@ -101,6 +101,7 @@ class Natalie:
         self.__dAnt_Fitness     = None
 
         self.__dAnt_Center      = None
+        self.__dAnt_CenterFit   = None
         self.__dAnt_Best        = None
 
         self.__cAnt_Default     = None
@@ -2172,6 +2173,8 @@ class Natalie:
 
             dBest_Fit       = self.__getFitness__( ant=[dBest_Geo], fitness=[dBest_Fit] )[0]
 
+            self.__dAnt_CenterFit = cp.deepcopy(dBest_Fit)
+
             #   STEP 20: Setup - Final steps
             del dBest_Geo["dir"]
             del dBest_Geo["fitness"]
@@ -2468,7 +2471,7 @@ class Natalie:
 
                     #   STEP 80: User output
                     if (self.bShowOutput):
-                        print("\t{" + Helga.time() + "} - Iteration (" + str(i) + "/" + str(iIterations - 1) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
@@ -2490,7 +2493,7 @@ class Natalie:
 
                     #   STEP 85: User output
                     if (self.bShowOutput):
-                        print("\t{" + Helga.time() + "} - Iteration (" + str(i) + "/" + str(iIterations - 1) + ") : Increasing region -> " + str(iTmp_Region))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
@@ -2517,7 +2520,7 @@ class Natalie:
 
                         #   STEP 91: User output
                         if (self.bShowOutput):
-                            print("\t{" + Helga.time() + "} - Iteration (" + str(i) + "/" + str(iIterations - 1) + ") : Decreasing region -> " + str(iTmp_Region))
+                            print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region))
 
                             dHold = lFitness[self.__iTRO_Candidates]
                             print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
@@ -2544,7 +2547,7 @@ class Natalie:
 
                     #   STEP 97: User output
                     if (self.bShowOutput):
-                        print("\t{" + Helga.time() + "} - Iteration (" + str(i) + "/" + str(iIterations - 1) + ") : Increasing region -> " + str(iTmp_Region))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
@@ -2563,7 +2566,7 @@ class Natalie:
 
                         #   STEP 101: User output
                         if (self.bShowOutput):
-                            print("\t{" + Helga.time() + "} - Iteration (" + str(i) + "/" + str(iIterations - 1) + ") : Decreasing region -> " + str(iTmp_Region), end="\n\n")
+                            print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region), end="\n\n")
                     
                     #   STPE 102: Region too small
                     else:

@@ -60,9 +60,9 @@
             "4":        "surrogate region",
             "5":        "retension fall off",
 
-            "primary iterations":   25,
+            "primary iterations":   8,
             "secondary iterations": 75,
-            "candidates":           6,
+            "candidates":           7,
             "algorithm region":     5,
             "surrogate region":     5,
             "retension fall off":   2

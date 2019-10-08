@@ -18,19 +18,20 @@ def x(eUI):
     return
 
 def y(q, eGlobal, eUI, stdin):
+    
+    print(q.get())
 
-    a = stdin.read(1)
-
-    eGlobal.set()
-    eUI.set()
-
-    q.put(a)
+    q.put(["u a hoe"])
 
     return
 
 
 if (__name__ == "__main__"):
 
+    while (True):
+        a = sys.stdin.read(1)
+        print(a)
+        
     eGlobal = mp.Event()
     eGlobal.clear()
 
@@ -38,8 +39,9 @@ if (__name__ == "__main__"):
     eUI.clear()
 
     q       = mp.Queue()
+    q.put(["sup bitch"])
 
-    pY  = mp.Process(target=y, args=(q, eGlobal, eUI, sys.stdin))
+    pY  = mp.Process(target=y, args=(q, eGlobal, eUI, None))
 
     pY.start()
 

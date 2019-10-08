@@ -161,7 +161,7 @@
                     "scalar":
                     {
                         "region": 0.9,
-                        "range": 9.0
+                        "range": 1.0
                     }
                 },
                 "acc check point":

@@ -3,6 +3,7 @@
 from    enum                            import  Enum
 
 import  copy                            as      cp
+import  multiprocessing                 as      mp
 import  numpy                           as      np
 import  os
 import  random                          as      rn
@@ -89,16 +90,8 @@ class Golem:
         self.__iSurrogates              = None
 
         self.__lSRG                     = []
-        self.__lSRG_Parameters          = []
-        self.__lSRG_Types               = []
-
-        self.__lSRG_Results             = []
         self.__lSRG_FItness             = []
         self.__lSRG_Accuracy            = []
-
-        #   STEP 1.2: Data variables
-        self.__lData_Input              = []
-        self.__lData_Output             = []
         
         #   STEP 1.3: Surrogate generation variables
         self.__iSRG_Min                 = self.__cf.data["parameters"]["surrogates"]["min"]
@@ -620,18 +613,16 @@ class Golem:
                     ~ Required
         """
 
-        #   STEP -1: Global variables
-        global  thread_eUI
-        global  thread_sUI
-
-        global  thread_eTR_Exit
-
-        global  thread_eEX
-
-        global  thread_eGlobal
-
         #   STEP 0: Local variables
+        eGlobal                 = None
+        eGlobal_Exit            = None
+
+        eUI_Event               = None
+        qUI_Queue               = None
         tUI_Thread              = None
+
+        eTR_Event               = None
+        qTR_Queue               = None
         tTR_Thread              = None
 
         #   STEP 1: Setup - Local variables
@@ -651,11 +642,27 @@ class Golem:
         #
         #   endregion
 
-        #   STEP 8: Setup - UI Thread
-        tUI_Thread  = tr.Thread(target=self.__threadUI__)
-        tUI_Thread.daemon = True
+        #   STEP 8: Setup - Global events
+        eGlobal         = mp.Event()
+        eGlobal.clear()
 
+        eGlobal_Exit    = mp.Event()
+        eGlobal_Exit.clear()
+
+        #   STEP 9: Setup - UI variables
+        eUI_Event       = mp.Event()
+        eUI_Event.clear()
+
+        qUI_Queue       = mp.Queue()
+
+        tUI_Thread          = tr.Thread(target=self.__threadUI__, args=(eGlobal_Exit, eGlobal, eUI_Event, qUI_Queue, ))
+        tUI_Thread.daemon   = True
+        tUI_Thread.start()
+        
         #   STEP 9: Setup - Training thread
+        eTR_Event           = mp.Event()
+        eTR_Event.clear()
+
         dTmp_Train = {
             "min":      self.__iSRG_Min,
             "max":      self.__iSRG_Max,
@@ -666,62 +673,59 @@ class Golem:
             "data":     kwargs["data"]
         }
 
-        tTR_Thread  = tr.Thread(target=self.__train_srgHandler__, args=(dTmp_Train, ))
-        tTR_Thread.daemon = True
+        qTR_Queue           = mp.Queue()
+        qTR_Queue.put([dTmp_Train])
 
-        #   STEP 10: Setup - Global variables
-        self.__initGlobals__()
-
-        #   STEP 11: Start threads
-        print("\t{" + Helga.time() + "} - Starting surrogate training\t\t-> ", end="")
-        tUI_Thread.start()
+        tTR_Thread          = tr.Thread(target=self.__train_srgHandler__, args=(eGlobal_Exit, eGlobal, eTR_Event, qTR_Queue, ))
+        tTR_Thread.daemon   = True
         tTR_Thread.start()
 
-        #   STEP 12: Loop until exit
-        while (True):
-            #   STEP 13: Wait for global event
-            thread_eGlobal.wait()
+        #   STEP 10: User output
+        if (self.bShowOutput):
+            print("\t{" + Helga.time() + "} - Starting surrogate training\t\t-> ", end="")
 
-            #   STEP 14: Clear event
-            thread_eGlobal.clear()
+        #   STEP 11: Loop until exit
+        while (True):
+            #   STEP 12: Wait for global event
+            eGlobal.wait()
+
+            #   STEP 13: Clear event
+            eGlobal.clear()
 
             #   STEP 15: Check if ui
-            if (thread_eUI.is_set()):
+            if (eUI_Event.is_set()):
                 #   STEP 16: Check if input is "exit"
-                if (thread_sUI == "exit"):
-                    #   STEP 17: Set exit event
-                    thread_eEX.set()
+                if (qUI_Queue.get()[0] == "exit"):
+                    #   STEP 17: Set global exit event
+                    eGlobal_Exit.set()
 
-                    #   STEP 18: Wait for training thread to join
+                    #   STEP 18: Wait for threads
+                    tUI_Thread.join()
                     tTR_Thread.join()
 
                     #   STEP 19: Exit loop
                     break
                 
-                #   STEP 20: Output wasn't exit
-                else:
-                    #   STEP 21: Reset - Global UI variables
-                    thread_eUI.clear()
-                    thread_sUI = ""
+            #   STEP 20: Check if training completed
+            if (eTR_Event.is_set()):
+                #   STEP 21: Set global exit event
+                eGlobal_Exit.set()
 
-                    #   STEP 22: Reset - UI thread
-                    tUI_Thread  = tr.Thread(target=self.__threadUI__)
-                    tUI_Thread.daemon = True
-
-                    #   STEP 23: Restart - UI thread
-                    tUI_Thread.start()
-
-            #   STEP 24: Check if training completed
-            if (thread_eTR_Exit.is_set()):
-                #   STEP 25: Transfer thread results
-                self.__train_transferResults__()
-
-                #   STEP 26: Exit loop
+                #   STEP 22: Exit loop
                 break
 
+        #   STEP 23: Get results from training
+        dTmp_SrgResults = qTR_Queue.get()[0]
+
+        #   STEP 24: Update - Class variables
+        self.__lSRG_Accuracy    = dTmp_SrgResults["accuracy"]
+        self.__lSRG_FItness     = dTmp_SrgResults["fitness"]
+        self.__lSRG             = dTmp_SrgResults["results"]
+
+        #   STEP 25: Return
         return
 
-    def __train_srgHandler__(self, kwargs: dict) -> None:
+    def __train_srgHandler__(self, _eExit, _eGlobal, _eTR, _qTR) -> None:
         """
             Description:
 
@@ -737,195 +741,120 @@ class Golem:
 
             Arguments:
 
-                + data  = ( vars ) A Data instance containing the dataset for
-                    the training process
-                    ~ Required
+                + _eExit    = ( mp.Event() ) Global exit event
 
-                + region    = ( float ) The region within which random 
-                    number generation can cocured
-                    ~ Required
+                + _eGlobal  = ( mp.Event() ) Global thread result event
 
-                + min   = ( int ) The minimum amount of required trained
-                    surrogates
-                    ~ Required
+                + _eTR      = ( mp.Event() ) Surrogate training result event
 
-                + max   = ( int ) The maximum amount of required trained
-                    surrogates
-                    ~ Required
-
-                + acc   = ( float ) The minimum accuracy requirement for which
-                    the function will terminate early
-                    ~ Required
+                + _qTR      = ( mp.Queue() ) Surrogate training result queue
         """
 
-        #   STEP -1: Global variables
-        global  thread_lTR_Results
-        global  thread_eTR_Exit
-
-        global  thread_eEX
-
-        global  thread_eGlobal
-
         #   STEP 0: Local variables
-        vData                   = None
+        dArgs                   = _qTR.get()[0]
+
+        vData                   = dArgs["data"]
+
+        lAccuracy               = []
+        lFitness                = []
+        lResults                = []
 
         fBest_Fitness           = np.inf
         iBest_Index             = 0
 
-        #   STEP 1: Setup - Local variables
-
-        #   region STEP 2->11: Error checking
-
-        #   STEP 2: Check if data arg passed
-        if ("data" not in kwargs):
-            #   STEP 3: Error handling
-            raise Exception("An error occured in Golem.__train_srgHandler__() -> Step 2: No data arg passed")
-        
-        #   STEP 4: Check if min arg passed
-        if ("min" not in kwargs):
-            #   STEP 5: Error handling
-            raise Exception("An error occured in Golem.__train_srgHandler__() -> Step 4: No min arg passed")
-        
-        #   STEP 6: Check if max arg passed
-        if ("max" not in kwargs):
-            #   STPE 7: Error handling
-            raise Exception("An error occured in Golem.__train_srgHandler__() -> Step 6: No max arg passed")
-
-        #   STEP 8: Check if acc arg passed
-        if ("acc" not in kwargs):
-            #   STPE 9: Error handling
-            raise Exception("An error occured in Golem.__train_srgHandler__() -> Step 8: No acc arg passed")
-
-        #   STEP 10: Checkif start arg passed
-        if ("region" not in kwargs):
-            #   STEP 11: Error handling
-            raise Exception("An error occured in Golem.__train_srgHandler__() -> Step 10: No start region passed")
-
-        #
-        #   endregion
-        
-        #   STEP 12: Update - Local variables
-        vData   = kwargs["data"]
-
-        #   STEP 13: Iterate through max surrogates
-        for i in range(0, kwargs["max"]):
-            #   STEP 14: Get new surrogate
-            dSRG    = self.__getSurrogate__(region=kwargs["region"])
+        #   STEP 1: Iterate through max surrogates
+        for i in range(0, dArgs["max"]):
+            #   STEP 2: Get new surrogate
+            dSRG    = self.__getSurrogate__(region=dArgs["region"])
 
             vSRG    = dSRG["surrogate"]
 
-            #   STEP 15: Do necessary pre-training
+            #   STEP 3 Do necessary pre-training
             vSRG.bShowOutput = False
 
-            #   STEP 16: Train surrogate
+            #   STEP 4: Train surrogate
             vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=False)
 
-            #   STEP 17: Get accuracy and fitness
+            #   STEP 5: Get accuracy and fitness
             fTmp_Fitness    = float ( vSRG.getAFitness(data=vData) / vData.getLen() )
             fTmp_Accuracy   = vSRG.getAccuracy(data=vData, size=vData.getLen(), full_set=True)
-            
-            #   STEP 18: Create result dictionary
-            dTmp_Results    = {
-                "surrogate":        vSRG,
-                "params":           dSRG["params"],
-                "enum":             dSRG["enum"],
 
-                "fitness":          fTmp_Fitness * (1.1 - fTmp_Accuracy["percent accuracy"]) * 100.0,
+            fTmp_Fitness    = fTmp_Fitness * (1.1 - fTmp_Accuracy["percent accuracy"]) * 100.0
 
-                "accuracy":         fTmp_Accuracy["percent accuracy"]
-            }
+            #   STEP 6: Append to output lists
+            lAccuracy.append( fTmp_Accuracy["percent accuracy"] )
+            lFitness.append( fTmp_Fitness )
+            lResults.append( vSRG )
 
-            #   STEP 19: Add to global
-            thread_lTR_Results[i] = dTmp_Results
-
-            #   STEP 20: Check if fittest surrogate so far
-            if ((dTmp_Results["fitness"] < fBest_Fitness) and (fTmp_Accuracy["percent accuracy"] == 1.0)):
-                #   STEP 21: Update - Local variables
+            #   STEP 7: Check if fittest surrogate so far
+            if ((fTmp_Fitness < fBest_Fitness) and (fTmp_Accuracy["percent accuracy"] == 1.0)):
+                #   STEP 8: Update - Local variables
                 fBest_Fitness   = fTmp_Fitness
                 iBest_Index     = i
 
-                #   STEP 22: User output - minimal
+                #   STEP 9: User output - minimal
                 print("!", end="")
 
+            #   STEP 10: Check if 100p accuracy
             elif (fTmp_Accuracy["percent accuracy"] == 1.0):
-                #   STEP 23: Minimal output
+                #   STEP 11: Minimal output
                 print(":", end="")
 
-            elif (dTmp_Results["fitness"] < fBest_Fitness):
-                fBest_Fitness   = dTmp_Results["fitness"]
+            #   STEP 12: Not 100p but best fitness
+            elif (fTmp_Fitness < fBest_Fitness):
+                #   STEP 13: Update - Local variables
+                fBest_Fitness   = fTmp_Fitness
                 iBest_Index     = i
 
+                #   STEP 14: User output - minimal
                 print("#", end="")
 
+            #   STEP 15: Bad surrogate
             else:
+                #   STEP 16: User outptu - minimal
                 print(".", end="")
 
-            #   STEP 24: Check if fitness below required and min surrogates generated 
-            if ((fBest_Fitness < kwargs["acc"]) and (i >= kwargs["min"])):
-                #   STEP 25: Exit loop early
+            #   STEP 17: Check if fitness below required and min surrogates generated 
+            if ((fBest_Fitness < dArgs["acc"]) and (i >= dArgs["min"])):
+                #   STEP 18: Exit loop early
                 break
 
-            #   STEP 26: Check if exit even
-            if (thread_eEX.is_set()):
-                #   STEP 27: Exit loop early
+            #   STEP 19: Check if exit even
+            if (_eExit.is_set()):
+                #   STEP 20: Exit loop early
                 break
 
 
         print("")
         
-        #   STEP 28: Swap best surrogate to index = 0
-        dSwap_0                         = thread_lTR_Results[0]
-        thread_lTR_Results[0]           = thread_lTR_Results[iBest_Index]
-        thread_lTR_Results[iBest_Index] = dSwap_0
-
-        #   STEP 29: Set exit events
-        thread_eTR_Exit.set()
-        thread_eGlobal.set()
-
-        #   STEP 30: Return
-        return
-    
-    def __train_transferResults__(self, **kwargs) -> None:
-        """
-            Description:
-
-                Transfers results from the surrogate handler to this class'
-                private variables
-        """
-
-        #   STEP -1: Global variables
-        global  thread_lTR_Results
-        global  thread_lTR_Lock
-
-        #   STEP 0: Local variables
-        thread_lTR_Lock.acquire()
+        #   STEP 21: Swap best surrogate to index = 0
+        vTmp_Swap               = lAccuracy[0]
+        lAccuracy[0]            = lAccuracy[iBest_Index]
+        lAccuracy[iBest_Index]  = vTmp_Swap
         
-        #   STEP 1: Setup - Local variables
-        
-        #   STEP 2: Clear current vars (precautionary)
-        self.__lSRG             = []
-        self.__lSRG_Parameters  = []
-        self.__lSRG_FItness     = []
-        self.__lSRG_Types       = []
-        self.__lSRG_Accuracy    = []
-        
-        #   STEP 3: Iterate through globally stored results
-        for i in range(0, len(thread_lTR_Results)):
-            #   STEP 4: Be safe OwO
-            try:
-                #   STEP 5: Save data to class variables
-                self.__lSRG.append(thread_lTR_Results[i]["surrogate"])
-                self.__lSRG_Parameters.append(thread_lTR_Results[i]["params"])
-                self.__lSRG_FItness.append(thread_lTR_Results[i]["fitness"])
-                self.__lSRG_Types.append(thread_lTR_Results[i]["enum"])
-                self.__lSRG_Accuracy.append(thread_lTR_Results[i]["accuracy"])
+        vTmp_Swap               = lFitness[0]
+        lFitness[0]             = lFitness[iBest_Index]
+        lFitness[iBest_Index]   = vTmp_Swap
 
-            except:
-                #   STEP 6: End of list reached, exit loop
-                break
+        vTmp_Swap               = lResults[0]
+        lResults[0]             = lResults[iBest_Index]
+        lResults[iBest_Index]   = vTmp_Swap
 
-        #   STEP 7: Return
-        thread_lTR_Lock.release()
+        #   STEP 22: Populate output dictionary
+        dOut    = {
+            "accuracy": lAccuracy,
+            "fitness":  lFitness,
+            "results":  lResults
+        }
+
+        #   STEP 23: Put output in queue
+        _qTR.put([dOut])
+
+        #   STEP 24: Set events
+        _eTR.set()
+        _eGlobal.set()
+
+        #   STEP 25: Return
         return
 
     #
@@ -1032,35 +961,112 @@ class Golem:
 
     #   region Back-End: Threading
     
-    def __threadUI__(self) -> None:
+    def __threadUI__(self, _eGlobal_Exit, _eGlobal, _eUI, _qReturn) -> None:
         """
-            ToDo:
-            
-                + Implement
-        """
-        
-        #   STEP -1: Global variables
-        global  thread_sUI
-        global  thread_eUI
+            Description:
 
-        global  thread_eGlobal
+                Run as Thread(). Gets input without blocking and returns via
+                the passed mp.Queue()
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Parameters:
+
+                + _eGlobal_Exit  = ( mp.Event() ) Event signalling global exit
+                    for threads and processes
+
+                + _eGlobal  = ( mp.Event() ) Event signalling global action
+
+                + eUI       = ( mp.Event() ) Event signalling input pushed to
+                    the output mp.Queue
+
+                + _qReturn  = ( mp.Queue() ) The queue onto which user input
+                    should be returned
+        """
+
+        #   STEP 0: Local variables
+        tBlocking           = None
+
+        qBlocking           = mp.Queue()
+        eBlocking           = mp.Event()
+
+        #   STEP 1: Setup - Local variables
+        eBlocking.clear()
+
+        #   STEP 2: Setup - Threaded blocking ui
+        tBlocking           = tr.Thread(target=self.__threadUI_Blocking__, args=(eBlocking, qBlocking, ) )
+        tBlocking.daemon    = True
+        tBlocking.start()
+
+        #   STEP 3: Loop to infinity and beyond
+        while (True):
+            #   STEP 4: Check for global exit event
+            if (_eGlobal_Exit.is_set()):
+                #   STEP 5: Exit
+                break
+
+            #   STEP 6: Check for input from blocking thread
+            if (eBlocking.is_set()):
+                #   STEP 7:Clear event and pass input along
+                eBlocking.clear()
+
+                _qReturn.put( qBlocking.get() )
+
+                #   STEP 8: Set UI event and global event
+                _eUI.set()
+                _eGlobal.set()
+
+            #   STEP 9: Sleep
+            t.sleep(0.35)
+
+        #   STEP 20: Return
+        return
+
+    def __threadUI_Blocking__(self, _eUI, _qReturn) -> None:
+        """
+            Description:
+
+                Run as Thread(). Gets blocking input and returns via the passed
+                mp.Queue()
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Parameters:
+
+                + _eUI       = ( mp.Event() ) Event signalling input pushed to
+                    the output mp.Queue
+
+                + _qReturn  = ( mp.Queue() ) The queue onto which user input
+                    should be returned
+        """
 
         #   STEP 0: Local variables
 
-        #   STEP 1: Setup - Local variables
-        
-        #   STEP 2: Attempt to acquire lock
-        if (thread_eUI.is_set() == True):
-            thread_eUI.wait()
+        #   STEP 1: Setup - Local varibales
 
-        #   STEP 3: Wait for user input
-        thread_sUI = input("")
+        #   STEP 2: Loop to infinity
+        while (True):
+            #   STEP 3: Check - _eUI status
+            if (_eUI.is_set()):
+                #   STEP 4: Wait for it to finish
+                _eUI.wait()
 
-        #   STEP 5: Check that parent hasn't reset
-        if (thread_eUI != None):
-            #   STEP 6: Set events
-            thread_eUI.set()
-            thread_eGlobal.set()
+            #   STEP 5: Get input
+            sTmp_Input  = input()
+
+            #   STEP 6: Push input to queue
+            _qReturn.put([sTmp_Input])
+
+            #   STEP 7: Set event
+            _eUI.set()
 
         #   STEP 8: Return
         return

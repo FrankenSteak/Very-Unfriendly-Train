@@ -928,6 +928,9 @@ class Annie:
 		if ("advanced_training" in kwargs):
 			bOptimization = kwargs["advanced_training"]
 
+			if ((bOptimization) and (rn.uniform(0.0, 1.0) < 0.1)):
+				bOptimization = False
+
 		if ("advanced_algorithm" in kwargs):
 			iAlgorithm = kwargs["advanced_algorithm"]
 
