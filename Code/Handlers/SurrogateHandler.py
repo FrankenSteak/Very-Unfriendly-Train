@@ -762,6 +762,8 @@ class Golem:
         fBest_Fitness           = np.inf
         iBest_Index             = 0
 
+        print("{" + Helga.time() + "} - Starting surrogate training\t\t->")
+
         #   STEP 1: Iterate through max surrogates
         for i in range(0, dArgs["max"]):
             #   STEP 2: Get new surrogate
