@@ -1929,8 +1929,13 @@ class Annie:
 
 		#	STEP 2: Check for small dataset
 		if (_dData.getLen() < 2 * iBatch_Size):
-			#	STEP 3: Update - Batch size
-			iBatch_Size = 5 * _dData.getLen()
+			iTmp_BatchSize	= 0
+
+			while (iTmp_BatchSize < 2 * iBatch_Size):
+				iTmp_BatchSize += _dData.getLen()
+
+			iBatch_Size = iTmp_BatchSize
+				
 
 		#	STEP 2: User Output
 		if (self.bShowOutput):

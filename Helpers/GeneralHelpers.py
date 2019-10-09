@@ -1,7 +1,7 @@
 #region Imports
 
-import datetime as dt
-import math as mt
+import  datetime        as dt
+import  math            as mt
 import  numpy           as np
 
 #endregion
@@ -23,6 +23,130 @@ class Helga:
 
     #region Front-End
 
+    #   region Front-End: List stuff
+
+    @classmethod
+    def getCentroid(self, _lCandidates: list) -> list:
+        """
+            Description:
+
+                Gets the centroid of the list of candidates passed.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Parameters:
+
+                :param _lCandidates:    = ( list ) List of candidates
+
+            |\n
+
+            Returns:
+
+                + lOut  = ( list ) 
+        """
+
+        #   STEP 0: Local variables
+        lOut                    = None
+
+        #   STEP 1: Setup - Local variables
+        
+        #   STEP 2: Check that candidates is a list
+        if (type(_lCandidates) != list):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Helga.getCentroid() -> Step 2: Passed parameter must be a list")
+
+        #   STEP 4: Setup - Local variables
+        lOut    = Helga.getShape(_lCandidates[0])
+
+        #   STEP 5: Loop through candidates
+        for i in range(0, len( _lCandidates )):
+            #   STEP 6: Loop through candidate parameters
+            for j in range(0, len( _lCandidates[i] )):
+                #   STEP 7: Check if param is list
+                if ( type( _lCandidates[i][j] ) == list):
+                    #   STEP 8: Loop through param list
+                    for k in range(0, len( _lCandidates[i][j] )):
+                        #   STEP 9: Add to output
+                        lOut[j][k] += _lCandidates[i][j][k]
+
+                #   STEP 10: Param not list
+                else:
+                    #   STEP 11: Add to output
+                    lOut[j] += _lCandidates[i][j]
+
+        #   STEP 12: Loop through output params
+        for i in range(0, len( lOut )):
+            #   STEP 13: Check if param is list
+            if ( type( lOut[i] ) == list):
+                #   STEP 14: Loop through param list
+                for j in range(0, len( lOut[i] )):
+                    #   STEP 15: Average output val
+                    lOut[i][j] = lOut[i][j] / float( len( _lCandidates ))
+
+            #   STEP 16: Param not list
+            else:
+                #   STEP 17: Average output val
+                lOut[i] = lOut[i] / float ( len( _lCandidates )) 
+
+        #   STEP 18: Return
+        return lOut
+
+    @classmethod
+    def shiftCandidates(self, _lCentroid: list, _lCandidates: list, _fScalar: float, _iRegion1: int, _iRegion2: int) -> list:
+        """
+            Description:
+
+                Shifts the candidate list towards or from the passed centroid
+                based on the provided arguments.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Parameters:
+
+                :param _lCentroid:  = ( list ) The candidate about which the
+                    candidate list should be shifted
+
+                :param _lCandidates:    = ( list ) The list of candidates to be
+                    shifted about the centroied
+
+                :param _fScalar:    = ( float ) The scalar for the shifting
+                    operations
+
+            |\n
+
+            Example:
+
+                + lCandidate_New    = _lCentroid + _fScalar * ( _iRegion1 * _lCentroid + _iRegion2 * _lCandidates[i] )
+        """
+
+        #   STEP 0: Local variables
+        #   STEP 1: Setup - Local variables
+        #   STEP 2: ??
+        #   STEP ??: Return
+        return []
+
+    @classmethod
+    def orderCandidates(self, _lBy: list, _lDependent: list) -> dict:
+        """
+        """
+
+        #   STEP 0: Local variables
+        #   STEP 1: Setup - Local variables
+        #   STEP 2: ??
+        #   STEP ??: Return
+        return {}
+
+    #
+    #   endregion
+
     #   region Front-End: Gets
 
     @classmethod
@@ -38,7 +162,7 @@ class Helga:
         #   STEP 2: Iterate through list
         for i in range(0, len(_lData)):
             #   STEP 3: Check if single data value
-            if (type(_lData[i]) == float):
+            if ((type(_lData[i]) == float) or (type(_lData[i]) == int)):
                 lOut.append(0.0)
 
             #   STEP 4: Append list of zeros
@@ -64,24 +188,6 @@ class Helga:
             lOut.append(list(_lData[i]))
 
         #   STEP 4: Return
-        return lOut
-
-    @classmethod
-    def round(slef, _lData, iRound) -> list:
-        """
-        """
-
-        #   STEP 0: Local variables
-        lOut                    = []
-
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Iterate through input data
-        for i in range(0, len(_lData)):
-            #   STEP 3: Round value
-            lOut.append( round( _lData[i], iRound ) )
-
-        #   STEP ??: Return
         return lOut
 
     #
@@ -118,6 +224,24 @@ class Helga:
     #   region Front-End: Other
 
     @classmethod
+    def round(slef, _lData, iRound) -> list:
+        """
+        """
+
+        #   STEP 0: Local variables
+        lOut                    = []
+
+        #   STEP 1: Setup - Local variables
+
+        #   STEP 2: Iterate through input data
+        for i in range(0, len(_lData)):
+            #   STEP 3: Round value
+            lOut.append( round( _lData[i], iRound ) )
+
+        #   STEP ??: Return
+        return lOut
+
+    @classmethod
     def nop(self) -> None:
         return
 
@@ -130,30 +254,17 @@ class Helga:
 #
 #endregion
 
-
 #region Archive
 
-    """
-    
-    @classmethod
-    def extractData(self, _fFile) -> str:
-        sTmp = _fFile.readline()
-        sTmp = sTmp.split(":")
-        sTmp = sTmp[1]
-        sTmp = sTmp.split("\n")
-        sTmp = sTmp[0]
-        
-        return sTmp
+if (__name__ == "__main__"):
 
-    @classmethod
-    def extractBool(self, _fFile) -> bool:
-        sTmp = self.extractData(_fFile)
+    ltmp = [[1,1],
+            [2,2],
+            [3,1],
+            [4,0]]
 
-        if (sTmp == "True"):
-            return True
-        else:
-            return False
-
-    """
+    lTmp = Helga.getCentroid(ltmp)
+    Helga.nop()
+    print(lTmp)
 
 #endregion

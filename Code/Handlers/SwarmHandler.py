@@ -528,9 +528,9 @@ class Sarah:
         #                       STEP 1.4: Init swarm
         swarm                   = SwarmChan(dPsoParams["candidates"])
 
-        swarm.initPsoPositions(lCandidates)
-        swarm.initPsoFitness(lFitness)
-        swarm.initPsoParams(dPsoParams["phi1"], dPsoParams["phi2"], dPsoParams["eta"])
+        swarm.initPsoPositions( lCandidates )
+        swarm.initPsoFitness( lFitness )
+        swarm.initPsoParams( dPsoParams["phi1"], dPsoParams["phi2"], dPsoParams["eta"] )
 
         #   endregion
 

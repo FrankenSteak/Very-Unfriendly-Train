@@ -258,6 +258,11 @@ class Golem:
                 #   STEP 13: Remap
                 self.vBest = kwargs["data"].remap( candidate=cp.deepcopy( self.vBest ) )
 
+                #   STEP 14: Loop through best candidates
+                for i in range(0, len( self.lMap_Results )):
+                    #   STEP 15: Outsource - Remapping
+                    self.lMap_Results[i] = kwargs["data"].remap( candidate=cp.deepcopy( self.lMap_Results[i] ))
+
         #   STEP 14: Populate output dict
         dOut = {
             "result":   self.vBest,
@@ -657,7 +662,7 @@ class Golem:
 
         tUI_Thread          = tr.Thread(target=self.__threadUI__, args=(eGlobal_Exit, eGlobal, eUI_Event, qUI_Queue, ))
         tUI_Thread.daemon   = True
-        tUI_Thread.start()
+        #tUI_Thread.start()
         
         #   STEP 9: Setup - Training thread
         eTR_Event           = mp.Event()
@@ -680,10 +685,6 @@ class Golem:
         tTR_Thread.daemon   = True
         tTR_Thread.start()
 
-        #   STEP 10: User output
-        if (self.bShowOutput):
-            print("\t{" + Helga.time() + "} - Starting surrogate training\t\t-> ", end="")
-
         #   STEP 11: Loop until exit
         while (True):
             #   STEP 12: Wait for global event
@@ -700,7 +701,7 @@ class Golem:
                     eGlobal_Exit.set()
 
                     #   STEP 18: Wait for threads
-                    tUI_Thread.join()
+                    #tUI_Thread.join()
                     tTR_Thread.join()
 
                     #   STEP 19: Exit loop
@@ -710,6 +711,7 @@ class Golem:
             if (eTR_Event.is_set()):
                 #   STEP 21: Set global exit event
                 eGlobal_Exit.set()
+                #tUI_Thread.join()
 
                 #   STEP 22: Exit loop
                 break
@@ -762,7 +764,7 @@ class Golem:
         fBest_Fitness           = np.inf
         iBest_Index             = 0
 
-        print("{" + Helga.time() + "} - Starting surrogate training\t\t->")
+        print("\t{" + Helga.time() + "} - Starting surrogate training\t\t-> ", end="")
 
         #   STEP 1: Iterate through max surrogates
         for i in range(0, dArgs["max"]):
@@ -772,10 +774,10 @@ class Golem:
             vSRG    = dSRG["surrogate"]
 
             #   STEP 3 Do necessary pre-training
-            vSRG.bShowOutput = False
+            vSRG.bShowOutput = True
 
             #   STEP 4: Train surrogate
-            vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=False)
+            vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=True)
 
             #   STEP 5: Get accuracy and fitness
             fTmp_Fitness    = float ( vSRG.getAFitness(data=vData) / vData.getLen() )
@@ -825,7 +827,6 @@ class Golem:
             if (_eExit.is_set()):
                 #   STEP 20: Exit loop early
                 break
-
 
         print("")
         
@@ -1023,7 +1024,7 @@ class Golem:
                 _eGlobal.set()
 
             #   STEP 9: Sleep
-            t.sleep(0.35)
+            t.sleep(0.1)
 
         #   STEP 20: Return
         return

@@ -244,9 +244,8 @@ class SpongeBob:
 
                 + initial   = ( list ) The initial candidate
 
-                -Optimizer = TRO
-                    + region    = ( float ) The algorithm's current region
-                        ~ Required
+                + region    = ( float ) The algorithm's current region
+                    ~ Required if <optimizer="tro">
 
             |\n
 
@@ -808,7 +807,6 @@ class SpongeBob:
             "fitness":      vGarry.lTroBest[1],
             "iterations":   i
         }
-
 
         #   STEP ??: Return
         return dOut

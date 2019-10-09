@@ -22,7 +22,7 @@
 
             "min":  2,
             "max":  9,
-            "accuracy requirement": 0.5
+            "accuracy requirement": 0.75
         },
         "bools":
         {

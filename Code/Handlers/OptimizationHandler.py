@@ -401,6 +401,7 @@ class Hermione:
             t.sleep(0.35)
 
         #   STEP 20: Return
+        
         return
 
     def __threadUI_Blocking__(self, _eUI, _qReturn) -> None:
@@ -555,7 +556,7 @@ class Hermione:
 
         tUI_Thread              = tr.Thread(target=self.__threadUI__, args=(eGlobal_Exit, eGlobal, eUI_Event, qUI_Queue, ))
         tUI_Thread.daemon       = True
-        tUI_Thread.start()
+        #tUI_Thread.start()
 
         lUO_Lock                = mp.RLock()
 
@@ -661,6 +662,7 @@ class Hermione:
                 if (qUI_Queue.get()[0] == "exit"):
                     #   STEP 35: Set thread joining event
                     eGlobal_Exit.set()
+                    #tUI_Thread.join()
 
                     #   STEP 36: Loop through mapping threads
                     for i in range(0, len(lThread_Data)):
@@ -760,7 +762,8 @@ class Hermione:
                     print("\t- Assigning SpongeBob to mapping")
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 6: Release lock
                     _lUO.release()
@@ -782,7 +785,8 @@ class Hermione:
                     print("\t- Assigning Sarah to mapping")
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 13: Release lock
                     _lUO.release()
@@ -823,7 +827,8 @@ class Hermione:
                     print("\t- Assigning Sarah to training")
                     print("\t- Optimizer: " + str(eTmp_Optimizer))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 24: Release lock
                     _lUO.release()
@@ -848,7 +853,8 @@ class Hermione:
                     print("\t- Assigning SpongeBob to training")
                     print("\t- Optimizer: " + str(eTmp_Optimizer))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 32: Release lock
                     _lUO.release()
@@ -983,7 +989,7 @@ class Hermione:
 
         tUI_Thread              = tr.Thread(target=self.__threadUI__, args=(eGlobal_Exit, eGlobal, eUI_Event, qUI_Queue, ))
         tUI_Thread.daemon       = True
-        tUI_Thread.start()
+        #tUI_Thread.start()
 
         lUO_Lock                = mp.RLock()
 
@@ -1101,6 +1107,7 @@ class Hermione:
                 if (qUI_Queue.get()[0] == "exit"):
                     #   STEP 40: Set thread joining event
                     eGlobal_Exit.set()
+                    #tUI_Thread.join()
 
                     #   STEP 41: Loop through training threads
                     for i in range(0, len( lThread_Data )):
@@ -1197,7 +1204,8 @@ class Hermione:
                     print("\t- Assigning SpongeBob to training")
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 6: Release lock
                     _lUO.release()
@@ -1219,7 +1227,8 @@ class Hermione:
                     print("\t- Assigning Sarah to training")
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 13: Release lock
                     _lUO.release()
@@ -1260,7 +1269,8 @@ class Hermione:
                     print("\t- Assigning Sarah to training")
                     print("\t- Optimizer: " + str(eTmp_Optimzier))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 24: Release lock
                     _lUO.release()
@@ -1285,7 +1295,8 @@ class Hermione:
                     print("\t- Assigning SpongeBob to training")
                     print("\t- Optimizer: " + str(eTmp_Optimizer))
                     print("\t- Thread ID: " + str(iThread_ID))
-                    print("\t- Application Thread ID: " + str(iThread_AppID) + "\n")
+                    print("\t- Application Thread ID: " + str(iThread_AppID))
+                    print("\t- Time: " + Helga.time() + "\n")
 
                     #   STEP 32: Release lock
                     _lUO.release()
@@ -1309,7 +1320,8 @@ class Hermione:
             _lUO.acquire()
 
             #   STEP 38: Print output
-            print("\t\t\t\t\t- Thread: " + str(iThread_AppID) +  " - <" + str(dResults["accuracy"]) + "  :  " + str(round(fTmpFitness, 2)) + ">\n")
+            print("\t\t\t\t\t- Thread: " + str(iThread_AppID) +  " - <" + str(dResults["accuracy"]) + "  :  " + str(round(fTmpFitness, 2)) + ">")
+            print("\t\t\t\t\t- Time: " + Helga.time() + "\n")
 
             #   STEP 39: release lock
             _lUO.release()

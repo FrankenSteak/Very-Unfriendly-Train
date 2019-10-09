@@ -476,8 +476,8 @@ class Natalie:
             #   STEP 7: Set frequency parameters accordingly
             self.__dAnt_Frequency   = {
                 "center":   round(kwargs["ant"]["frequency"]["start"] + ( kwargs["ant"]["frequency"]["end"] - kwargs["ant"]["frequency"]["start"] ) / 2.0, 2),
-                "start":    round(kwargs["ant"]["frequency"]["start"] + ( self.__cf.data["parameters"]["frequency"]["lower frequency offset"] * 0.75 ), 2),
-                "end":      round(kwargs["ant"]["frequency"]["end"] - ( self.__cf.data["parameters"]["frequency"]["upper frequency offset"] * 0.75 ), 2),
+                "start":    round(kwargs["ant"]["frequency"]["start"] + ( self.__cf.data["parameters"]["frequency"]["lower frequency offset"] ), 2),
+                "end":      round(kwargs["ant"]["frequency"]["end"] - ( self.__cf.data["parameters"]["frequency"]["upper frequency offset"] ), 2),
                 "samples":  self.__cf.data["parameters"]["frequency"]["samples"]
             }
 
@@ -645,8 +645,6 @@ class Natalie:
         #   STEP 0: Local variables
         lOut                    = []
 
-        fArea_Original          = None
-
         #   STEP 1: Setup - Local variables
         
         #   region STEP 2->5: Error checking
@@ -665,7 +663,10 @@ class Natalie:
         #   endregion
 
         #   STEP 7: Update - Local variables
-        fArea_Original = self.__dAnt_Center["substrate"]["l"] * self.__dAnt_Center["substrate"]["w"]
+        fOriginal_Area  = self.__dAnt_Center["substrate"]["l"] * self.__dAnt_Center["substrate"]["w"]
+
+        if (self.__dAnt_CenterFit != None):
+            fOriginal_Freq  = self.__dAnt_CenterFit["freq"]
 
         #   STEP 6: Iterate through antenna
         for i in range(0, len(kwargs["ant"])):
@@ -686,36 +687,42 @@ class Natalie:
             fTmp_Right  = ( dFit["upper"]["total"] ) * 0.3
 
             #   STEP 12: Get total area fitness
-            fTmp_Area_Tot   = fTmp_Area / fArea_Original
+            fTmp_Area   = fTmp_Area / fOriginal_Area
 
             #   STEP 13: Get total frequency fitness
             fTmp_Freq_Tot   = fTmp_Left + fTmp_Mid + fTmp_Right
 
             #   STEP 14: Get overall fitness
-            fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area_Tot * 8.0  - 6.0 ) 
+            fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
             fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.8 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
 
             #   STEP 15: Populate output dictionary
             dTmp = {
-                "items":    1,
+                "items":    2,
 
                 "0":        "desired",
-                #"0":        "final",
-                "1":        "area",
-                #"2":        "lower",
-                #"3":        "upper",
-                #"4":        "freq",
+                "1":        "final",
+                "2":        "area",
+                #"3":        "freq",
+                #"4":        "lower",
+                #"5":        "upper",
 
-                "lower":    dFit["lower"]["total"],
-                "desired":  dFit["desired"]["total"],
-                "upper":    dFit["upper"]["total"],
+                "lower":            dFit["lower"]["total"],
+                "desired":          dFit["desired"]["total"],
+                "upper":            dFit["upper"]["total"],
 
-                "area":     fTmp_Area_Tot,
-                "freq":     fTmp_Freq_Tot,
-                "final":    fTmp_Fitness,
+                "area":             fTmp_Area,
+                "freq":             fTmp_Freq_Tot,
+                "final":            fTmp_Fitness,
 
-                "dir":      kwargs["fitness"][i]["dir"]
+                "dir":              kwargs["fitness"][i]["dir"]
             }
+
+            if (self.__dAnt_CenterFit != None):
+                dTmp["freq percent"] = fTmp_Freq_Tot / fOriginal_Freq
+
+            else:
+                dTmp["freq percent"] = 1.0
 
             #   STEP 16: Append to output
             lOut.append(dTmp)
@@ -929,8 +936,6 @@ class Natalie:
         fOut                    = None
         fOffset                 = None
 
-        bRegion                 = None
-
         #   STEP 1: Setup - Local variables
         
         #   region STEP 2->7: Error checking
@@ -958,55 +963,10 @@ class Natalie:
             #   STEP 9: Return
             return kwargs["center"]
 
-        #   region STEP 10->21: Get random region
-        
-        #   STEP 10: Check if even regions
-        if (kwargs["scalars"]["region"] == 0):
-            #   STEP 11: Generate random num - If greater than 0.5 go positive
-            if (rn.uniform(0.0, 1.0) > 0.5):
-                #   STEP 12: Set bRegion = True for positive
-                bRegion = True
-
-            else:
-                #   STEP 13: Set bRegion = False for negative
-                bRegion = False
-            
-        #   STEP 14: Check if positive bias
-        elif (kwargs["scalars"]["region"] > 0):
-            #   STEP 15: Gen random num - if less than region go positive
-            if (rn.uniform(0.0, 1.0) <= kwargs["scalars"]["region"]):
-                #   STEp 16: Set bRegion = True for positive
-                bRegion = True
-
-            else:
-                #   STEP 17: Set bRegion = False for negative
-                bRegion = False
-
-        #   STEP 18: Must be negative bias
-        else:
-            #   STEP 19: Gen random num if less than -1*region go negative
-            if (rn.uniform(0.0, 1.0) <= -1.0 * kwargs["scalars"]["region"]):
-                #   STEP 20: Set bRegion = False for negative
-                bRegion = False
-
-            else:
-                #   STEP 21: Set bRegion = True for pos
-                bRegion = True
-
-        #
-        #   endregion
-
         #   STEP 22: Get offset
-        fOffset = kwargs["scalars"]["range"] * kwargs["region"]
+        fOffset = kwargs["center"] + kwargs["scalars"]["range"] * ( kwargs["scalars"]["region"] - 0.5 ) * 2.0
 
-        #   STEP 23: Caluclate output
-        if (bRegion):
-            #   STEP 24: Add offset to center
-            fOut = rn.gauss(kwargs["center"], fOffset)
-
-        else:
-            #   STEP 25: Subtract offset from center
-            fOut = rn.gauss(kwargs["center"], -1.0 * fOffset)
+        fOut = rn.gauss(fOffset, kwargs["scalars"]["range"] * kwargs["region"])
 
         #   STEP 26: Check if lw arg passed
         if ("lw" in kwargs):
@@ -2385,7 +2345,7 @@ class Natalie:
                 #   STEP 71: Check - Retension status
                 if (bRetension):
                     #   STEP 72: Extend retension lists
-                    lRetension_Geo.extend([dTmp_SrgResults])
+                    lRetension_Geo.extend(dTmp_SrgResults)
                     lRetension_Fit.extend(lTmp_SrgFitness)
 
                 #
@@ -2474,10 +2434,10 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "{" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
-                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "{" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 81: Check if new best isn't old best
                 elif (iTmp_Index != self.__iTRO_Candidates):
@@ -2496,13 +2456,13 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
-                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
-                        dHold = lFitness[len(lTmp_Candidates) - 1]
-                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                        dHold = lFitness[len(lFitness) - 1]
+                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 86: Bad region
                 else:
@@ -2523,13 +2483,13 @@ class Natalie:
                             print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region))
 
                             dHold = lFitness[self.__iTRO_Candidates]
-                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
                             
                             dHold = lFitness[iTmp_Index]
-                            print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                            print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                             
                             dHold = lFitness[len(lTmp_Candidates) - 1]
-                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                     #   STEP 92: Region too small
                     else:
@@ -2550,10 +2510,10 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
-                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 98: Not new best
                 else:
@@ -2580,11 +2540,65 @@ class Natalie:
 
             #   STEP 117: Check - Retension status
             if (bRetension):
-                #   STEP 118: Loop for fall off
-                for _ in range(0, self.__iTRO_Retension_FallOff):
-                    #   STEP 120: Pop candidates from retension list
-                    lRetension_Geo.pop(0)
-                    lRetension_Fit.pop(0)
+                #   STEP ??: Check if surrogate
+                if (bSurrogate):
+                    lTmp_Distance   = None
+
+                    #   STEP ??: Check if index in range
+                    if (iTmp_Index < vData.getLen()):
+                        #   STEP ??: Get distance of candidates from curr best
+                        vData.reset()
+                        lTmp_Distance = vData.getInputDistance(iTmp_Index)
+
+                    #   STEP ??: New best not in data
+                    else:
+                        #   STEP ??: 
+                        dTmp_Data           = None
+                        dTmp_DataRange      = None
+                        dTmp_DataMap        = None
+
+                        lTmp_DataMap_In     = []
+                        lTmp_DataMap_Out    = []
+                        
+                        dTmp_Data       = self.__moldData__(candidates=[dBest_Geo], fitness=[dBest_Fit])
+
+                        #   STEP 55: Setup - Final data ranges
+                        dTmp_DataRange      = {
+                            "lower":        -0.985,
+                            "center":       0.0,
+                            "upper":        0.985
+                        }
+
+                        #   STEP 56: Setup - Data maps
+                        for j in range(0, len( dTmp_Data["in"] ) ):
+                            lTmp_DataMap_In.append(j)
+
+                        for j in range(0, len( dTmp_Data["out"] ) ):
+                            lTmp_DataMap_Out.append(j)
+
+                        dTmp_DataMap    = {
+                            "in": lTmp_DataMap_In,
+                            "out": lTmp_DataMap_Out
+                        }
+
+                        #   STEP 57: Setup - Create new Data container
+                        vTmp_Data   = Data()
+                        vTmp_Data.setData(data=dTmp_Data, automap=False, transpose=True)
+
+                        #   STEP 61: Map data
+                        vTmp_Data.mapData(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=True, output=True)
+
+                        vData.reset()
+                        vData.insert( data= vTmp_Data.pop(used=False, index=0))
+
+                        lTmp_Distance = vData.getInputDistance( vData.getLen() - 1)
+
+                else:
+                    #   STEP 118: Loop for fall off
+                    for _ in range(0, self.__iTRO_Retension_FallOff):
+                        #   STEP 120: Pop candidates from retension list
+                        lRetension_Geo.pop(0)
+                        lRetension_Fit.pop(0)
 
             #
             #   endregion
