@@ -774,10 +774,10 @@ class Golem:
             vSRG    = dSRG["surrogate"]
 
             #   STEP 3 Do necessary pre-training
-            vSRG.bShowOutput = True
+            vSRG.bShowOutput = False
 
             #   STEP 4: Train surrogate
-            vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=True)
+            vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=False)
 
             #   STEP 5: Get accuracy and fitness
             fTmp_Fitness    = float ( vSRG.getAFitness(data=vData) / vData.getLen() )

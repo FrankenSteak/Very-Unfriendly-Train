@@ -1919,184 +1919,225 @@ class Annie:
 		"""
 
 		#	STEP 0: Local variables
+		dData_Testing		= None
+		dData_Training		= None
+
+		lBest_Set			= self.getWeights(password=self.__iPassword)
+		fBest_Fitness		= np.inf
+		iBest_Index			= 0
+
 		iBatch_Iterations	= None
 		iBatch_Size			= self.__iBatchSize
 
 		iAccurateBatches	= 0
 
+		#	region STEP 1->6: Setup - Localv variables
+
 		#	STEP 1: Setup - Local variables
-		iBatch_Iterations	= int( np.ceil( _dData.getLen() / iBatch_Size ) )
+		dData_Training		= _dData.splitData()
+
+		dData_Testing		= dData_Training["testing"]
+		dData_Training		= dData_Training["training"]
+		
+		iBatch_Iterations	= int( np.ceil( dData_Training.getLen() / iBatch_Size ) )
 
 		#	STEP 2: Check for small dataset
-		if (_dData.getLen() < 2 * iBatch_Size):
+		if ( dData_Training.getLen() < 2 * iBatch_Size ):
+			#	STEP 3: Setup - Tmp variable
 			iTmp_BatchSize	= 0
 
+			#	STEP 4: Iterate 
 			while (iTmp_BatchSize < 2 * iBatch_Size):
-				iTmp_BatchSize += _dData.getLen()
+				#	STEP 5: Increment batch size by data length
+				iTmp_BatchSize += dData_Training.getLen()
 
+			#	STEP 6: Update - Batch Size
 			iBatch_Size = iTmp_BatchSize
-				
 
-		#	STEP 2: User Output
+		#
+		#	endregion
+
+		#	STEP 7: User Output
 		if (self.bShowOutput):
 			print("Annie (def-training) {" + Helga.time() + "} - Starting default training")
 			print("\t~ Epochs: " 			+ str(self.__iEpochs))
 			print("\t~ Batches per Epoch: " + str(iBatch_Iterations))
 			print("\t~ Batch size: " 		+ str(iBatch_Size))
-			print("\t~ Dataset size: " 		+ str(_dData.getLen()) + "\n")
+			print("\t~ Dataset size: " 		+ str(dData_Training.getLen()) + "\n")
 
-		#	STEP 3: Iterate for epochs
+		#	STEP 8: Iterate for epochs
 		for i in range(0, self.__iEpochs):
 
-			#	STEP 4: Iterate for batch iterations
+			#	STEP 9: Iterate for batch iterations
 			for j in range(0, iBatch_Iterations):
 
-				#	region STEP 5->24: Accuracy check point
+				#	region STEP 10->35: Accuracy check point
 
-				#	STEP 5: Get accuracy
-				dHold 	= self.getAccuracy(data=_dData, size=_dData.getLen())
-				iAccTmp = dHold["accurate samples"]
-				fAccTmp	= dHold["percent accuracy"]
+				#	STEP 10: Get accuracy
+				dTmp_AccTest	= self.getAccuracy(data=dData_Testing, 	size=dData_Testing.getLen())
+				dTmp_AccTrain	= self.getAccuracy(data=dData_Training, size=dData_Training.getLen())
 
-				#	STEP 6: Check if accuracy requirement has been met
-				if (fAccTmp >= self.__fAccRequirement * 1.008):
-					#	STEP 7: Increment number of accurate batches
+				#	STEP 11: Get fitness
+				fTmp_Fitness	= 100.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] ) * ( 1.0 - dTmp_AccTrain["percent accuracy"] ) + 50.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] )
+
+				#	STEP 12: Check if best fitness
+				if (fTmp_Fitness < fBest_Fitness):
+					#	STEP 13: Update - Best
+					lBest_Set		= self.getWeights(password=self.__iPassword)
+					fBest_Fitness	= fTmp_Fitness
+					iBest_Index		= i * (iBatch_Iterations * iBatch_Size) + j
+
+					if (fBest_Fitness < 2):
+						Helga.nop()
+
+					print(".", end="")
+
+				#	STEP 14: If temp fitness not converging
+				elif (fTmp_Fitness > 10.0 * fBest_Fitness):
+					#	STEP 15: End epoch
+					break
+
+				#	STEP 16: Check if accuracy requirement has been met
+				if (dTmp_AccTest["percent accuracy"] >= self.__fAccRequirement):
+					#	STEP 17: Increment number of accurate batches
 					iAccurateBatches += 1
 
+					#	STEP 18: User output
 					if (self.bShowOutput):
 						print("\t> " + str(iAccurateBatches), i, j, sep="\t-\t")
 
-					#	STEP 8: If accurate batches meets requirement
+					#	STEP 19: If accurate batches meets requirement
 					if (iAccurateBatches == iBatch_Iterations):
-						#	STEP 9: Check if first generation
+						#	STEP 20: Check if first generation
 						if (self.bIsFertile):
-							#	STEP 10: Split data
-							dHold = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
+							#	STEP 21: Split data
+							dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
 
-							#	STEP 11: Train child net
-							self.__trainChild__(data=dHold["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
+							#	STEP 22: Train child net
+							self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
 
-							#	STEP 12: Get classification dataset
-							dHold = self.__getClassificationDataset__(data=_dData)
+							#	STEP 23: Get classification dataset
+							dTmp_AccTrain = self.__getClassificationDataset__(data=_dData)
 							
-							#	STEP 13: Train classifier
-							self.__trainClassifier__(data=dHold["new set"], show_comparison=True, show_output=True)
+							#	STEP 24: Train classifier
+							self.__trainClassifier__(data=dTmp_AccTrain["new set"], show_comparison=True, show_output=True)
 
-							#	STEP 14: Get new accuracy
-							dHold = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
+							#	STEP 25: Get new accuracy
+							dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
 						
-						#	STEP 15: Check if classifier
+						#	STEP 26: Check if classifier
 						elif (self.bIsClassifier):
-							#	STEP 16: Split data
-							dHold = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
+							#	STEP 27: Split data
+							dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
 
-							#	STEP 17: Train child net
-							self.__trainChild__(data=dHold["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
+							#	STEP 28: Train child net
+							self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
 
-							#	STEP 18: Get new accuracy
-							dHold = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
+							#	STEP 29: Get new accuracy
+							dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
 
+						#	STEP 30: Just a normal net
 						else:
-							#	STEP 19: Get accuracy of full set
-							dHold = self.getAccuracy(data=_dData, size=0, full_set=True)
+							#	STEP 31: Get accuracy of full set
+							dTmp_AccTrain	= self.getAccuracy(data=_dData, size=0, full_set=True)
 
-						#	STEP 20: Get accuracy as percentage
-						iAccTmp	= dHold["accurate samples"]
-						fAccTmp	= dHold["percent accuracy"]
-
-						#	STEP 21: User Output
+						#	STEP 32: User Output
 						if (self.bShowOutput):
 							print("")
 							print("\t+ Desired accuracy achieved\n")
-							print("\t+ Iterations: " + str(i * (iBatch_Iterations * iBatch_Size) + j))
-							print("\t+ Accurate Samples: " + str(iAccTmp))
-							print("\t+ Percentage Accuracy: " + str(round(fAccTmp * 100.0, 2)) + "%\n")
+							print("\t+ Iterations: " 			+ str(i * ( iBatch_Iterations * iBatch_Size ) + j ) )
+							print("\t+ Accurate Samples: " 		+ str( dTmp_AccTrain["accurate samples"] ) )
+							print("\t+ Percentage Accuracy: " 	+ str( round( dTmp_AccTrain["percent accuracy"] * 100.0, 2)) + "%\n")
 							
-						#	STEP 22: Export this annie
+						#	STEP 33: Export this annie
 						if (self.bIsChild == False):
 							self.exportAnnie(file=str(Helga.ticks()), extension=False)
 
-						#	STEP 23: Populate output dictionary
+						#	STEP 34: Populate output dictionary
 						dOut = {
-							"iterations": i * iBatch_Iterations + j,
-							"child set": 	dHold["child dataset"]
+							"iterations":	i * iBatch_Iterations + j,
+							"child set": 	dTmp_AccTrain["child dataset"]
 						}
 
-						#	STEP 24: Return
+						#	STEP 35: Return
 						return dOut
 				
 				#
 				#	endregion
 
-				#	region STEP 25->27: Train
+				#	region STEP 36->38: Train
 
-				#	STEP 25: Iterate for batch size
+				#	STEP 36: Iterate for batch size
 				for _ in range(0, iBatch_Size):
-					#	STEP 26: Get data point
-					dDNR = _dData.getRandDNR()
+					#	STEP 37: Get data point
+					dDNR = dData_Training.getRandDNR()
 
-					#	STEP 27: Propagate forward and backward
+					#	STEP 38: Propagate forward and backward
 					self.__propagateForward__(dDNR["in"])
 					self.__propagateBackward__(dDNR["out"])
 
 				#
 				#	endregion
 
-		#	STEP 28: Get total iterations
+		#	STEP 39: Get total iterations
 		iTmp = self.__iEpochs * (iBatch_Iterations * iBatch_Size)
 
-		#	STEP 29: Check if first generation
+		#	STEP 40: Update weights to fittest set
+		self.setWeights(password=self.__iPassword, weights=lBest_Set)
+
+		#	STEP 41: Check if first generation
 		if (self.bIsFertile):
-			#	STEP 30: Split data
-			dHold = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
+			#	STEP 42: Split data
+			dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
 
-			#	STEP 31: Train child net
-			self.__trainChild__(data=dHold["child dataset"], original_data=_dData, show_comparison=False, child_output=False)
+			#	STEP 43: Train child net
+			self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=False)
 
-			#	STEP 32: Get classification dataset
-			dHold = self.__getClassificationDataset__(data=_dData)
+			#	STEP 44: Get classification dataset
+			dTmp_AccTrain = self.__getClassificationDataset__(data=_dData)
 			
-			#	STEP 33: Train classifier
-			self.__trainClassifier__(data=dHold["new set"], show_comparison=True, show_output=True)
+			#	STEP 45: Train classifier
+			self.__trainClassifier__(data=dTmp_AccTrain["new set"], show_comparison=True, show_output=True)
 
-			#	STEP 34: Get new accuracy
-			dHold = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
+			#	STEP 46: Get new accuracy
+			dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
 
-		#	STEP 35: Check if classifier
+		#	STEP 47: Check if classifier
 		elif (self.bIsClassifier):
-			#	STEP 36: Split data
-			dHold = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
+			#	STEP 48: Split data
+			dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
 
-			#	STEP 37: Train child net
-			self.__trainChild__(data=dHold["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
+			#	STEP 49: Train child net
+			self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
 
-			#	STEP 38: Get new accuracy
-			dHold = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
+			#	STEP 50: Get new accuracy
+			dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
 			
+		#	STEP 51: Normal net
 		else:
-			#	STEP 39: Get accuracy of full set
-			dHold = self.getAccuracy(data=_dData, size=0, full_set=True)
+			#	STEP 52: Get accuracy of full set
+			dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True)
 
-		#	STEP 40: Check if output
+		#	STEP 53: Check if output
 		if (self.bShowOutput):
-			#	STEP 41: Get accuracy as percentage
-			iAccTmp = dHold["accurate samples"]
-			fAccTmp = dHold["percent accuracy"]
+			#	STEP 54: Get accuracy as percentage
+			iAccTmp = dTmp_AccTrain["accurate samples"]
+			fAccTmp = dTmp_AccTrain["percent accuracy"]
 
-			#	STEP 42: Print output
+			#	STEP 55: Print output
 			print("")
 			print("\t- Desired accuracy NOT achieved\n")
 			print("\t- Iterations: " + str(iTmp))
 			print("\t- Accurate Samples: " + str(iAccTmp))
 			print("\t- Percentage Accuracy: " + str(round(fAccTmp * 100.0, 2)) + "%\n")						
 		
-		#	STEP 43: Populate output dictionary
+		#	STEP 56: Populate output dictionary
 		dOut = {
 			"iterations":	iTmp,
-			"child set":	dHold["child dataset"]
+			"child set":	dTmp_AccTrain["child dataset"]
 		}
 
-		#	STEP 44: Return		
+		#	STEP 57: Return		
 		return dOut
 
 	def __propagateForward__(self, _dataPoint: list) -> None:
@@ -2836,7 +2877,7 @@ if (__name__ == "__main__"):
 		
 		fire.bShowOutput 	= True
 
-		fire.trainSet(cp.deepcopy(dat), advanced_training=True, compare=True)
+		fire.trainSet(cp.deepcopy(dat), advanced_training=False, compare=True)
 
 		print("---", "---", sep="\n", end="\n\n")
 
