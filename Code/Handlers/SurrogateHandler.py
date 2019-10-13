@@ -774,16 +774,17 @@ class Golem:
             vSRG    = dSRG["surrogate"]
 
             #   STEP 3 Do necessary pre-training
-            vSRG.bShowOutput = False
+            vSRG.bShowOutput            = True
+            vSRG.bUse_NoiseInjection    = True
 
             #   STEP 4: Train surrogate
-            vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=False)
+            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=False)
+            fTmp_Fitness    = fTmp_Fitness["fitness"]
 
             #   STEP 5: Get accuracy and fitness
-            fTmp_Fitness    = float ( vSRG.getAFitness(data=vData) / vData.getLen() )
             fTmp_Accuracy   = vSRG.getAccuracy(data=vData, size=vData.getLen(), full_set=True)
 
-            fTmp_Fitness    = fTmp_Fitness * (1.1 - fTmp_Accuracy["percent accuracy"]) * 100.0
+            fTmp_Fitness    = fTmp_Fitness * (1.1 - fTmp_Accuracy["percent accuracy"])
 
             #   STEP 6: Append to output lists
             lAccuracy.append( fTmp_Accuracy["percent accuracy"] )

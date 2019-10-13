@@ -279,12 +279,12 @@ class Natalie:
         #   STEP 14: Check if primary is tro
         if (kwargs["primary"] == "tro"):
             #   STEP 15: Outsource
-            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False, retension=True)
+            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=False, save=bSave, surrogate=False, retension=True)
 
         #   STEP 16: Check if primary is nm
         elif (kwargs["primary"] == "nm"):
             #   STEP 17: Outsource
-            dPrimary_Results    = self.__nm__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False)
+            dPrimary_Results    = self.__nm__(stage="Primary", new=bNew, cull=False, save=bSave, surrogate=False)
 
         #   STEP 18: Unrecognized optimizer
         else:
@@ -299,12 +299,12 @@ class Natalie:
         #   STEP 20: Check if secondary is tro
         if (kwargs["secondary"] == "tro"):
             #   STEP 21: Outsource
-            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
+            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=False, save=bSave, surrogate=bSurrogate)
 
         #   STEP 22: Check if secondary is nm
         if (kwargs["secondary"] == "nm"):
             #   STEP 23: Outsource
-            self.__nm__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
+            self.__nm__(stage="Secondary", center=dPrimary_Results, new=False, cull=False, save=bSave, surrogate=bSurrogate)
 
         #   STEP 24: Unrecognized optimizer
         else:
@@ -665,9 +665,6 @@ class Natalie:
         #   STEP 7: Update - Local variables
         fOriginal_Area  = self.__dAnt_Center["substrate"]["l"] * self.__dAnt_Center["substrate"]["w"]
 
-        if (self.__dAnt_CenterFit != None):
-            fOriginal_Freq  = self.__dAnt_CenterFit["freq"]
-
         #   STEP 6: Iterate through antenna
         for i in range(0, len(kwargs["ant"])):
             #   STEP 7: Get current ant and fitness
@@ -691,8 +688,8 @@ class Natalie:
 
             #   STEP 13: Get total frequency fitness
             fTmp_Freq_Tot   = fTmp_Left + fTmp_Mid + fTmp_Right
-
-            #   STEP 14: Get overall fitness
+            
+            #   STEP 18: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
             fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.8 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
 
@@ -701,8 +698,8 @@ class Natalie:
                 "items":    2,
 
                 "0":        "desired",
-                "1":        "final",
-                "2":        "area",
+                "1":        "area",
+                "2":        "final",
                 #"3":        "freq",
                 #"4":        "lower",
                 #"5":        "upper",
@@ -718,11 +715,6 @@ class Natalie:
                 "dir":              kwargs["fitness"][i]["dir"]
             }
 
-            if (self.__dAnt_CenterFit != None):
-                dTmp["freq percent"] = fTmp_Freq_Tot / fOriginal_Freq
-
-            else:
-                dTmp["freq percent"] = 1.0
 
             #   STEP 16: Append to output
             lOut.append(dTmp)
@@ -2298,17 +2290,9 @@ class Natalie:
                 #   STEP 57: Setup - Create new Data container
                 vData   = Data()
                 vData.setData(data=dTmp_Data, automap=False, transpose=True)
-                
-                #   STEP 60: User output
-                if (self.bShowOutput):
-                    print("\n\t\t- Data Distance (pre-mapping) : ", vData.getInputDistance(0), sep="\t")
 
                 #   STEP 61: Map data
                 vData.mapData(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=True, output=True)
-
-                #   STEP 62: User output
-                if (self.bShowOutput):
-                    print("\t\t- Data Distance (post-mapping) : ", vData.getInputDistance(0), sep="\t", end="\n\n")
 
                 #
                 #   endregion
@@ -2403,7 +2387,7 @@ class Natalie:
             #   STEP 111: Check culling status
             if (bCull):
                 #   STEP 112: Loop through candidates
-                for j in range(0, len( lFitness ) ):
+                for j in range(0, self.__iTRO_Candidates + 1 ):
                     #   STEP 113: If not current best and not previous best
                     if ((j != iTmp_Index) and (j != self.__iTRO_Candidates)):
                         #   STEP 114: Get path for directory
@@ -2434,10 +2418,10 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "{" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
-                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "{" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 81: Check if new best isn't old best
                 elif (iTmp_Index != self.__iTRO_Candidates):
@@ -2456,13 +2440,13 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
-                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
                         dHold = lFitness[len(lFitness) - 1]
-                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 86: Bad region
                 else:
@@ -2483,13 +2467,13 @@ class Natalie:
                             print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region))
 
                             dHold = lFitness[self.__iTRO_Candidates]
-                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
                             
                             dHold = lFitness[iTmp_Index]
-                            print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                            print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                             
                             dHold = lFitness[len(lTmp_Candidates) - 1]
-                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                     #   STEP 92: Region too small
                     else:
@@ -2510,10 +2494,10 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
-                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq percent"] * 100.0, 3)) + "\t- {" + str(round(dHold["freq"] * 100.0, 3)) + "}", "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+                        print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
                 #   STEP 98: Not new best
                 else:
@@ -2592,6 +2576,8 @@ class Natalie:
                         vData.insert( data= vTmp_Data.pop(used=False, index=0))
 
                         lTmp_Distance = vData.getInputDistance( vData.getLen() - 1)
+
+                    Helga.nop()
 
                 else:
                     #   STEP 118: Loop for fall off

@@ -583,3 +583,13 @@ class Antonio:
 
 #
 #endregion
+
+#region Testing
+
+if (__name__ == "__main__"):
+    av = Antonio()
+
+    print(av.tanH(0.0))
+    print(av.tanHD(0.0))
+#
+#   endregion

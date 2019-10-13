@@ -138,20 +138,32 @@ class Annie:
 		self.__fClearBias			= None
 		#	endregion
 
+		#	region STPE 1.11: Dropout
+
+		self.__lDropOut				= None
+		self.__fDropOut_Input		= None
+		self.__fDropOut_Hidden		= None
+
+		#	endregion
+
 		#endregion
 
 		#region STEP 2: Public variables
 
 		#	region STEP 2.1: Chlidren
+
 		self.bIsFertile				= None
-
 		self.bIsClassifier			= None
-
 		self.bIsChild				= None
+		
 		#	endregion
 
 		#	region STEP 2.2: Other
+
 		self.bShowOutput			= None
+		self.bUse_Dropout			= False
+		self.bUse_NoiseInjection	= True
+
 		#	endregion
 		
 		#endregion
@@ -902,8 +914,7 @@ class Annie:
 
 		"""
 
-		#	region STEP 0: Local variables
-
+		#	STEP 0: Local variables
 		dOut							= None
 
 		iOut 							= -1
@@ -912,8 +923,6 @@ class Annie:
 		bComparison						= False
 		bOptimization					= False
 		iAlgorithm						= 1 + rn.randint(0, 1) * 2
-
-		#	endregion
 
 		#	region STEP 1: Setup - Local variables
 
@@ -965,7 +974,7 @@ class Annie:
 				print("Annie (train-set) {" + Helga.time() + "} - Training via Default Training")
 
 			#	STEP 7: Outsource default training
-			iOut = self.__trainDef__(_dData, bCheckAcc)
+			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
 
 		#
 		#		endregion
@@ -1041,11 +1050,13 @@ class Annie:
 
 		#	STEP 25: Populate output dictionary
 		dOut = {
-			"result": iOut,
-			"check accuracy": bCheckAcc,
-			"show comparison": bComparison,
-			"use optimization": bOptimization,
-			"optimization algorithm": iAlgorithm
+			"fitness":					dTmp_Out["fitness"],
+			"iterations":				dTmp_Out["iterations"],
+
+			"check accuracy": 			bCheckAcc,
+			"show comparison": 			bComparison,
+			"use optimization": 		bOptimization,
+			"optimization algorithm": 	iAlgorithm
 		}
 
 		#	STEP 26: Return
@@ -1414,6 +1425,9 @@ class Annie:
 		self.__iEpochs				= _dParams["training methods"]["def"]["epochs"]
 		self.__iBatchSize			= _dParams["training methods"]["def"]["batch size"]
 		self.__fAccRequirement		= _dParams["training methods"]["def"]["acc requirement"]
+
+		self.__fDropOut_Hidden		= _dParams["training methods"]["def"]["drop out"]["hidden drop out"]
+		self.__fDropOut_Input		= _dParams["training methods"]["def"]["drop out"]["input drop out"]
 
 		self.bIsFertile				= _dParams["children"]["is fertile"]
 		self.bIsClassifier			= _dParams["children"]["is classifier"]
@@ -1924,12 +1938,9 @@ class Annie:
 
 		lBest_Set			= self.getWeights(password=self.__iPassword)
 		fBest_Fitness		= np.inf
-		iBest_Index			= 0
 
 		iBatch_Iterations	= None
 		iBatch_Size			= self.__iBatchSize
-
-		iAccurateBatches	= 0
 
 		#	region STEP 1->6: Setup - Localv variables
 
@@ -1942,12 +1953,12 @@ class Annie:
 		iBatch_Iterations	= int( np.ceil( dData_Training.getLen() / iBatch_Size ) )
 
 		#	STEP 2: Check for small dataset
-		if ( dData_Training.getLen() < 2 * iBatch_Size ):
+		if ( dData_Training.getLen() < iBatch_Size ):
 			#	STEP 3: Setup - Tmp variable
 			iTmp_BatchSize	= 0
 
 			#	STEP 4: Iterate 
-			while (iTmp_BatchSize < 2 * iBatch_Size):
+			while (iTmp_BatchSize < iBatch_Size):
 				#	STEP 5: Increment batch size by data length
 				iTmp_BatchSize += dData_Training.getLen()
 
@@ -1978,90 +1989,16 @@ class Annie:
 				dTmp_AccTrain	= self.getAccuracy(data=dData_Training, size=dData_Training.getLen())
 
 				#	STEP 11: Get fitness
-				fTmp_Fitness	= 100.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] ) * ( 1.0 - dTmp_AccTrain["percent accuracy"] ) + 50.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] )
+				fTmp_Fitness	= 100.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] ) * ( 1.01 - dTmp_AccTrain["percent accuracy"] ) + 90.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] ) + 10.0 * ( 1.01 - dTmp_AccTrain["percent accuracy"] )
 
 				#	STEP 12: Check if best fitness
 				if (fTmp_Fitness < fBest_Fitness):
 					#	STEP 13: Update - Best
 					lBest_Set		= self.getWeights(password=self.__iPassword)
 					fBest_Fitness	= fTmp_Fitness
-					iBest_Index		= i * (iBatch_Iterations * iBatch_Size) + j
 
-					if (fBest_Fitness < 2):
-						Helga.nop()
+					print("\t{" + Helga.time() + "} -", "Fitness: " + str( round( fBest_Fitness, 2 ) ) + "\t", "Test: " + str( round( dTmp_AccTest["percent accuracy"], 2) ), "Train: " + str( round( dTmp_AccTrain["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
 
-					print(".", end="")
-
-				#	STEP 14: If temp fitness not converging
-				elif (fTmp_Fitness > 10.0 * fBest_Fitness):
-					#	STEP 15: End epoch
-					break
-
-				#	STEP 16: Check if accuracy requirement has been met
-				if (dTmp_AccTest["percent accuracy"] >= self.__fAccRequirement):
-					#	STEP 17: Increment number of accurate batches
-					iAccurateBatches += 1
-
-					#	STEP 18: User output
-					if (self.bShowOutput):
-						print("\t> " + str(iAccurateBatches), i, j, sep="\t-\t")
-
-					#	STEP 19: If accurate batches meets requirement
-					if (iAccurateBatches == iBatch_Iterations):
-						#	STEP 20: Check if first generation
-						if (self.bIsFertile):
-							#	STEP 21: Split data
-							dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
-
-							#	STEP 22: Train child net
-							self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
-
-							#	STEP 23: Get classification dataset
-							dTmp_AccTrain = self.__getClassificationDataset__(data=_dData)
-							
-							#	STEP 24: Train classifier
-							self.__trainClassifier__(data=dTmp_AccTrain["new set"], show_comparison=True, show_output=True)
-
-							#	STEP 25: Get new accuracy
-							dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
-						
-						#	STEP 26: Check if classifier
-						elif (self.bIsClassifier):
-							#	STEP 27: Split data
-							dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
-
-							#	STEP 28: Train child net
-							self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
-
-							#	STEP 29: Get new accuracy
-							dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
-
-						#	STEP 30: Just a normal net
-						else:
-							#	STEP 31: Get accuracy of full set
-							dTmp_AccTrain	= self.getAccuracy(data=_dData, size=0, full_set=True)
-
-						#	STEP 32: User Output
-						if (self.bShowOutput):
-							print("")
-							print("\t+ Desired accuracy achieved\n")
-							print("\t+ Iterations: " 			+ str(i * ( iBatch_Iterations * iBatch_Size ) + j ) )
-							print("\t+ Accurate Samples: " 		+ str( dTmp_AccTrain["accurate samples"] ) )
-							print("\t+ Percentage Accuracy: " 	+ str( round( dTmp_AccTrain["percent accuracy"] * 100.0, 2)) + "%\n")
-							
-						#	STEP 33: Export this annie
-						if (self.bIsChild == False):
-							self.exportAnnie(file=str(Helga.ticks()), extension=False)
-
-						#	STEP 34: Populate output dictionary
-						dOut = {
-							"iterations":	i * iBatch_Iterations + j,
-							"child set": 	dTmp_AccTrain["child dataset"]
-						}
-
-						#	STEP 35: Return
-						return dOut
-				
 				#
 				#	endregion
 
@@ -2070,14 +2007,22 @@ class Annie:
 				#	STEP 36: Iterate for batch size
 				for _ in range(0, iBatch_Size):
 					#	STEP 37: Get data point
-					dDNR = dData_Training.getRandDNR()
+					dDNR = dData_Training.getRandDNR(noise=self.bUse_NoiseInjection)
 
 					#	STEP 38: Propagate forward and backward
 					self.__propagateForward__(dDNR["in"])
 					self.__propagateBackward__(dDNR["out"])
 
+				#	STEP 14: If temp fitness not converging
+				if (fTmp_Fitness > 10.0 * fBest_Fitness):
+					#	STEP 15: End epoch
+					print("\t{" + Helga.time() + "} - \tEnding epoch " + str(i) + " early")
+					break
+
 				#
 				#	endregion
+
+		#	region STEP 39->55: Post training evaluations
 
 		#	STEP 39: Get total iterations
 		iTmp = self.__iEpochs * (iBatch_Iterations * iBatch_Size)
@@ -2085,38 +2030,7 @@ class Annie:
 		#	STEP 40: Update weights to fittest set
 		self.setWeights(password=self.__iPassword, weights=lBest_Set)
 
-		#	STEP 41: Check if first generation
-		if (self.bIsFertile):
-			#	STEP 42: Split data
-			dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
-
-			#	STEP 43: Train child net
-			self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=False)
-
-			#	STEP 44: Get classification dataset
-			dTmp_AccTrain = self.__getClassificationDataset__(data=_dData)
-			
-			#	STEP 45: Train classifier
-			self.__trainClassifier__(data=dTmp_AccTrain["new set"], show_comparison=True, show_output=True)
-
-			#	STEP 46: Get new accuracy
-			dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
-
-		#	STEP 47: Check if classifier
-		elif (self.bIsClassifier):
-			#	STEP 48: Split data
-			dTmp_AccTrain = self.getAccuracy(data=cp.deepcopy(_dData), size=0, full_set=True, split=True)
-
-			#	STEP 49: Train child net
-			self.__trainChild__(data=dTmp_AccTrain["child dataset"], original_data=_dData, show_comparison=False, child_output=True)
-
-			#	STEP 50: Get new accuracy
-			dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True, test_child=True)
-			
-		#	STEP 51: Normal net
-		else:
-			#	STEP 52: Get accuracy of full set
-			dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True)
+		dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True)
 
 		#	STEP 53: Check if output
 		if (self.bShowOutput):
@@ -2131,9 +2045,13 @@ class Annie:
 			print("\t- Accurate Samples: " + str(iAccTmp))
 			print("\t- Percentage Accuracy: " + str(round(fAccTmp * 100.0, 2)) + "%\n")						
 		
+		#
+		#	endregion
+
 		#	STEP 56: Populate output dictionary
 		dOut = {
 			"iterations":	iTmp,
+			"fitness":		fBest_Fitness,
 			"child set":	dTmp_AccTrain["child dataset"]
 		}
 
@@ -2149,57 +2067,80 @@ class Annie:
 		#	STEP 1: Setup - Local variables
 		self.__resetNodes__()
 
-		#	STEP 2: Check data point width
+		#	STEP 2: Check - Data width
 		if (len(_dataPoint) != self.__iInputWidth):
+			#	STEP 3: Error handling
 			raise Exception("An error occured in Annie.__propagateForward() -> Step 2: Data input width mismatch")		
 
-		#	STEP 3: Set the input nodes
+		#	STEP 5: Update - Drop out list
+		self.__lDropOut	= Helga.getShape(self.__lNodes)
+			
+		#	STEP 6: Iterate through inputs
 		for i in range(0, len(_dataPoint)):
-			self.__lNodes[0][i] = _dataPoint[i]
+			#	STEP 7: Check if drop out
+			if ((self.bUse_Dropout) and (rn.uniform(0.0, 1.0) < self.__fDropOut_Input)):
+				#	STEP 8: Set node as dropout
+				self.__lNodes[0][i]		= 0.0
+				self.__lDropOut[0][i]	= True
 
-		#	STEP 4: Check if using bias
+			#	STEP 9: Not dropout
+			else:
+				#	STEP 10: Update - Node
+				self.__lNodes[0][i] 	= _dataPoint[i]
+				self.__lDropOut[0][i]	= False
+
+		#	STEP 11: Check if using bias
 		if (self.__bUseBias):
-			#	STEP 5: Set bias input
+			#	STEP 12: Update - Bias nodes
 			self.__lNodes[0][len(self.__lNodes[0]) - 1] = self.__lBias[0]
 		
-		#	STEP 6: Propagate each layer foward
+		#	STEP 13: Propagate each layer foward
 		for i in range(1, len(self.__lNodes)):
-			#	STEP 7: Get the length of the layer
-			iTmp 		= len(self.__lNodes[i])
-			iIterations	= iTmp
+			#	STEP 14: Get the length of the layer
+			iTmp 			= len(self.__lNodes[i])
+			iTmp_Iterations	= iTmp
 
-			#	STEP 8: Check if bias is being used and not output layer
+			#	STEP 15: Check if bias is being used and not output layer
 			if ((self.__bUseBias) and (i != len(self.__lNodes) - 1)):
-				#	STEP 9: Set pre activation bias node
-				self.__lNodes_PreActivation[i][iTmp - 1] = self.__lBias[i]
+				#	STEP 16: Set pre activation bias node
+				self.__lNodes_PreActivation[i][iTmp - 1] 	= self.__lBias[i]
 
-				#	STEP 10: Set bias node
+				#	STEP 17: Set bias node
 				self.__lNodes[i][iTmp - 1] 					= self.__acFunctions.getActivation(self.__iAcFunction, self.__lBias[i])
 
-				#	STEP 11: Adjust layer length
-				iIterations -= 1
+				#	STEP 18: Adjust layer length
+				iTmp_Iterations 							-= 1
 
-			#	STEP 13: Iterate through the nodes in the layer
-			for j in range(0, iIterations):
-				#	STEP 14: Setup - Temp variables
-				fTmp = 0.0
+			#	STEP 19: Iterate through the nodes in the layer
+			for j in range(0, iTmp_Iterations):
+				#	STEP 20: Check - Dropout status
+				if ((self.bUse_Dropout) and (rn.uniform(0.0, 1.0) < self.__fDropOut_Hidden) and (i != len(self.__lNodes) - 1)):
+					#	STEP 21: Set node as dropout
+					self.__lNodes[i][j]					= 0.0
+					self.__lNodes_PreActivation[i][j]	= 0.0
+					self.__lDropOut[i][j]				= True
 
-				#	STEP 15: Get the sum of all the inputs - iterate through relevant weights
-				for k in range(0, len(self.__lNodes[i - 1])):
-					#	STEP 16: Sum input
-					ln = self.__lNodes[i - 1][k]
-					lw = self.__lWeights[i - 1][k * iTmp + j]
-					
-					#	STPE 17: Update sum
-					fTmp = fTmp + ln * lw
+				#	STEP 22: Not dropout
+				else:
+					#	STEP 23: Setup - Temp variables
+					fTmp = 0.0
 
-				#	STEP 18: Save pre-activation function values
-				self.__lNodes_PreActivation[i][j]	= fTmp
+					#	STEP 24: Get the sum of all the inputs - iterate through relevant weights
+					for k in range(0, len(self.__lNodes[i - 1])):
+						#	STEP 25: Sum input
+						ln = self.__lNodes[i - 1][k]
+						lw = self.__lWeights[i - 1][k * iTmp + j]
+						
+						#	STPE 26: Update sum
+						fTmp = fTmp + ln * lw
 
-				#	STEP 19: Update node values
-				self.__lNodes[i][j] 				= self.__acFunctions.getActivation(self.__iAcFunction, fTmp)
+					#	STEP 27: Save pre-activation function values
+					self.__lNodes_PreActivation[i][j]	= fTmp
+
+					#	STEP 28: Update node values
+					self.__lNodes[i][j] 				= self.__acFunctions.getActivation(self.__iAcFunction, fTmp)
 			
-		#	STEP 28: Return
+		#	STEP 29: Return
 		return
 	
 	def __propagateBackward__(self, _lfExpectedOutput: list) -> None:
@@ -2214,20 +2155,20 @@ class Annie:
 		lTmpError				= None
 
 		#	STEP 1: Setup - Local variables
-		lNodeSig 				= self.__getShape_Nodes()
-		lNodeErr 				= self.__getShape_Nodes()
-		lWeightErr 				= self.__getShape_Weights()
+		lNodeSig 	= self.__getShape_Nodes()
+		lNodeErr 	= self.__getShape_Nodes()
+		lWeightErr 	= self.__getShape_Weights()
 
-		lTmpError				= self.getError(_lfExpectedOutput)
+		lTmpError	= self.getError(_lfExpectedOutput)
 
 		#	STEP 2: Get sigmas for all node layers - iterate through layers
-		lNodeSig = self.__pbSigma__(lNodeSig)
+		lNodeSig    = self.__pbSigma__(lNodeSig)
 
 		#	STEP 3: Get node errors
-		lNodeErr = self.__pbNodeError__(lTmpError, lNodeSig, lNodeErr)
+		lNodeErr    = self.__pbNodeError__(lTmpError, lNodeSig, lNodeErr)
 
 		#	STEP 4: Get weight errors
-		lWeightErr = self.__pbWeightError__(lNodeSig, lNodeErr, lWeightErr)
+		lWeightErr  = self.__pbWeightError__(lNodeSig, lNodeErr, lWeightErr)
 
 		#	STEP 5: Update weights
 		self.__pbUpdateWeights__(lWeightErr)
@@ -2264,13 +2205,20 @@ class Annie:
 		for i in range(1, len(_lNodeSig)):
 			#	 STPE 8: Iterate through nodes in layer
 			for j in range(0, len(_lNodeSig[i])):
-				#	STEP 9: Get pre-activation value
-				fTmp_preActivation	= self.__lNodes_PreActivation[i][j]
+                #   STEP 9: Check - Dropout status
+				if ((self.bUse_Dropout) and (self.__lDropOut[i][j] == True)):
+                    #   STEP 10: Set as dropout node
+					_lNodeSig[i][j] = 0.0
 
-				#	STEP 10: Get normal activation function
-				_lNodeSig[i][j]	= self.__acFunctions.getActivationD(self.__iAcFunction, fTmp_preActivation)
+                #   STEP 11: Not dropout
+				else:
+                    #	STEP 12: Get pre-activation value
+					fTmp_preActivation	= self.__lNodes_PreActivation[i][j]
 
-		#	STEP 11: Return
+                    #	STEP 13: Get normal activation function
+					_lNodeSig[i][j]	= self.__acFunctions.getActivationD(self.__iAcFunction, fTmp_preActivation)
+
+		#	STEP 14: Return
 		return _lNodeSig
 
 	def __pbNodeError__(self, _lError: list, _lNodeSig: list, _lNodeErr: list) -> list:
@@ -2303,21 +2251,25 @@ class Annie:
 					#	STEP 8: Set error for the node -> dE/da = -E
 					_lNodeErr[i][j] = -1.0 * _lError[j]
 
+                #   STPE 9: Check - Dropout status
+				elif ((self.bUse_Dropout) and (self.__lDropOut[i][j] == True)):
+                    #   STEP 10: Set as dropout node
+					_lNodeErr[i][j] = 0.0
+
+                #   STEP 11: Not dropout
 				else:
-					#	STEP 9: Reset temp vars
+					#	STEP 12: Reset temp vars
 					fTmp	= 0.0
 
-					#	STEP 10: Iterate through the layer above thisone
+					#	STEP 13: Iterate through the layer above thisone
 					for k in range(0, iIterations):
-						#	STEP 11: Sum the error from iterable node to current node
+						#	STEP 14: Sum the error from iterable node to current node
 						fTmp = fTmp + self.__lWeights[i][j * iTmpLen + k] * _lNodeSig[i + 1][k] * _lNodeErr[i + 1][k]
 
-						Helga.nop()
-
-					#	STEP 12: Set current node error
+					#	STEP 15: Set current node error
 					_lNodeErr[i][j] = fTmp
 
-		#	STEP 13: Return
+		#	STEP 16: Return
 		return _lNodeErr
 
 	def __pbWeightError__(self, _lNodeSig: list, _lNodeErr: list, _lWeightErr: list) -> list:
@@ -2331,7 +2283,7 @@ class Annie:
 		#	STEP 2: Iterate through weight layers
 		for i in range(0, len(_lWeightErr)):
 			#	STEP 3: Get length of node layer
-			iTmpLen = len(_lNodeErr[i + 1])
+			iTmpLen     = len(_lNodeErr[i + 1])
 			iIterations	= iTmpLen
 			
 			if ((self.__bUseBias) and (i < len(_lWeightErr) - 1)):
@@ -2352,6 +2304,7 @@ class Annie:
 		"""
 
 		#	STEP 0: Local variables
+        
 		#	STEP 1: Setup - Local variables
 
 		#	STEP 2: Check if momentum should be taken into account
@@ -2827,28 +2780,23 @@ class Annie:
 
 		#	STEP 2: Print Output
 		print("-----------------------------", "\t\tStats\t\t", "-----------------------------")
-		print("Learning Rate: ", self.__fLearningRate)
-		print("Momentum: ", self.__fMomentum)
+		print("Learning Rate: ", 	self.__fLearningRate)
+		print("Momentum: ", 		self.__fMomentum)
+
 		print("\n-----------------------------", "\tResult Comparison\t", "-----------------------------")
 		for _ in range(0, min(20, _dData.getLen())):
 			dDNR = _dData.getRandDNR()
 
 			self.__propagateForward__(dDNR["in"])
-			print(dDNR["out"], self.getOutput(round=True))
+			print( Helga.round( dDNR["out"], 1) , Helga.round( self.getOutput(), 1) )
 
 		print("\n-----------------------------", "\tClassification\t\t", "-----------------------------\n")
+		
 		_dData.reset()
 		dHold = self.getAccuracy(data=_dData, size=_dData.getLen(), full_set=True)
-		iAcc = dHold["accurate samples"]
-		print("Correct Classifications: " + str(iAcc))
-		return
 
-		print("\n-----------------------------", "\tWeights and Nodes\t", "-----------------------------\n")
-		print("\nAnnie (Comparison) {" + Helga.time() + "} - Nodes\n")
-		Helga.print2DArray(self.__lNodes)
-		print("\nAnnie (Comparison) {" + Helga.time() + "} - Weights\n")
-		Helga.print2DArray(self.__lWeights)
-		print("\n-----------------------------", "\tComparison End\t\t", "-----------------------------\n")
+		print("Dataset Size: ", 	str( _dData.getLen() ))
+		print("Correct Classifications: " + str(dHold["accurate samples"]))
 
 		#	STEP 3: Return
 		return
@@ -2869,15 +2817,23 @@ if (__name__ == "__main__"):
 	dat = Data()
 	dat.importData(file="Testing\\4.json")
 
+	x = ""
+
 	while (True):
-		input("> Continue")
+		x = input("> Continue")
 		os.system("cls")
 
 		fire = Annie()
 		
-		fire.bShowOutput 	= True
+		fire.bShowOutput 			= True
 
-		fire.trainSet(cp.deepcopy(dat), advanced_training=False, compare=True)
+		if (x == "x"):
+			fire.bUse_NoiseInjection	= True
+
+		else:
+			fire.bUse_NoiseInjection	= False
+
+		y = fire.trainSet(cp.deepcopy(dat), advanced_training=False, compare=True)
 
 		print("---", "---", sep="\n", end="\n\n")
 

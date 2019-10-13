@@ -929,6 +929,11 @@ class Data:
                 + index = ( int ) The index of the data to be returned
                     ~ Required
 
+                + noise = ( bool ) A flag that specifies whether or not
+                    gaussian noise should be added to the input of the
+                    returned DNR
+                    ~ Default   = False
+                    
             |\n
 
             Returns:
@@ -942,9 +947,10 @@ class Data:
         #   STEP 0: Local variables
         dOut                    = None
 
-        lTmpIn                  = None
-        lTmpOut                 = None
-        lTmpClass               = None
+        lData_Inputs            = None
+        lData_Outputs           = None
+
+        bNoise                  = False
 
         #   STEP 1: Setup - Local variables
 
@@ -953,73 +959,71 @@ class Data:
             #   STEP 3: Error handling
             raise Exception("An error occured in Data.getDNR() -> Step 2: No index argument passed")
 
-        #   STEP 4: Check if data needs to be reset
+        #   STEP 4: Check if noise arg passed
+        if ("noise" in kwargs):
+            #   STEP 5: Update - Local variables
+            bNoise = kwargs["noise"]
+
+        #   STEP 6: Check if data needs to be reset
         if (len(self.__lInput) == 0):
+            #   STEP 7: Reset data
             self.__resetData__()
 
-        #   STEP 5: Check if index in range
+        #   STEP 8: Check if passed index in range
         if (kwargs["index"] < len(self.__lInput)):
 
-            #   region STEP 6->14: Get data
-
-            #   STEP 6: Be safe
-            try:
-                #   STEP 7: Get input data
-                lTmpIn = self.__lInput.pop(kwargs["index"])
-            
-            except Exception as ex:
-                #   STEP 8: Error handling
-                print("Initial Error: ", ex)
-                raise Exception("An error occured in Data.getDNR() -> Step 6")
+            #   region STEP 9->14: Get data
 
             #   STEP 9: Be safe
             try:
-                #   STEP 10: Get output data
-                lTmpOut = self.__lOutput.pop(kwargs["index"])
-
+                #   STEP 10: Get input data
+                lData_Inputs    = self.__lInput.pop(kwargs["index"])
+            
             except Exception as ex:
                 #   STEP 11: Error handling
                 print("Initial Error: ", ex)
-                raise Exception("An error occured in Data.getDNR() -> Step 9")
+                raise Exception("An error occured in Data.getDNR() -> Step 6")
 
             #   STEP 12: Be safe
             try:
-                #   STEP 13: Get class data
-                lTmpClass = self.__lClass.pop(kwargs["index"])
+                #   STEP 13: Get output data
+                lData_Outputs   = self.__lOutput.pop(kwargs["index"])
 
             except Exception as ex:
                 #   STEP 14: Error handling
-                #ToDo
-                #print("Initial Error: ", ex)
-                #raise Exception("An error occured in Data.getDNR() -> Step 12")
-                Helga.nop()
+                print("Initial Error: ", ex)
+                raise Exception("An error occured in Data.getDNR() -> Step 9")
             
             #
             #   endregion
 
             #   STEP 15: Add data to used lists
-            self.__lUsedInput.append(lTmpIn)
-            self.__lUsedOutput.append(lTmpOut)
-            self.__lUsedClass.append(lTmpClass)
+            self.__lUsedInput.append( lData_Inputs )
+            self.__lUsedOutput.append( lData_Outputs )
 
             #   STEP 16: Increment request counter
             self.__iRequests += 1
 
-            #   STEP 17: Populate output dictionary
+            #   STEP 17: Check - Noise status
+            if (bNoise):
+                #   STEP 18: Loop through inputs
+                for i in range(0, len( lData_Inputs )):
+                    #   STEP 19: Add noise to input
+                    lData_Inputs[i] += rn.gauss(0.0, 0.01)
+
+            #   STEP 20: Populate output dictionary
             dOut = {
-                "in":       lTmpIn,
-                "out":      lTmpOut,
-                "class":    lTmpClass
+                "in":   lData_Inputs,
+                "out":  lData_Outputs
             }
 
-            #   STEP 18: Return
+            #   STEP 21: Return
             return dOut
 
-        else:
-            #   STEP 19: Error handling
-            raise Exception("An error occured in Data.getDNR() -> Step 5: Data index out of bounds")
+        #   STEP 22: Error handling
+        raise Exception("An error occured in Data.getDNR() -> Step 22: Data index out of bounds")
 
-    def getRandDNR(self) -> dict:
+    def getRandDNR(self, **kwargs) -> dict:
         """
             Description:
 
@@ -1031,6 +1035,15 @@ class Data:
             |\n
             |\n
             |\n
+
+            Arguments:
+
+                + noise = ( bool ) A flag that specifies whether or not
+                    gaussian noise should be added to the input of the
+                    returned DNR
+                    ~ Default   = False
+
+            |\n
                         
             Returns:
 
@@ -1041,25 +1054,30 @@ class Data:
         """
 
         #   STEP 0: Local variables
-        iIndex                  = None
+        bNoise                  = False
 
         #   STEP 1: Setup - Local variables
 
-        #   STEP 2: Check if reset required
+        #   STEP 2: Check if noise arg passed
+        if ("noise" in kwargs):
+            #   STEP 3: Update noise variable
+            bNoise  = kwargs["noise"]
+
+        #   STEP 4: Check if reset required
         if ((len(self.__lInput) == 0) and (len(self.__lUsedInput) > 0)):
-            #   STEP 3: Reset data
+            #   STEP 5: Reset data
             self.__resetData__()
 
-        #   STEP 4: Check if class not initialized
+        #   STEP 6: Check if class not initialized
         elif ((len(self.__lInput) == 0) and (len(self.__lUsedInput) == 0)):
-            #   STEP 5: Error Handling
+            #   STEP 7: Error Handling
             raise Exception("An error occured in Data.getRandDNR() -> Step 4: Class not initialized")
 
-        #   STEP 6: Get a random index
-        iIndex = rn.randint(0, len(self.__lInput) - 1)
+        #   STEP 8: Get a random index
+        iTmp_Index  = int( rn.uniform(0.0, float( len(self.__lInput) - 1 ) ) )
 
-        #   STEP 7: Outsource - Return
-        return self.getDNR(index=iIndex)
+        #   STEP 9: Outsource - Return
+        return self.getDNR(index=iTmp_Index, noise=bNoise)
 
     #
     #   endregion

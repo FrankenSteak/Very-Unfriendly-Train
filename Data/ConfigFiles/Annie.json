@@ -104,15 +104,26 @@
 
             "def":
             {
-                "items": 3,
+                "items":    4,
 
-                "0": "epochs",
-                "1": "batch size",
-                "2": "acc requirement",
+                "0":        "epochs",
+                "1":        "batch size",
+                "2":        "acc requirement",
+                "3":        "drop out",
 
-                "epochs":           15,
-                "batch size":       20,
-                "acc requirement":  0.98
+                "epochs":                   30,
+                "batch size":               20,
+                "acc requirement":          0.97,
+                "drop out":
+                {
+                    "items":    2,
+
+                    "0":        "input drop out",
+                    "1":        "hidden drop out",
+
+                    "input drop out":   0.2,
+                    "hidden drop out":  0.5
+                }
             }
         },
         "children":
