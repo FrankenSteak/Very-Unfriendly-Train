@@ -776,18 +776,6 @@ class Golem:
             #   STEP 3 Do necessary pre-training
             vSRG.bShowOutput            = False
             vSRG.bUse_NoiseInjection    = True
-
-            fTmp    = rn.uniform(0.0, 1.0)
-
-            if (fTmp < 0.7):
-                vSRG.bUse_L1            = True
-
-            elif (fTmp < 0.8):
-                vSRG.bUse_Dropout       = True
-                vSRG.bUse_L2            = True
-
-            elif (fTmp < 0.9):
-                vSRG.bUse_L2            = True
                 
             #   STEP 4: Train surrogate
             fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=False)
