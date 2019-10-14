@@ -21,8 +21,8 @@
             "2": "samples",
             "3": "accuracy check samples",
 
-            "lower frequency offset":   0.0085e9,
-            "upper frequency offset":   0.0085e9,
+            "lower frequency offset":   0.0065e9,
+            "upper frequency offset":   0.0065e9,
             "samples":                  2,
             "accuracy check samples":   2
         },
@@ -60,7 +60,7 @@
             "4":        "surrogate region",
             "5":        "retension fall off",
 
-            "primary iterations":   15,
+            "primary iterations":   75,
             "secondary iterations": 75,
             "candidates":           7,
             "algorithm region":     5,
