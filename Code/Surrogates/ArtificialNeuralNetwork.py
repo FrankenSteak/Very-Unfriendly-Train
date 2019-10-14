@@ -59,7 +59,7 @@ class Annie:
 
 	def __init__(self, **kwargs) -> None:
 		
-		#region STEP 0: Local variables
+		#	region STEP 0: Local variables
 
 		self.__enum					= en.Annie
 		self.__config				= Conny()
@@ -69,18 +69,17 @@ class Annie:
 
 		rn.seed(dt.datetime.now())
 
-		#endregion
+		#	endregion
 
-		#region STEP 1: Private variables
+		#	region STEP 1: Private variables
 
-		#	region STEP 1.0: Children
+		#	STEP 1.0: Children
 		self.__annChild 			= None
 		self.__iIterationsChildGen	= None
 
 		self.__annClassifier		= None
-		#	endregion
-
-		#	region STEP 1.1: Layout
+		
+		#	STEP 1.1: Layout
 		self.__lWeights				= None
 		self.__lWeights_Momentum	= None
 
@@ -96,77 +95,74 @@ class Annie:
 		self.__dHiddenDetails		= None
 
 		self.__fWeightRange			= None
-		#	endregion
-
-		#	region STEP 1.3: Activation functions
+		
+		#	STEP 1.3: Activation functions
 		self.__acFunctions			= Antonio()
 		self.__iAcFunction			= None
-		#	endregion
-
-		#	region STEP 1.4: Learning Rate
-		self.__fLearningRate		= None
-		#	endregion
 		
-		#	region STEP 1.5: Momentum
+		#	STEP 1.4: Learning Rate
+		self.__fLearningRate		= None
+		
+		#	STEP 1.5: Momentum
 		self.__bMomentumActive		= None
 
 		self.__fMomentum			= None		
-		#	endregion
-
-		#	region STEP 1.6: Default training variables
+		
+		#	STEP 1.6: Default training variables
 		self.__fAccRequirement		= None
 
 		self.__iEpochs				= None
 		self.__iBatchSize			= None
-		#	endregion
-
-		#	region STEP 1.7: Other
+		
+		#	STEP 1.7: Other
 		self.__iAccSampleSize		= None
 		self.__iFitSampleSize		= None
-		#	endregion
-
-		#	region STEP 1.9: Bools
+		
+		#	STEP 1.9: Bools
 		self.__bAllowTesting		= None
-		#	endregion
-
-		#	region STEP 1.10: Bias
+		
+		#	STEP 1.10: Bias
 		self.__lBias				= None
 
 		self.__fBias				= None
 		
 		self.__fUseBias				= None
 		self.__fClearBias			= None
-		#	endregion
-
-		#	region STPE 1.11: Dropout
-
+		
+		#	STEP 1.11: Dropout
 		self.__lDropOut				= None
 		self.__fDropOut_Input		= None
 		self.__fDropOut_Hidden		= None
+		
+		#	STEP 1.12: Regularizations
+		self.__fWeightDecay			= None
+		self.__fLambda_1			= None
+		self.__fLambda_2			= None
 
+		#
 		#	endregion
 
-		#endregion
+		#	region STEP 2: Public variables
 
-		#region STEP 2: Public variables
-
-		#	region STEP 2.1: Chlidren
-
+		#	STEP 2.1: Chlidren
 		self.bIsFertile				= None
 		self.bIsClassifier			= None
 		self.bIsChild				= None
 		
-		#	endregion
-
-		#	region STEP 2.2: Other
-
+		#	STEP 2.2: Other
 		self.bShowOutput			= None
-		self.bUse_Dropout			= False
-		self.bUse_NoiseInjection	= True
 
+		#	STEP 2.3: Drop out
+		self.bUse_Dropout			= False
+
+		#	STEP 2.4: Regularization
+		self.bUse_NoiseInjection	= True
+		self.bUse_WeightDecay		= False
+		self.bUse_L1				= False
+		self.bUse_L2				= False
+
+		#
 		#	endregion
-		
-		#endregion
 
 		#region STEP 3: Setup - Private variables
 
@@ -917,55 +913,59 @@ class Annie:
 		#	STEP 0: Local variables
 		dOut							= None
 
-		iOut 							= -1
+		iAlgorithm						= rn.randint(0, 1)
 
 		bCheckAcc						= True
 		bComparison						= False
 		bOptimization					= False
-		iAlgorithm						= 1 + rn.randint(0, 1) * 2
 
-		#	region STEP 1: Setup - Local variables
-
+		#	STEP 1: Setup - Local variables
 		_dData.reset()
 
+		#	region STEP 2->11: Argument check
+
+		#	STEP 2: Check if acc flag passed
 		if ("acc" in kwargs):
+			#	STEP 3: Update - Local variables
 			bCheckAcc = kwargs["acc"]
 
+		#	STEP 4: Check if compare flag passed
 		if ("compare" in kwargs):
+			#	STPE 5: Update - Local variable
 			bComparison = kwargs["compare"]
 
+		#	STEP 6: Check if advanced training flag passed
 		if ("advanced_training" in kwargs):
+			#	STEP 7: Update - Local variable
 			bOptimization = kwargs["advanced_training"]
 
+			#	STEP 8: Random 10% to not use advanced training
 			if ((bOptimization) and (rn.uniform(0.0, 1.0) < 0.1)):
+				#	STEP 9: Update - Local variable
 				bOptimization = False
 
+		#	STEP 10: Check if advanced algorithm passed
 		if ("advanced_algorithm" in kwargs):
+			#	STEP 11: Update - Local variable
 			iAlgorithm = kwargs["advanced_algorithm"]
 
+		#
 		#	endregion
 
-		#	region STEP 2: Check if class fully initialized
+		#	region STEP 12->14: Check if class fully initialized
 
+		#	STEP 12: Check if weights initialized
 		if (self.__lWeights == None):
-			#	STEP 3: Get geometry from data
+			#	STEP 13: Get geometry from data
 			dGeo = self.__getGeometry__(_dData)
 
-			#	STEP 4: Init geometry
+			#	STEP 14: Init geometry
 			self.__initGeometry__(dGeo)
 
+		#
 		#	endregion
 
-		#	STEP !!: Check if skipping training
-		if ("skip_training" in kwargs):
-			#	STEP !!: If training should be skipped and testing is allowed
-			if ((kwargs["skip_training"]) and (self.__bAllowTesting)):
-				#	STEP !!: Return 
-				return {}
-
-		#	region STEP 5->23: Train this surrogate
-
-		#		region STEP 5->7: Default training
+		#	region STEP 15->17: Default training
 
 		#	STEP 5: Check if DEF training
 		if (bOptimization == False):
@@ -977,78 +977,48 @@ class Annie:
 			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
 
 		#
-		#		endregion
+		#	endregion
 
-		#		region STEP 8->15: Trust-Region Optimization training
+		#	region STEP 18->21: Trust-Region Optimization training
 
-		#	STEP 8: Check if TRO training
+		#	STEP 18: Check if TRO assisted DEF training
 		elif ((bOptimization == True) and (iAlgorithm == 0)):
-			#	STEP 9: User Output
-			if (self.bShowOutput):
-				print("Annie (train-set) {" + Helga.time() + "} - Training via Trust-Region Optimization")
-
-			#	STEP 10: Outousource tro training
-			iOut = self.__trainTro__(_dData)
-
-		#	STEP 11: Check if TRO assisted DEF training
-		elif ((bOptimization == True) and (iAlgorithm == 1)):
-			#	STEP 12: User Output
+			#	STEP 19: User Output
 			if (self.bShowOutput):
 				print("Annie (train-set) {" + Helga.time() + "} - Training via Trust-Region Optimization assisted Default training")
 
-			#	STEP 13: Outsource tro training
-			iOut = self.__trainTro__(_dData)
+			#	STEP 20: Outsource tro training
+			self.__trainTro__(_dData)
 
-			#	STEP 14: Check TRO output
-			if (iOut < 0):
-				#	STEP 15: Outsoruce def training
-				iOut -= self.__trainDef__(_dData, bCheckAcc)["iterations"]
-
-			else:
-				iOut += self.__trainDef__(_dData, bCheckAcc)["iterations"]
-		
+			#	STEP 21: Outsoruce def training
+			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
+			
 		#
-		#		endregion
+		#	endregion
 		
-		#		region STEP 16->23: Particle-Swarm Optimization training
+		#	region STEP 22->25: Particle-Swarm Optimization training
 
-		#	STEP 16: Check if PSO training
-		elif ((bOptimization == True) and (iAlgorithm == 2)):
-			#	STEP 17: User Output
-			if (self.bShowOutput):
-				print("Annie (train-set) {" + Helga.time() + "} - Training via Particle-Swarm Optimization")
-
-			#	STEP 18: Outsource pso training
-			iOut = self.__trainPso__(_dData)
-
-		#	STEP 19: Chec if PSO assisted DEF training
-		elif ((bOptimization == True) and (iAlgorithm == 3)):
-			#	STEP 20: User Output
+		#	STEP 22: Chec if PSO assisted DEF training
+		elif ((bOptimization == True) and (iAlgorithm == 1)):
+			#	STEP 23: User Output
 			if (self.bShowOutput):
 				print("Annie (train-set) {" + Helga.time() + "} - Training via Particle-Swarm Optimization assisted Default training")
 
-			#	STEP 21: Outsource pso training
-			iOut = self.__trainPso__(_dData)
+			#	STEP 24: Outsource pso training
+			self.__trainPso__(_dData)
 			
-			#	STEP 22: Check PSO output
-			if (iOut < 0):
-				#	STEP 23: Outsource def training
-				iOut -= self.__trainDef__(_dData, bCheckAcc)["iterations"]
-
-			else:
-				iOut += self.__trainDef__(_dData, bCheckAcc)["iterations"]
-		
-		#
-		#		endregion
+			#	STEP 25: Outsource def training
+			dTmp_Out 	= self.__trainDef__(_dData, bCheckAcc)
 
 		#
 		#	endregion
 
-		#	STEP 24: Check if comparison results should be shown
+		#	STEP 26: Check if comparison results should be shown
 		if (bComparison):
+			#	STEP 27: Perform data comparison
 			self.showComparison(_dData)
 
-		#	STEP 25: Populate output dictionary
+		#	STEP 28: Populate output dictionary
 		dOut = {
 			"fitness":					dTmp_Out["fitness"],
 			"iterations":				dTmp_Out["iterations"],
@@ -1059,7 +1029,7 @@ class Annie:
 			"optimization algorithm": 	iAlgorithm
 		}
 
-		#	STEP 26: Return
+		#	STEP 29: Return
 		return dOut
 
 	#
@@ -1429,6 +1399,10 @@ class Annie:
 		self.__fDropOut_Hidden		= _dParams["training methods"]["def"]["drop out"]["hidden drop out"]
 		self.__fDropOut_Input		= _dParams["training methods"]["def"]["drop out"]["input drop out"]
 
+		self.__fWeightDecay			= _dParams["training methods"]["def"]["weight decay"]
+		self.__fLambda_1			= _dParams["training methods"]["def"]["lambda1"]
+		self.__fLambda_2			= _dParams["training methods"]["def"]["lambda2"]
+
 		self.bIsFertile				= _dParams["children"]["is fertile"]
 		self.bIsClassifier			= _dParams["children"]["is classifier"]
 
@@ -1740,47 +1714,56 @@ class Annie:
 		#	STEP 0: Local variables
 		dOut					= None
 
-		inWidth					= None
-		outWidth				= None
-		hidWidth				= None
-		hidLength				= None
+		iWidth_Input			= None
+		iWidth_Output			= None
+		iWidth_Hidden			= None
+		iLength_Hidden			= None
 
 		#	STEP 1: Setup - Local variables
-		inWidth					= _dData.getInputWidth()
-		outWidth				= _dData.getOutputWidth()
+		iWidth_Input	= _dData.getInputWidth()
+		iWidth_Output	= _dData.getOutputWidth()
 
-		hidWidth 				= inWidth + int(rn.random() * inWidth)
+		iWidth_Hidden 	= iWidth_Input + int(rn.random() * iWidth_Input)
 
 		#	STEP 2: Check if geometry is shallow
-		if (self.__dHiddenDetails["is shallow"]):
+		if (( self.__dHiddenDetails["is shallow"] ) and ( rn.uniform(0.0, 1.0) < 0.95 ) and ( self.bUse_Dropout == False ) ):
 			#	STEP 3: Get length probabilities
-			dProbabilities = self.__dHiddenDetails["probabilities"] 
+			dProbabilities	= self.__dHiddenDetails["probabilities"] 
 
 			#	STEP 4: Get random number
-			rand = rn.random()
+			fTmp = rn.uniform(0.0, 1.0)
 
 			#	STEP 5: Check if 2 length
-			if (rand < dProbabilities["2"]):
-				hidLength = 2
+			if (fTmp < dProbabilities["2"]):
+				iLength_Hidden = 2
 
 			#	STEP 6: Check if 3 lenght
-			elif (rand < dProbabilities["2"] + dProbabilities["3"]):
-				hidLength = 3
+			elif (fTmp < dProbabilities["2"] + dProbabilities["3"]):
+				iLength_Hidden = 3
 
 			#	STEP 7: Then must be 1 length
 			else:
-				hidLength = 1
+				iLength_Hidden = 1
 
 		#	STEP 8: Not shallow
 		else:
-			hidLength = inWidth + int(rn.random() * inWidth)
+			#	STEP 9
+			iTmp_Len1	= iWidth_Input + int(rn.random() * iWidth_Input)
+			iTmp_Len2	= rn.randint(4, 7)
+
+			iLength_Hidden	= min(iTmp_Len1, iTmp_Len2)
+
+			#	STEP 10: User output
+			if (self.bShowOutput):
+				print("Annie (get-geo) {" + Helga.time() + "} - Initializing deep net")
+				print("\t~ Depth: " + str(iLength_Hidden), end="\n\n")
 
 		#	STEP 2: Populate output dictionary
 		dOut = {
-			"in width": 		inWidth,
-			"out width": 		outWidth,
-			"hidden width":		hidWidth,
-			"hidden length":	hidLength
+			"in width": 		iWidth_Input,
+			"out width": 		iWidth_Output,
+			"hidden width":		iWidth_Hidden,
+			"hidden length":	iLength_Hidden
 		}
 
 		#	STEP 3: Return
@@ -1939,8 +1922,13 @@ class Annie:
 		lBest_Set			= self.getWeights(password=self.__iPassword)
 		fBest_Fitness		= np.inf
 
+		fScalar_Train		= 10.0
+		fScalar_Test		= 90.0
+
 		iBatch_Iterations	= None
 		iBatch_Size			= self.__iBatchSize
+
+		iEpochs				= self.__iEpochs
 
 		#	region STEP 1->6: Setup - Localv variables
 
@@ -1953,7 +1941,7 @@ class Annie:
 		iBatch_Iterations	= int( np.ceil( dData_Training.getLen() / iBatch_Size ) )
 
 		#	STEP 2: Check for small dataset
-		if ( dData_Training.getLen() < iBatch_Size ):
+		if ( dData_Training.getLen() < iBatch_Size / 2 ):
 			#	STEP 3: Setup - Tmp variable
 			iTmp_BatchSize	= 0
 
@@ -1963,7 +1951,13 @@ class Annie:
 				iTmp_BatchSize += dData_Training.getLen()
 
 			#	STEP 6: Update - Batch Size
-			iBatch_Size = iTmp_BatchSize
+			iBatch_Size 	= iTmp_BatchSize
+
+			fScalar_Train	= 65.0
+			fScalar_Test	= 35.0
+
+		if (self.bUse_Dropout):
+			iEpochs	= int(iEpochs * 0.65)
 
 		#
 		#	endregion
@@ -1971,76 +1965,96 @@ class Annie:
 		#	STEP 7: User Output
 		if (self.bShowOutput):
 			print("Annie (def-training) {" + Helga.time() + "} - Starting default training")
-			print("\t~ Epochs: " 			+ str(self.__iEpochs))
-			print("\t~ Batches per Epoch: " + str(iBatch_Iterations))
-			print("\t~ Batch size: " 		+ str(iBatch_Size))
-			print("\t~ Dataset size: " 		+ str(dData_Training.getLen()) + "\n")
+			print("\t~ Epochs:\t\t"				+ str(iEpochs))
+			print("\t~ Batches per Epoch:\t"	+ str(iBatch_Iterations))
+			print("\t~ Batch size:\t\t"			+ str(iBatch_Size))
+			print("\t~ Dataset size:\t\t"		+ str(dData_Training.getLen()) + "\n")
+
+			print("\t~ Node Drop Out:\t\t" 			+ str(self.bUse_Dropout))
+			print("\t~ Gaussian Noise Injection:\t"	+ str(self.bUse_NoiseInjection))
+			print("\t~ Weight Decay:\t\t\t"			+ str(self.bUse_WeightDecay))
+			print("\t~ L1 Regularization:\t\t" 		+ str(self.bUse_L1))
+			print("\t~ L2 Regularization:\t\t"		+ str(self.bUse_L2) + "\n")
 
 		#	STEP 8: Iterate for epochs
-		for i in range(0, self.__iEpochs):
+		for i in range(0, iEpochs):
 
 			#	STEP 9: Iterate for batch iterations
 			for j in range(0, iBatch_Iterations):
 
-				#	region STEP 10->35: Accuracy check point
+				#	region STEP 10->16: Train
 
-				#	STEP 10: Get accuracy
+				#	STEP 10: Iterate for batch size
+				for _ in range(0, iBatch_Size):
+					#	STEP 11: Get data point
+					dDNR = dData_Training.getRandDNR(noise=self.bUse_NoiseInjection)
+
+					#	STEP 12: Check - Drop Out status
+					if (self.bUse_Dropout):
+						#	STEP 13: Set dropout flag
+						self.__propagateForward__(dDNR["in"], training=True)
+
+					#	STEP 14: No dropout
+					else:
+						#	STEP 15: Propagate forwared
+						self.__propagateForward__(dDNR["in"])
+					
+					#	STEP 16: Outsource - Back Prop
+					self.__propagateBackward__(dDNR["out"])
+
+				#
+				#	endregion
+
+				#	region STEP 17->24: Accuracy check point
+
+				#	STEP 17: Get accuracy
 				dTmp_AccTest	= self.getAccuracy(data=dData_Testing, 	size=dData_Testing.getLen())
 				dTmp_AccTrain	= self.getAccuracy(data=dData_Training, size=dData_Training.getLen())
 
-				#	STEP 11: Get fitness
-				fTmp_Fitness	= 100.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] ) * ( 1.01 - dTmp_AccTrain["percent accuracy"] ) + 90.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] ) + 10.0 * ( 1.01 - dTmp_AccTrain["percent accuracy"] )
+				#	STEP 18: Get fitness
+				fTmp_Fitness	= 100.0 * ( 1.0 - dTmp_AccTest["percent accuracy"] ) * ( 1.01 - dTmp_AccTrain["percent accuracy"] ) + fScalar_Test * ( 1.0 - dTmp_AccTest["percent accuracy"] ) + fScalar_Train * ( 1.01 - dTmp_AccTrain["percent accuracy"] )
 
-				#	STEP 12: Check if best fitness
+				#	STEP 19: Check if best fitness
 				if (fTmp_Fitness < fBest_Fitness):
-					#	STEP 13: Update - Best
+					#	STEP 20: Update - Best
 					lBest_Set		= self.getWeights(password=self.__iPassword)
 					fBest_Fitness	= fTmp_Fitness
 
-					print("\t{" + Helga.time() + "} -", "Fitness: " + str( round( fBest_Fitness, 2 ) ) + "\t", "Test: " + str( round( dTmp_AccTest["percent accuracy"], 2) ), "Train: " + str( round( dTmp_AccTrain["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
+					#	STEP 21: User output
+					if (self.bShowOutput):
+						print("\t{" + Helga.time() + "} -", "Fitness: " + str( round( fBest_Fitness, 2 ) ) + "\t", "Test: " + str( round( dTmp_AccTest["percent accuracy"], 2) ), "Train: " + str( round( dTmp_AccTrain["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
 
-				#
-				#	endregion
-
-				#	region STEP 36->38: Train
-
-				#	STEP 36: Iterate for batch size
-				for _ in range(0, iBatch_Size):
-					#	STEP 37: Get data point
-					dDNR = dData_Training.getRandDNR(noise=self.bUse_NoiseInjection)
-
-					#	STEP 38: Propagate forward and backward
-					self.__propagateForward__(dDNR["in"])
-					self.__propagateBackward__(dDNR["out"])
-
-				#	STEP 14: If temp fitness not converging
-				if (fTmp_Fitness > 10.0 * fBest_Fitness):
-					#	STEP 15: End epoch
-					print("\t{" + Helga.time() + "} - \tEnding epoch " + str(i) + " early")
+				#	STEP 22: If temp fitness not converging
+				elif ( fTmp_Fitness > 10.0 * fBest_Fitness ):
+					#	STEP 23: User output
+					if (self.bShowOutput):
+						print("\t{" + Helga.time() + "} - \tEnding epoch " + str(i) + " early by " + str( iBatch_Iterations - j ) + " batch iterations")
+					
+					#	STEP 24: End epoch
 					break
-
+				
 				#
 				#	endregion
 
-		#	region STEP 39->55: Post training evaluations
+		#	region STEP 25->31: Post training evaluations
 
-		#	STEP 39: Get total iterations
+		#	STEP 25: Get total iterations
 		iTmp = self.__iEpochs * (iBatch_Iterations * iBatch_Size)
 
-		#	STEP 40: Update weights to fittest set
+		#	STEP 26: Update weights to fittest set
 		self.setWeights(password=self.__iPassword, weights=lBest_Set)
 
+		#	STEP 27: Get dataset accuracy
 		dTmp_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True)
 
-		#	STEP 53: Check if output
+		#	STEP 28: User output
 		if (self.bShowOutput):
-			#	STEP 54: Get accuracy as percentage
+			#	STEP 29: Get accuracy as percentage
 			iAccTmp = dTmp_AccTrain["accurate samples"]
 			fAccTmp = dTmp_AccTrain["percent accuracy"]
 
-			#	STEP 55: Print output
+			#	STEP 30: Print output
 			print("")
-			print("\t- Desired accuracy NOT achieved\n")
 			print("\t- Iterations: " + str(iTmp))
 			print("\t- Accurate Samples: " + str(iAccTmp))
 			print("\t- Percentage Accuracy: " + str(round(fAccTmp * 100.0, 2)) + "%\n")						
@@ -2048,17 +2062,17 @@ class Annie:
 		#
 		#	endregion
 
-		#	STEP 56: Populate output dictionary
+		#	STEP 32: Populate output dictionary
 		dOut = {
 			"iterations":	iTmp,
 			"fitness":		fBest_Fitness,
 			"child set":	dTmp_AccTrain["child dataset"]
 		}
 
-		#	STEP 57: Return		
+		#	STEP 33: Return		
 		return dOut
 
-	def __propagateForward__(self, _dataPoint: list) -> None:
+	def __propagateForward__(self, _dataPoint: list, **kwargs) -> None:
 		"""
 		"""
 
@@ -2078,7 +2092,7 @@ class Annie:
 		#	STEP 6: Iterate through inputs
 		for i in range(0, len(_dataPoint)):
 			#	STEP 7: Check if drop out
-			if ((self.bUse_Dropout) and (rn.uniform(0.0, 1.0) < self.__fDropOut_Input)):
+			if ((self.bUse_Dropout) and (rn.uniform(0.0, 1.0) < self.__fDropOut_Input) and ("training" in kwargs)):
 				#	STEP 8: Set node as dropout
 				self.__lNodes[0][i]		= 0.0
 				self.__lDropOut[0][i]	= True
@@ -2114,7 +2128,7 @@ class Annie:
 			#	STEP 19: Iterate through the nodes in the layer
 			for j in range(0, iTmp_Iterations):
 				#	STEP 20: Check - Dropout status
-				if ((self.bUse_Dropout) and (rn.uniform(0.0, 1.0) < self.__fDropOut_Hidden) and (i != len(self.__lNodes) - 1)):
+				if ((self.bUse_Dropout) and (rn.uniform(0.0, 1.0) < self.__fDropOut_Hidden) and (i != len(self.__lNodes) - 1) and ("training" in kwargs)):
 					#	STEP 21: Set node as dropout
 					self.__lNodes[i][j]					= 0.0
 					self.__lNodes_PreActivation[i][j]	= 0.0
@@ -2307,35 +2321,76 @@ class Annie:
         
 		#	STEP 1: Setup - Local variables
 
-		#	STEP 2: Check if momentum should be taken into account
-		if (self.__bMomentumActive):
+		#	STEP 2: Check - Momentum status
+		if (self.__bMomentumActive == False):
 			#	STEP 3: Iterate through weight layers
 			for i in range(0, len(_lWeightErr)):
 				#	STEP 4: Iterate through weights in layer
 				for j in range(0, len(_lWeightErr[i])):
-					if (_lWeightErr[i][j] != 0):
-						#	STEP 5: Calculate delta = -learning * error + momentum * previous weights
-						fDelta = -1.0 * self.__fLearningRate * _lWeightErr[i][j] + self.__fMomentum * self.__lWeights_Momentum[i][j]
-
-						#	STEP 6: Set new weight
-						self.__lWeights[i][j] = round(self.__lWeights[i][j] + fDelta, 6)
-			
-			#	STEP 7: Save momentum weight
-			self.__lWeights_Momentum = cp.copy(self.__lWeights)
-
-		#	STEP 8: No momentum
-		else:
-			#	STEP 9: Iterate through weight layers
-			for i in range(0, len(_lWeightErr)):
-				#	STEP 10: Iterate through weights in layer
-				for j in range(0, len(_lWeightErr[i])):
-					#	STEP 11: Calculate delta = -error
+					#	STEP 5: Calculate delta = -error
 					fDelta = -1.0 * _lWeightErr[i][j]
 
-					#	STEP 12: Save new weight
+					#	STEP 6: Save new weight
 					self.__lWeights[i][j] = round(self.__lWeights[i][j] + fDelta, 6)
 
-		#	STEP 13: Return
+			#	STEP 7: Return
+			return
+
+		#	STEP 8: Iterate through weight layers
+		for i in range(0, len(_lWeightErr)):
+			#	STEP 9: Iterate through weights in layer
+			for j in range(0, len(_lWeightErr[i])):
+				#	STEP 10: Calculate delta = -learning * error + momentum * previous weights
+				fDelta = -1.0 * self.__fLearningRate * _lWeightErr[i][j] + self.__fMomentum * self.__lWeights_Momentum[i][j]
+
+				#	STEP 11: Check - L1 status
+				if (self.bUse_L1):
+					#	STEP 12: Check if weight is positive
+					if (self.__lWeights[i][j] > 0):
+						#	STEP 13: Update - Delta
+						fDelta -= self.__fLearningRate * self.__fLambda_1
+
+					#	STEP 14: Check if weight is negative
+					elif (self.__lWeights[i][j] < 0):
+						#	STEP 15: Update - Detla
+						fDelta += self.__fLearningRate * self.__fLambda_1
+
+				#	STEP 16: Check - L2 status
+				if (self.bUse_L2):
+					#	STEP 17: Update - Delta
+					fDelta -= 2.0 * self.__fLearningRate * self.__fLambda_2 * self.__lWeights[i][j]
+
+				"""
+				#	STEP 18: Check - Drop Out status
+				if (self.bUse_Dropout):
+					#	STEP 19: Check if first weight leayer
+					if (i == 0):
+						#	STEP 20: Update - Delta
+						fDelta *= ( 1.0 - self.__fDropOut_Input )
+
+					#	STEP 21: Not first weight layer
+					else:
+						#	STEP 22: Update - Delta
+						fDelta *= ( 1.0 - self.__fDropOut_Hidden )
+				"""
+					
+				#	STEP 23: Set new weight
+				self.__lWeights[i][j] = round(self.__lWeights[i][j] + fDelta, 6)
+		
+		#	STEP 24: Save momentum weight
+		self.__lWeights_Momentum = cp.copy(self.__lWeights)
+
+		#	STEP 13: Check - Weight Decay status
+		if (self.bUse_WeightDecay):
+			#	STEP 14: Iterate through weight layers
+			for i in range(0, len( self.__lWeights )):
+				#	STEP 15: Iterate through weights in layer
+				for j in range(0, len( self.__lWeights[i] )):
+					#	STEP 16: Update weight
+					self.__lWeights[i][j]	*= (1.0 - self.__fWeightDecay )
+
+
+		#	STEP 17: Return
 		return
 
 	#
@@ -2690,9 +2745,6 @@ class Annie:
 		#	STEP 4: Set new weights
 		self.__setWeights(dResults["surrogate"].getWeights(password=self.__iPassword))
 
-		#	STEP 5: Update weights
-		self.__setAcFunction__(algorithm=dResults["algorithm"], scalar=dResults["scalar"])
-
 		#	STEP 6: Update password
 		self.__resetPassword__()
 
@@ -2752,9 +2804,6 @@ class Annie:
 		#	STEP 4: Set new weights
 		self.__setWeights(dResults["surrogate"].getWeights(password=self.__iPassword))
 		
-		#	STEP 5: Update weights
-		self.__setAcFunction__(algorithm=dResults["algorithm"], scalar=dResults["scalar"])
-
 		#	STEP 6: Update password
 		self.__resetPassword__()
 
@@ -2788,7 +2837,7 @@ class Annie:
 			dDNR = _dData.getRandDNR()
 
 			self.__propagateForward__(dDNR["in"])
-			print( Helga.round( dDNR["out"], 1) , Helga.round( self.getOutput(), 1) )
+			print( Helga.round( dDNR["out"], 1) , Helga.round( self.getOutput(), 1), sep="\t")
 
 		print("\n-----------------------------", "\tClassification\t\t", "-----------------------------\n")
 		
@@ -2825,15 +2874,10 @@ if (__name__ == "__main__"):
 
 		fire = Annie()
 		
-		fire.bShowOutput 			= True
+		fire.bShowOutput 	= True
+		fire.bUse_L1		= True
 
-		if (x == "x"):
-			fire.bUse_NoiseInjection	= True
-
-		else:
-			fire.bUse_NoiseInjection	= False
-
-		y = fire.trainSet(cp.deepcopy(dat), advanced_training=False, compare=True)
+		y = fire.trainSet(cp.deepcopy(dat), advanced_training=True, compare=True)
 
 		print("---", "---", sep="\n", end="\n\n")
 

@@ -499,8 +499,7 @@ class SpongeBob:
 
         """
 
-        #   region STEP 0: Local variables
-        
+        #   STEP 0: Local variables
         surrogate               = None
         password                = None
 
@@ -508,58 +507,84 @@ class SpongeBob:
 
         garry                   = None
 
-        dTrainingData           = None
         dTestingData            = None
 
         lCandidates             = []
         lFitness                = []
-
-        iCount                  = 0
         
+        #   region STEP 1->6: Error checking
+
+        #   STEP 1: Check if surrogate arg passed
+        if ("surrogate" not in kwargs):
+            #   STEP 2: Error handling
+            raise Exception("An error occured in SpongeBob.__troTraining__() -> Step 1: NO surrogate arg passed")
+
+        #   STEP 3: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 4: Error handling
+            raise Exception("An error occured in SpongeBob.__troTraining__() -> Step 3: No data arg passed")
+
+        #   STEP 5: Check if password arg passed
+        if ("password" not in kwargs):
+            #   STEP 6: Error handling
+            raise Exception("An error occured in SpongeBob.__troTraining__() -> Step 5: No password arg passed")
+
+        #
         #   endregion
-
-        #   region STEP 1: Setup - Local variables
-
-        #                       STEP 1.1: Init algorithm parameters
-        dTroParams              = self.__getParams__(optimizer=ga.TRO)
-
-        #                       STEP 1.2: Init datasets
-        dTestingData            = kwargs["data"].splitData()
         
-        dTrainingData           = dTestingData["training"]
-        dTestingData            = dTestingData["testing"]
-        
-        #                       STEP 1.3: Setup surrogate
-        
-        #       STEP 1.3.1: Init surrogate and password variables
-        surrogate               = kwargs["surrogate"]
-        password                = kwargs["password"]
+        #   region STEP 7->13: Setup - Local variables
 
-        #       STEP 1.3.2: Init surrogate activation funcitons
-        surrogate.setAcFunction(password=password, algorithm="tro", scalar=dTroParams["scalar"])
+        #   STEP 7: Init algorithm parameters
+        dTroParams      = self.__getParams__(optimizer=ga.TRO)
+
+        #   STEP 8: Init datasets
+        dTestingData    = kwargs["data"].splitData()
         
-        #       STEP 1.3.3: Init candidate list
+        dData_Train     = dTestingData["training"]
+        dData_Test      = dTestingData["testing"]
+        
+        #   STEP 9: Init surrogate and password variables
+        surrogate       = kwargs["surrogate"]
+        password        = kwargs["password"]
+
+        #   STEP 10: Init surrogate activation funcitons
+        
+        #   STEP 11: Init candidate list
         lCandidates.append(surrogate.getWeights(password=password))
 
-        #       STEP 1.3.4: Init fitness list
-        lFitness                = self.__getFitness__(type="surrogate", candidates=lCandidates, surrogate=surrogate, data=dTestingData, password=password)
+        #   STEP 12: Init fitness list
+        lFitness        = self.__getFitness__(type="surrogate", candidates=lCandidates, surrogate=surrogate, data=dData_Test, password=password)
         
-        #                       STEP 1.4: Init genetic algorithm
-        garry                   = Garry(dTroParams["candidates"])
+        #   STEP 13: Init genetic algorithm
+        garry           = Garry(dTroParams["candidates"])
 
         garry.initTroParticles(candidates=lCandidates)
         garry.initTroFitness(fitness=lFitness)
         garry.initTroParams(region=dTroParams["region"])
 
+        #   STPE 14: Check if L1
+        fTmp    = rn.uniform(0.0, 1.0)
+
+        #   STEP 15: Check if L1
+        if (fTmp < 0.65):
+            #   STEP 16: Set - L1
+            surrogate.bUse_L1   = True
+
+        #   STEP 17: Check if L2
+        elif (fTmp < 0.85):
+            #   STEP 18: Set - L2
+            surrogate.bUse_L2   = True
+
+        #
         #   endregion
 
-        #   STEP 2: User Output
+        #   STEP 14: User Output
         if (self.bShowOutput):
             print("SpongeBob (train-srg-tro) {" + Helga.time() + "} - Starting Trust-Region Optimization\n")
 
-        #   STEP 3: Perform specified number of iterations
+        #   STEP 15: Perform specified number of iterations
         for i in range(0, dTroParams["iterations"] + 1):
-            #   STEP 4: Clear necesarry variables
+            #   STEP 16: Clear necesarry variables
             lCandidates     = []
             lFitness        = []
 
@@ -572,7 +597,7 @@ class SpongeBob:
                 surrogate.setWeights(weights=lCandidates[j], password=password)
 
                 #   STEP 8: Append candidate fitness
-                lFitness.append(surrogate.getAFitness(data=dTestingData))
+                lFitness.append(surrogate.getAFitness(data=dData_Test))
 
             #   STEP 9: Update garry
             garry.setPopulation(candidates=lCandidates)
@@ -584,15 +609,15 @@ class SpongeBob:
             #   STEP 11: Perform default training
             for j in range(0, dTroParams["iterations-def"]):
                 #   STEP 12: Get random data sample
-                dDNR = dTrainingData.getRandDNR()
+                dDNR = dData_Train.getRandDNR(noise=True)
 
                 #   STEP 13: Perform propagation
-                surrogate.propagateForward(data=dDNR["in"], password=password)
-                surrogate.propagateBackward(data=dDNR["out"], password=password)
+                surrogate.propagateForward( data=dDNR["in"], password=password)
+                surrogate.propagateBackward( data=dDNR["out"], password=password)
 
             #   STEP 14: Update garry
-            garry.vBestSolution.lCurrPosition = surrogate.getWeights(password=password)
-            garry.fBestSolution = surrogate.getAFitness(data=dTestingData)
+            garry.vBestSolution.lCurrPosition   = surrogate.getWeights(password=password)
+            garry.fBestSolution                 = surrogate.getAFitness(data=dData_Test)
 
             #   STEP 15: Perform trust-region optimization
             garry.tro()
@@ -602,49 +627,8 @@ class SpongeBob:
                 #   STEP 17: Exit loop
                 break
 
-            #   STEP 18: Check if accucacy check needs to be performed
-            if (iCount == dTroParams["check point"]):
-                #   STEP 19: Reset counter
-                iCount = 0
-
-                #   STEP 20: Get accuracy as percentage
-                dHold = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen())
-                iAcc = dHold["accurate samples"]
-                fAcc = dHold["percent accuracy"]
-
-                #   STEP 21: Check if accuracy requirement met
-                if (fAcc >= dTroParams["requirement"]):
-                    #   STEP 22: User Output
-                    if (self.bShowOutput):
-                        print("SpongeBob (train-srg-tro) {" + Helga.time() + "} - Trust-Region Optimization successful")
-                        print("\tTotal Iterations: " + str(i))
-                        print("\tAccurate Samples: " + str(iAcc))
-                        print("\tPercent Accuracy: " + str(round(fAcc * 100.0, 2)) + "%\n")
-
-                    #   STEP 23: Populate output dictionary
-                    dOut = {
-                        "accuracy":     iAcc,
-                        "algorithm":    "tro",
-                        "iterations":   i,
-                        "scalar":       dTroParams["scalar"],
-                        "surrogate":    surrogate
-                    }
-
-                    #   STEP !!: Check that iAcc > 0
-                    if (iAcc <= 0):
-                        dOut["inverse accuracy"] = np.inf
-
-                    else:
-                        dOut["inverse accuracy"] = float(dHold["iterations"] / iAcc)
-
-                    #   STEP 24: Return
-                    return dOut
-
-            #   STEP 25: Increment counter
-            iCount += 1
-
         #   STEP 26: Get accuracy as percentage
-        dHold = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen())
+        dHold = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen(), full_set=True)
         iAcc = dHold["accurate samples"]
         fAcc = dHold["percent accuracy"]
 
@@ -819,3 +803,12 @@ class SpongeBob:
     
 #
 #endregion
+
+#region Testing
+
+
+if (__name__ == "__main__"):
+    Helga.nop()
+
+#
+#   endregion

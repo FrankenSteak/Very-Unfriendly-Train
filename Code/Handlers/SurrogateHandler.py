@@ -777,14 +777,26 @@ class Golem:
             vSRG.bShowOutput            = True
             vSRG.bUse_NoiseInjection    = True
 
+            fTmp    = rn.uniform(0.0, 1.0)
+
+            if (fTmp < 0.7):
+                vSRG.bUse_L1            = True
+
+            elif (fTmp < 0.8):
+                vSRG.bUse_Dropout       = True
+                vSRG.bUse_L2            = True
+
+            elif (fTmp < 0.9):
+                vSRG.bUse_L2            = True
+                
             #   STEP 4: Train surrogate
-            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=False)
+            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=True)
             fTmp_Fitness    = fTmp_Fitness["fitness"]
 
             #   STEP 5: Get accuracy and fitness
             fTmp_Accuracy   = vSRG.getAccuracy(data=vData, size=vData.getLen(), full_set=True)
 
-            fTmp_Fitness    = fTmp_Fitness * (1.1 - fTmp_Accuracy["percent accuracy"])
+            fTmp_Fitness    = fTmp_Fitness * ( 1.1 - fTmp_Accuracy["percent accuracy"] )
 
             #   STEP 6: Append to output lists
             lAccuracy.append( fTmp_Accuracy["percent accuracy"] )

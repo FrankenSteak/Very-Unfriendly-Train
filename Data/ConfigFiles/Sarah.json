@@ -51,7 +51,7 @@
                         },
                         "back propagation":
                         {
-                            "default": 15
+                            "default": 40
                         }
                     },
                     "candidates":

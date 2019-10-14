@@ -15,6 +15,7 @@ from    Code.Enums.Swarms               import Swarms               as sw
 from    Code.Optimizers.Particle        import UwU
 
 from    Helpers.Config                  import Conny
+from    Helpers.GeneralHelpers          import Helga
 
 #endregion
 
@@ -1544,3 +1545,11 @@ class SwarmChan:
 
 #
 #endregion
+
+#   region Testing
+
+if (__name__ == "__main__"):
+    Helga.nop()
+
+#
+#   endregion

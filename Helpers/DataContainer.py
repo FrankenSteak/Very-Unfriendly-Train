@@ -1009,7 +1009,7 @@ class Data:
                 #   STEP 18: Loop through inputs
                 for i in range(0, len( lData_Inputs )):
                     #   STEP 19: Add noise to input
-                    lData_Inputs[i] += rn.gauss(0.0, 0.01)
+                    lData_Inputs[i] += rn.gauss(0.0, 0.02)
 
             #   STEP 20: Populate output dictionary
             dOut = {

@@ -478,7 +478,7 @@ class Sarah:
 
         """
 
-        #   region STEP 0: Local variables
+        #   STEP 0: Local variables
 
         surrogate               = None
         password                = None
@@ -493,54 +493,77 @@ class Sarah:
         lCandidates             = []
         lFitness                = []
 
-        iCount                  = 0
+        #   region STEP 1->6: Error checking
 
+        #   STEP 1: Check if surrogate arg passed
+        if ("surrogate" not in kwargs):
+            #   STEP 2: Error handling
+            raise Exception("An error occured in Sarah.__psoTraining__() -> Step 1: No surorgate arg passed")
+
+        #   STEP 3: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 4: Error handling
+            raise Exception("An error occured in Sarah.__psoTraining__() -> Stpe 3: No data arg passed")
+
+        #   STEP 5: Check if password arg passed
+        if ("password" not in kwargs):
+            #   STEP 6: Error handling
+            raise Exception("An error occured in Sarah.__psoTraining__() -> Step 5: No password arg passed")
+
+        #
         #   endregion
 
-        #   region STEP 1: Setup - Local variables
+        #   region STEP 7->17: Setup - Local variables
 
-        #                       STEP 1.1: Init algorithm parameters
-        dPsoParams              = self.__getParams__(optimizer=sw.PSO)
+        #   STEP 7: Init algorithm parameters
+        dPsoParams      = self.__getParams__(optimizer=sw.PSO)
 
-        #                       STEP 1.2: Init datasets
-        dTestingData            = kwargs["data"].splitData()
+        #   STEP 8: Init datasets
+        dTestingData    = kwargs["data"].splitData()
 
-        dTrainingData           = dTestingData["training"]
-        dTestingData            = dTestingData["testing"]
+        dTrainingData   = dTestingData["training"]
+        dTestingData    = dTestingData["testing"]
 
-        #               region  STEP 1.3: Setup surrogate
-        
-        #       STEP 1.3.1: Set surrogate and password variables
-        surrogate               = kwargs["surrogate"]
-        password                = kwargs["password"]
+        #   STEP 9: Set surrogate and password variables
+        surrogate       = kwargs["surrogate"]
+        password        = kwargs["password"]
 
-        #       STEP 1.3.2: Init surrogate activation functions
-        surrogate.setAcFunction(password=password, algorithm="pso", scalar=dPsoParams["scalar"])
+        #   STEP 10: Init candidate list
+        lCandidates     = self.__getCandidates__(optimizer=sw.PSO, params=dPsoParams, initial=surrogate.getWeights(password=password))
 
-        #       STEP 1.3.3: Init candidate list
-        lCandidates             = self.__getCandidates__(optimizer=sw.PSO, params=dPsoParams, initial=surrogate.getWeights(password=password))
+        #   STEP 11: Init fitness list
+        lFitness        = self.__getFitness__(type="surrogate", candidates=lCandidates, surrogate=surrogate, data=dTestingData, password=password) 
 
-        #       STEP 1.3.4: Init fitness list
-        lFitness                = self.__getFitness__(type="surrogate", candidates=lCandidates, surrogate=surrogate, data=dTestingData, password=password) 
-
-        #       endregion
-
-        #                       STEP 1.4: Init swarm
-        swarm                   = SwarmChan(dPsoParams["candidates"])
+        #   STEP 12: Init swarm
+        swarm           = SwarmChan(dPsoParams["candidates"])
 
         swarm.initPsoPositions( lCandidates )
         swarm.initPsoFitness( lFitness )
         swarm.initPsoParams( dPsoParams["phi1"], dPsoParams["phi2"], dPsoParams["eta"] )
+        
+        #   STEP 13: Get rand
+        fTmp            = rn.uniform(0.0, 1.0)
 
+        #   STEP 14: Check if L1
+        if (fTmp < 0.65):
+            #   STEP 15: Set - L1
+            surrogate.bUse_L1  = True
+
+        #   STEP 16: Check if L2
+        elif  (fTmp < 0.85):
+            #   STPE 17: Set - L2
+            surrogate.bUse_L2   = True
+
+        #
         #   endregion
 
-        #   STEP 2: User Output
+        #   STEP 18: User Output
         if (self.bShowOutput):
             print("Sarah (train-srg-pso) {" + Helga.time() + "} - Starting Particle-Swarm Optimization\n")
 
-        #   STEP 3: Perform number of iterations
+        #   STEP 19: Perform number of iterations
         for i in range(0, dPsoParams["iterations"] + 1):
-            #   STEP 4: Reset variables
+            #   STEP 20: Reset variables
             lFitness    = []
             lCandidates = []
 
@@ -566,7 +589,7 @@ class Sarah:
             #   STEP 11: Perform default training
             for j in range(0, dPsoParams["iterations-def"]):
                 #   STEP 12: Get random data sample
-                dDNR = dTrainingData.getRandDNR()
+                dDNR = dTrainingData.getRandDNR(noise=True)
 
                 #   STEP 13: Perform propagation
                 surrogate.propagateForward(data=dDNR["in"], password=password)
@@ -578,51 +601,10 @@ class Sarah:
             #
             #   endregion
 
-            #   STEP 15: Check if accuracy check needs to be performed
-            if (iCount == dPsoParams["check point"]):
-                #   STEP 16: Reset counter
-                iCount = 0
-
-                #   STEP 17: Get accuracy as percentage
-                dHold = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen())
-                iAcc = dHold["accurate samples"]
-                fAcc = dHold["percent accuracy"]
-
-                #   STEP 18: Check if accuracy requirement met
-                if (fAcc >= dPsoParams["requirement"]):
-                    #   STEP 19: User Output
-                    if (self.bShowOutput):
-                        print("Sarah (train-srg-pso) {" + Helga.time() + "} - Particle-Swarm Optimization succcessful")
-                        print("\tTotal iterations: " + str(i))
-                        print("\tAccurate Samples: " + str(iAcc))
-                        print("\tPercent Accuracy: " + str(round(fAcc * 100.0, 2)) + "%\n")
-
-                    #   STEP 20: Populate output dictionary
-                    dOut = {
-                        "accuracy":     iAcc,
-                        "algorithm":    "pso",
-                        "iterations":   i,
-                        "scalar":       dPsoParams["scalar"],
-                        "surrogate":    surrogate
-                    }
-
-                    #   STEP !!: Check that iAcc > 0
-                    if (iAcc <= 0):
-                        dOut["inverse accuracy"] = np.inf
-
-                    else:
-                        dOut["inverse accuracy"] = float(dHold["iterations"] / iAcc)
-
-                    #   STEP 21: Return
-                    return dOut
-
-            #   STEP 22: Increment counter
-            iCount += 1
-
         #   STEP 24: Get accuracy as percentage
-        dHold = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen())
-        iAcc = dHold["accurate samples"]
-        fAcc = dHold["percent accuracy"]
+        dHold   = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen(), full_set=True)
+        iAcc    = dHold["accurate samples"]
+        fAcc    = dHold["percent accuracy"]
 
         #   STEP 23: User Output
         if (self.bShowOutput):

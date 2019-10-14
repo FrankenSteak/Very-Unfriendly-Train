@@ -279,12 +279,12 @@ class Natalie:
         #   STEP 14: Check if primary is tro
         if (kwargs["primary"] == "tro"):
             #   STEP 15: Outsource
-            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=False, save=bSave, surrogate=False, retension=True)
+            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False, retension=True)
 
         #   STEP 16: Check if primary is nm
         elif (kwargs["primary"] == "nm"):
             #   STEP 17: Outsource
-            dPrimary_Results    = self.__nm__(stage="Primary", new=bNew, cull=False, save=bSave, surrogate=False)
+            dPrimary_Results    = self.__nm__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False)
 
         #   STEP 18: Unrecognized optimizer
         else:
@@ -299,12 +299,12 @@ class Natalie:
         #   STEP 20: Check if secondary is tro
         if (kwargs["secondary"] == "tro"):
             #   STEP 21: Outsource
-            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=False, save=bSave, surrogate=bSurrogate)
+            self.__tro__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
 
         #   STEP 22: Check if secondary is nm
         if (kwargs["secondary"] == "nm"):
             #   STEP 23: Outsource
-            self.__nm__(stage="Secondary", center=dPrimary_Results, new=False, cull=False, save=bSave, surrogate=bSurrogate)
+            self.__nm__(stage="Secondary", center=dPrimary_Results, new=False, cull=bCull, save=bSave, surrogate=bSurrogate)
 
         #   STEP 24: Unrecognized optimizer
         else:
@@ -662,64 +662,95 @@ class Natalie:
         #
         #   endregion
 
-        #   STEP 7: Update - Local variables
+        #   STEP 6: Update - Local variables
         fOriginal_Area  = self.__dAnt_Center["substrate"]["l"] * self.__dAnt_Center["substrate"]["w"]
 
-        #   STEP 6: Iterate through antenna
+        #   STEP 7: Iterate through antenna
         for i in range(0, len(kwargs["ant"])):
-            #   STEP 7: Get current ant and fitness
-            dAnt = kwargs["ant"][i]
-            dFit = kwargs["fitness"][i]["fitness"]["frequency"]
+            #   STEP 8: Setup - Tmp Variables
+            dTmp_Ant        = kwargs["ant"][i]
+            dTmp_Fit        = kwargs["fitness"][i]["fitness"]["frequency"]
 
-            #   STEP 8: Calculate area of antenna
-            fTmp_Area   = dAnt["substrate"]["l"] * dAnt["substrate"]["w"]
+            dTmp_Results    = {}
 
-            #   STEP 9: Get left fitness
-            fTmp_Left   = ( dFit["lower"]["total"] ) * 0.5
+            #   STEP 9: Calculate area of antenna
+            fTmp_Area   = dTmp_Ant["substrate"]["l"] * dTmp_Ant["substrate"]["w"]
 
-            #   STEP 10: Get center firness
-            fTmp_Mid    = ( dFit["desired"]["total"] ) * 0.7
+            #   STEP 10: Get left fitness
+            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.5
 
-            #   STEP 11: Get right fitness
-            fTmp_Right  = ( dFit["upper"]["total"] ) * 0.3
+            #   STEP 11: Get center firness
+            fTmp_Mid    = ( dTmp_Fit["desired"]["total"] ) * 0.7
 
-            #   STEP 12: Get total area fitness
+            #   STEP 12: Get right fitness
+            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.3
+
+            #   STEP 13: Get total area fitness
             fTmp_Area   = fTmp_Area / fOriginal_Area
 
-            #   STEP 13: Get total frequency fitness
+            #   STEP 14: Get total frequency fitness
             fTmp_Freq_Tot   = fTmp_Left + fTmp_Mid + fTmp_Right
             
-            #   STEP 18: Get overall fitness
+            #   STEP 15: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
             fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.8 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
 
-            #   STEP 15: Populate output dictionary
-            dTmp = {
-                "items":    2,
+            #   STEP 16: Check if hard data provided
+            if ("hard" in dTmp_Fit):
+                #   STEP 17: Populate fitness dictionary
+                dTmp_Results    = {
+                    "items":    2,
 
-                "0":        "desired",
-                "1":        "area",
-                "2":        "final",
-                #"3":        "freq",
-                #"4":        "lower",
-                #"5":        "upper",
+                    "0":        "area",
+                    "1":        "freq",
 
-                "lower":            dFit["lower"]["total"],
-                "desired":          dFit["desired"]["total"],
-                "upper":            dFit["upper"]["total"],
+                    "lower":    dTmp_Fit["lower"]["total"],
+                    "desired":  dTmp_Fit["desired"]["total"],
+                    "upper":    dTmp_Fit["upper"]["total"],
 
-                "area":             fTmp_Area,
-                "freq":             fTmp_Freq_Tot,
-                "final":            fTmp_Fitness,
+                    "area":     fTmp_Area,
+                    "freq":     fTmp_Freq_Tot,
+                    "final":    fTmp_Fitness,
 
-                "dir":              kwargs["fitness"][i]["dir"]
-            }
+                    "dir":      kwargs["fitness"][i]["dir"] 
+                }
+
+                #   STEP 18: Loop through hard data
+                for j in range(0, dTmp_Fit["hard"]["items"] ):
+                    #   STEP 19: Add to fitness dictionary
+                    dTmp_Results[ "h" + str( j ) ]  = dTmp_Fit["hard"][ str( j ) ]
+
+                Helga.nop()
+
+            #   STEP 20: No hard data provided
+            else:
+                #   STEP 21: Populate output dictionary
+                dTmp_Results = {
+                    "items":    1,
+
+                    "0":        "final",
+                    "1":        "desired",
+                    "2":        "area",
+                    #"3":        "freq",
+                    #"4":        "lower",
+                    #"5":        "upper",
+
+                    "lower":    dTmp_Fit["lower"]["total"],
+                    "desired":  dTmp_Fit["desired"]["total"],
+                    "upper":    dTmp_Fit["upper"]["total"],
+
+                    "area":     fTmp_Area,
+                    "freq":     fTmp_Freq_Tot,
+                    "final":    fTmp_Fitness,
+
+                    "dir":      kwargs["fitness"][i]["dir"]
+                }
 
 
-            #   STEP 16: Append to output
-            lOut.append(dTmp)
+            #   STEP 22: Append to output
+            lOut.append(dTmp_Results)
 
-        #   STEP 3: Return
+        #   STEP 23: Return
         return lOut
 
     def __getCandidates__(self, **kwargs) -> list:
@@ -926,7 +957,6 @@ class Natalie:
 
         #   STPE 0: Local variables
         fOut                    = None
-        fOffset                 = None
 
         #   STEP 1: Setup - Local variables
         
@@ -958,7 +988,7 @@ class Natalie:
         #   STEP 22: Get offset
         fOffset = kwargs["center"] + kwargs["scalars"]["range"] * ( kwargs["scalars"]["region"] - 0.5 ) * 2.0
 
-        fOut = rn.gauss(fOffset, kwargs["scalars"]["range"] * kwargs["region"])
+        fOut    = rn.gauss(fOffset, kwargs["scalars"]["range"] * kwargs["region"])
 
         #   STEP 26: Check if lw arg passed
         if ("lw" in kwargs):
@@ -2171,7 +2201,7 @@ class Natalie:
             #   STEP 24: Check - Surrogate status
             if (bSurrogate):
                 #   STEP 25: Update - Scope variables
-                iTmp_Region     = 0.25 * float(iRegion_Srg + iRegion_Alg) / float(self.__iTRO_Region_SRG + self.__iTRO_Region)
+                iTmp_Region     = 0.5 * float(iRegion_Srg + iRegion_Alg) / float(self.__iTRO_Region_SRG + self.__iTRO_Region)
 
             #   STEP 26: No surrogate
             else:
@@ -2266,7 +2296,7 @@ class Natalie:
                 #   STEP 53: Not retension
                 else:
                     #   STEP 54: Update - Data dictionary
-                    dTmp_Data       = self.__moldData__(candidates=lCandidates, fitness=lFitness)
+                    dTmp_Data       = self.__moldData__(candidates=lCandidates,     fitness=lFitness)
 
                 #   STEP 55: Setup - Final data ranges
                 dTmp_DataRange      = {
@@ -2283,8 +2313,8 @@ class Natalie:
                     lTmp_DataMap_Out.append(j)
 
                 dTmp_DataMap    = {
-                    "in": lTmp_DataMap_In,
-                    "out": lTmp_DataMap_Out
+                    "in":   lTmp_DataMap_In,
+                    "out":  lTmp_DataMap_Out
                 }
 
                 #   STEP 57: Setup - Create new Data container
