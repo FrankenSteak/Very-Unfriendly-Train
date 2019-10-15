@@ -279,7 +279,7 @@ class Natalie:
         #   STEP 14: Check if primary is tro
         if (kwargs["primary"] == "tro"):
             #   STEP 15: Outsource
-            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False, retension=True)
+            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False)
 
         #   STEP 16: Check if primary is nm
         elif (kwargs["primary"] == "nm"):
@@ -294,6 +294,7 @@ class Natalie:
         #
         #   endregion
 
+        """
         #   region STEP 20->25: Secondary optimization
 
         #   STEP 20: Check if secondary is tro
@@ -313,6 +314,7 @@ class Natalie:
 
         #
         #   endregion
+        """
 
         #   STEP 26: Return
         return
@@ -699,9 +701,9 @@ class Natalie:
             if ("hard" in dTmp_Fit):
                 #   STEP 17: Populate fitness dictionary
                 dTmp_Results    = {
-                    "items":    2,
+                    "items":    1,
 
-                    "0":        "area",
+                    "0":        "final",
                     "1":        "freq",
 
                     "lower":    dTmp_Fit["lower"]["total"],
@@ -1107,100 +1109,106 @@ class Natalie:
         
         #   STEP 14: Update - Local variables
         dOut = cp.deepcopy(kwargs["center"])
+
+        #   STEP 15: Check if there are elliptical slots
+        if (kwargs["center"]["elliptical"]["items"] > 0):
+            #   STEP 16: Setup - Tmp dictionaries
+            dTmp_Slots  = dOut["elliptical"]
+            dTmp_Scalar = kwargs["scalars"]["ellipse"]["change slot"]
+
+            #   STEP 17: Loop through slots
+            for i in range(0, dTmp_Slots["items"]):
+                #   STEP 18: Check - Change probability
+                if (rn.uniform(0.0, 1.0) < dTmp_Scalar["probability"]):
+                    #   STEP 19: Setup - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[ str(i) ]
+
+                    #   STEP 20: Outsource - SLot parameter randomization
+                    dTmp_CurrSlot["x"]  = self.__getRandVal__(center=dTmp_CurrSlot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                    dTmp_CurrSlot["y"]  = self.__getRandVal__(center=dTmp_CurrSlot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
+                    dTmp_CurrSlot["l"]  = self.__getRandVal__(center=dTmp_CurrSlot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"], lw=True)
+                    dTmp_CurrSlot["w"]  = self.__getRandVal__(center=dTmp_CurrSlot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"], lw=True)
         
-        #   STEP 15->41: Loop through current slots
-        for i in range(0, dOut["items"]):
-            #   STEP 16: Setup - Scope variables
-            dTmp_Slot   = dOut[str(i)]
+        #   STEP 21: Check if there are rectangular slots
+        if (kwargs["center"]["rectangular"]["items"] > 0):
+            #   STEP 22: Setup - Tmp dictionaries
+            dTmp_Slots  = dOut["rectangular"]
+            dTmp_Scalar = kwargs["scalars"]["square"]["change slot"]
 
-            #   STEP 17: Check if square slot
-            if (dTmp_Slot["type"] == "square"):
-                #   STEP 18: Check probability of change
-                if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["square"]["change slot"]["probability"]):
-                    #   STEP 19: Setup - Tmp scalar dictionary
-                    dTmp_Scalar = kwargs["scalars"]["square"]["change slot"]
+            #   STEP 23: Loop through slots
+            for i in range(0, dTmp_Slots["items"]):
+                #   STEP 24: Check - Change probability
+                if (rn.uniform(0.0, 1.0) < dTmp_Scalar["probability"]):
+                    #   STEP 25: Setup - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[ str(i) ]
 
-                    #   STEP 20: Outsource - Slot parameter randomization
-                    dTmp_Slot["x"]  = self.__getRandVal__(center=dTmp_Slot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
-                    dTmp_Slot["y"]  = self.__getRandVal__(center=dTmp_Slot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
-                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"], lw=True)
-                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"], lw=True)
+                    #   STEP 26: Outsource - SLot parameter randomization
+                    dTmp_CurrSlot["x"]  = self.__getRandVal__(center=dTmp_CurrSlot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                    dTmp_CurrSlot["y"]  = self.__getRandVal__(center=dTmp_CurrSlot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
+                    dTmp_CurrSlot["l"]  = self.__getRandVal__(center=dTmp_CurrSlot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"], lw=True)
+                    dTmp_CurrSlot["w"]  = self.__getRandVal__(center=dTmp_CurrSlot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"], lw=True)
+        
+        #   STEP 27: Check if there are triangular sltos
+        if (kwargs["center"]["triangular"]["items"] > 0):
+            #   STEP 28: Setup - Tmp dictionaries
+            dTmp_Slots  = dOut["triangular"]
+            dTmp_Scalar = kwargs["scalars"]["triangle"]["change slot"]
 
-            #   STEP 21: Check if elliptical slot
-            elif (dTmp_Slot["type"] == "ellipse"):
-                #   STEP 22: Check probability of change
-                if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["ellipse"]["change slot"]["probability"]):
-                    #   STEP 23: Setup - Tmp scalar dictionary
-                    dTmp_Scalar = kwargs["scalars"]["ellipse"]["change slot"]
+            #   STPE 29: Loop through slots
+            for i in range(0, dTmp_Slots["items"]):
+                #   STPE 30: Check - Change probability
+                if (rn.uniform(0.0, 1.0) < dTmp_Scalar["probability"]):
+                    #   STEP 31: Setup - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[ str(i) ]
 
-                    #   STEP 24: Outsource - Slot parameter randomization
-                    dTmp_Slot["x"]  = self.__getRandVal__(center=dTmp_Slot["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
-                    dTmp_Slot["y"]  = self.__getRandVal__(center=dTmp_Slot["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
-                    dTmp_Slot["l"]  = self.__getRandVal__(center=dTmp_Slot["l"], region=kwargs["region"], scalars=dTmp_Scalar["l"], lw=True)
-                    dTmp_Slot["w"]  = self.__getRandVal__(center=dTmp_Slot["w"], region=kwargs["region"], scalars=dTmp_Scalar["w"], lw=True)
+                    #   STEP 32: Loop through points in slot
+                    for j in range(0, dTmp_CurrSlot["items"]):
+                        #   STEP 33: Outsource slot parameter randomization
+                        dTmp_CurrSlot[str(j)]["x"]  = self.__getRandVal__(center=dTmp_CurrSlot[str(j)]["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                        dTmp_CurrSlot[str(j)]["y"]  = self.__getRandVal__(center=dTmp_CurrSlot[str(j)]["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
 
-            #   STEP 25: Check if trianular slot
-            elif (dTmp_Slot["type"] == "triangle"):
-                #   STEP 26: Check probability of change
-                if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["triangle"]["change slot"]["probability"]):
-                    #   STEP 27: Check that triangle has at least three corners
-                    if (dTmp_Slot["items"] < 3):
-                        #   STEP 28: Error handling
-                        raise Exception("An error occured in Natalie.__getSlots__() -> Step 27: Triangle must have three points")
+        #   STEP 34: Check if there are any polygonal slots
+        if (kwargs["center"]["polygonal"]["items"] > 0):
+            #   STEP 35: Setup - Tmp dictionaries
+            dTmp_Slots  = dOut["polygonal"]
+            dTmp_Scalar = kwargs["scalars"]["polygon"]["change point"]
+
+            #   STEP 36: Loop through slots
+            for i in range(0, dTmp_Slots["items"]):
+                #   STEP 37: Check - Change probability
+                if (rn.uniform(0.0, 1.0) < dTmp_Scalar["probability"]):
+                    #   STEP 38: Setup - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[ str(i) ]
                     
-                    #   STEP 29: Setup - Tmp scalar dictionary
-                    dTmp_Scalar = kwargs["scalars"]["triangle"]["change slot"]
+                    #   STEP 39: Loop through points in slot
+                    for j in range(0, dTmp_CurrSlot["items"]):
+                        #   STEP 40: Outsource slot parameter randomization
+                        dTmp_CurrSlot[str(j)]["x"]  = self.__getRandVal__(center=dTmp_CurrSlot[str(j)]["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
+                        dTmp_CurrSlot[str(j)]["y"]  = self.__getRandVal__(center=dTmp_CurrSlot[str(j)]["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
 
-                    #   STEP 30: Loop through points in slot
-                    for j in range(0, dTmp_Slot["items"]):
-                        #   STEP 31: Outsource slot parameter randomization
-                        dTmp_Slot[str(j)]["x"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
-                        dTmp_Slot[str(j)]["y"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
-
-            #   STEP 32: Check if polygon
-            elif (dTmp_Slot["type"] == "polygon"):
-                #   STEP 33: Check probability of change
-                if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["polygon"]["change point"]["probability"]):
-                    #   STEP 34: Check that polygon has at least three corners
-                    if (dTmp_Slot["items"] < 3):
-                        #   STEP 35: Error handling
-                        raise Exception("An error occured in Natalie.__getSLots__() -> Step 34: Polygon must have three or more points")
-
-                    #   STEP 37: Setup - Tmp scalar dictionary
-                    dTmp_Scalar = kwargs["scalars"]["polygon"]["change point"]
-
-                    #   STEP 38: Loop through points in slot
-                    for j in range(0, dTmp_Slot["items"]):
-                        #   STEP 39: Outsource - Slot parameter randomization
-                        dTmp_Slot[str(j)]["x"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
-                        dTmp_Slot[str(j)]["y"]  = self.__getRandVal__(center=dTmp_Slot[str(j)]["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
-
-            #   STEP 40: Unrecognized slot
-            else:
-                #   STEP 41: Error handling
-                raise Exception("An error occured in Natalie.__getSlots__() -> Step 41: Unrecognized slot type")
-        
-        #   STEP 42->115: Check - Slot creation and removal status
+        #   STEP 41->115: Check - Slot creation and removal status
         if (kwargs["slots"]):
-            #   STEP 43: Setup - Temp Variables
+            #   STEP 42: Setup - Temp Variables
             iTmp_CreationIterations = 1
 
-            #   STEP 44: Check if force arg passed
+            #   STEP 43: Check if force arg passed
             if ("force" in kwargs):
-                #   STEP 45: Update - Tmp variables
+                #   STEP 44: Update - Tmp variables
                 iTmp_CreationIterations = kwargs["force"]
 
-            #   STEP 45->78: Force create slots
+            #   STEP 45->70: Force create slots
             for i in range(0, iTmp_CreationIterations):
                 #   STEP 46: Setup - Tmp variable
+                dTmp_Slot   = None
+
+                fTmp_X      = ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.uniform(0.0, 1.0)
+                fTmp_Y      = ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.uniform(0.0, 1.0)
+
                 fTmp_Prob   = kwargs["scalars"]["square"]["probability"]
                 fTmp_Rand   = rn.uniform(0.0, 1.0)
 
-                fTmp_X =    ( kwargs["plane"]["l"] - kwargs["plane"]["x"] ) * rn.uniform(0.0, 1.0)
-                fTmp_Y =    ( kwargs["plane"]["w"] - kwargs["plane"]["y"] ) * rn.uniform(0.0, 1.0)
-
-                #   STEP 47->52: Check if square slot
-                if (fTmp_Rand < fTmp_Prob):
+                #   STEP 47->49: Check if square slot
+                if (( fTmp_Rand < fTmp_Prob ) and ( dTmp_Slot == None )):
                     #   STEP 48: Setup - Scope variables
                     dTmp_Scalar = kwargs["scalars"]["square"]["create slot"]
 
@@ -1219,28 +1227,19 @@ class Natalie:
                         "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"], lw=True),
                         "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"], lw=True),
 
-                        "type": "square",
+                        "type": "rectangular",
                         "id":   Helga.ticks()
                     }
-
-                    #   STEP 50: Add slot to center
-                    dOut[ str( dOut["items"] ) ] = dTmp_Slot
-
-                    #   STEP 51: Increment items
-                    dOut["items"] += 1
-
-                    #   STEP 52: *Clap Clap* Next iteration
-                    continue
                 
-                #   STEP 53: Update - Local variables
+                #   STEP 50: Update - Local variables
                 fTmp_Prob    += kwargs["scalars"]["ellipse"]["probability"]
 
-                #   STEP 54->59: Check if elliptical slot
-                if (fTmp_Rand < fTmp_Prob):
-                    #   STEP 55: Setup - Scope variables
+                #   STEP 51->53: Check if elliptical slot
+                if (( fTmp_Rand < fTmp_Prob ) and ( dTmp_Slot == None )):
+                    #   STEP 52: Setup - Scope variables
                     dTmp_Scalar = kwargs["scalars"]["ellipse"]["create slot"]
 
-                    #   STEP 56: Creat slot
+                    #   STEP 53: Creat slot
                     dTmp_Slot   = {
                         "items":    4,
 
@@ -1255,28 +1254,19 @@ class Natalie:
                         "l":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["l"], region=kwargs["region"], lw=True),
                         "w":    self.__getRandVal__(center=1.0,     scalars=dTmp_Scalar["w"], region=kwargs["region"], lw=True),
 
-                        "type": "ellipse",
+                        "type": "elliptical",
                         "id":   Helga.ticks()
                     }
 
-                    #   STEP 57: Add slot to center
-                    dOut[ str( dOut["items"] ) ] = dTmp_Slot
-
-                    #   STEP 58: Increment items
-                    dOut["items"] += 1
-
-                    #   STEP 59: *Clap Clap* Next iteration
-                    continue
-
-                #   STEP 60: Update - Local variables
+                #   STEP 54: Update - Local variables
                 fTmp_Prob    += kwargs["scalars"]["triangle"]["probability"]
 
-                #   STEP 61->69: Check if triangular slot
-                if (fTmp_Rand < fTmp_Prob):
-                    #   STEP 62: Setup - Scope variables
+                #   STEP 55->60: Check if triangular slot
+                if (( fTmp_Rand < fTmp_Prob ) and ( dTmp_Slot == None )):
+                    #   STEP 56: Setup - Scope variables
                     dTmp_Scalar = kwargs["scalars"]["triangle"]["create slot"]
 
-                    #   STEP 63: Create slot
+                    #   STEP 57: Create slot
                     dTmp_Slot   = {
                         "items":    3,
 
@@ -1284,13 +1274,13 @@ class Natalie:
                         "1":        "1",
                         "2":        "2",
 
-                        "type":     "triangle",
+                        "type":     "triangular",
                         "id":       Helga.ticks()
                     }
 
-                    #   STEP 64: Loop through required corners
+                    #   STEP 58: Loop through required corners
                     for j in range(0, 3):
-                        #   STEP 65: Create corner
+                        #   STEP 59: Create corner
                         dTmp_Corner = {
                             "items":    2,
 
@@ -1302,37 +1292,28 @@ class Natalie:
                             "z":    kwargs["z"]
                         }
 
-                        #   STEP 66: Add to triangle
+                        #   STEP 60: Add to triangle
                         dTmp_Slot[str(j)] = dTmp_Corner
-
-                    #   STEP 67: Add slot to center
-                    dOut[ str( dOut["items"] ) ]    = dTmp_Slot
-
-                    #   STEP 68: Increment items
-                    dOut["items"] += 1
-
-                    #   STEP 69: *Clap Clap* Next iteration
-                    continue
                     
-                #   STEP 70: Update - local variables
+                #   STEP 61: Update - local variables
                 fTmp_Prob    += kwargs["scalars"]["polygon"]["probability"]
 
-                #   STEP 71->78: Check if polygonal slot
-                if (fTmp_Rand < fTmp_Prob):
-                    #   STPE 72: Setup - Scope variables
+                #   STEP 62->78: Check if polygonal slot
+                if (( fTmp_Rand < fTmp_Prob ) and ( dTmp_Slot == None )):
+                    #   STPE 63: Setup - Scope variables
                     dTmp_Scalar = kwargs["scalars"]["polygon"]["create point"]
 
-                    #   STEP 73: Create slot
+                    #   STEP 64: Create slot
                     dTmp_Slot   = {
                         "items":    4,
 
-                        "type":     "polygon",
+                        "type":     "polygonal",
                         "id":   Helga.ticks()
                     }
 
-                    #   STEP 74: Loop through requried corners
+                    #   STEP 65: Loop through requried corners
                     for j in range(0, dTmp_Slot["items"]):
-                        #   STEP 75: Create corner
+                        #   STEP 66: Create corner
                         dTmp_Corner = {
                             "items":    2,
 
@@ -1344,104 +1325,120 @@ class Natalie:
                             "z":    kwargs["z"]
                         }
 
-                        #   STEP 76: Add to polygon
+                        #   STEP 67: Add to polygon
                         dTmp_Slot[str(j)]   = dTmp_Corner
 
-                    #   STEP 77: Add slot to center
-                    dOut[ str( dOut["items"] ) ]    = dTmp_Slot
+                #   STEP 68->70: Check if slot created
+                if (dTmp_Slot != None):
+                    #   STEP 69: Get type of slot
+                    sTmp    = dTmp_Slot["type"]
 
-                    #   STPE 78: Increment items
-                    dOut["items"] += 1
-
-            #   STEP 79->115: Check if force not in kwargs
+                    #   STEP 70: Add to candidate
+                    dOut[sTmp][ str( dOut[sTmp]["items"] ) ]    = dTmp_Slot
+                    dOut[sTmp]["items"] += 1
+                    
+            #   STEP 71->115: Check if force not in kwargs
             if ("force" not in kwargs):
-                #   STEP 80->115: Check that there are slots to remove
-                if (dOut["items"] > 0):
-                    #   STEP 81: Get a random slot
-                    iTmp_Index  = rn.randint(0, dOut["items"] - 1)
+                #   STEP 72: Get number of slots
+                iTmp_Slots  =   dOut["elliptical"]["items"]
+                iTmp_Slots  +=  dOut["rectangular"]["items"]
+                iTmp_Slots  +=  dOut["triangular"]["items"]
+                iTmp_Slots  +=  dOut["polygonal"]["items"]
 
-                    #   STEP 82->88: Check if square
-                    if (dOut[str(iTmp_Index)]["type"] == "square"):
-                        #   STEP 83: Check - Removal status
-                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["square"]["remove slot"]["probability"]):
+                #   STEP 73: If there are slots
+                if (iTmp_Slots > 0):
+                    #   STEP 81: Get a random slot
+                    iTmp_Index  = rn.randint(0, iTmp_Slots - 1)
+                    iTmp_Sum    = dOut["elliptical"]["items"]
+
+                    #   STEP 82: Check if elliptical
+                    if (iTmp_Index < iTmp_Sum):
+                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["ellipse"]["remove slot"]["probability"]):
+                            #   STEP 83: Get local slot
+                            iTmp_Index  = rn.randint(0, dOut["elliptical"]["items"] - 1)
+
                             #   STEP 84: Decrement slots
-                            dOut["items"]   -= 1
+                            dOut["elliptical"]["items"] -= 1
 
                             #   STEP 85: If slots not zero
-                            if (dOut["items"] > 0):
+                            if (dOut["elliptical"]["items"] > 0):
                                 #   STEP 86: Loop through remaining slots
-                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
+                                for i in range(iTmp_Index + 1, dOut["elliptical"]["items"] + 1):
                                     #   STEP 87: Shift slot
-                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
+                                    dOut["elliptical"][ str(i - 1) ] = dOut[ str(i) ]
 
-                            #   STEP 88: Delete slot at end of list
-                            del dOut[ str( dOut["items"] ) ]
+                            #   STEP 88: Remove slot at end of list
+                            del dOut["elliptical"][ str( dOut["elliptical"]["items"] ) ]
 
-                    #   STEP 89->95: Check if ellipse
-                    elif (dOut[str(iTmp_Index)]["type"] == "ellipse"):
-                        #   STEP 90: Check - Removal status
-                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["ellipse"]["remove slot"]["probability"]):
-                            #   STEP 91: Decrement slots
-                            dOut["items"]   -= 1
+                        return dOut
 
-                            #   STEP 92: If slots not zero
-                            if (dOut["items"] > 0):
-                                #   STEP 93: Loop through remaining slots
-                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
-                                    #   STEP 94: Shift slot
-                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
+                    #   STEP 90: Add rectangular items to sum
+                    iTmp_Sum    += dOut["rectangular"]["items"]
 
-                            #   STEP 95: Delete slot at end of list
-                            del dOut[ str( dOut["items"] ) ]
+                    #   STEP 91: Check if rectangular
+                    if (iTmp_Index < iTmp_Sum):
+                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["square"]["remove slot"]["probability"]):
+                            #   STEP 92: Get local slot index
+                            iTmp_Index  = rn.randint(0, dOut["rectangular"]["items"] - 1)
 
-                    #   STEP 96->102: Check if triangle
-                    elif (dOut[str(iTmp_Index)]["type"] == "triangle"):
-                        #   STEP 97: Check - Removal status
+                            #   STEP 93: Decrement slots
+                            dOut["rectangular"]["items"] -= 1
+
+                            #   STEP 94: If slots not zero
+                            if ( dOut["rectangular"]["items"] > 0):
+                                #   STEP 95: Loop through remaining slots
+                                for i in range(iTmp_Index + 1, dOut["rectangular"]["items"] + 1):
+                                    #   STEP 96: Shift slot
+                                    dOut["rectangular"][ str(i - 1) ] = dOut["rectangular"][ str(i) ]
+
+                            #   STEP 97: Remove slot at end of list
+                            del dOut["rectangular"][ str( dOut["rectangular"]["items"] ) ]
+
+                        return dOut
+
+                    #   STEP 99: Add triangular items to sum
+                    iTmp_Sum    += dOut["triangular"]["items"]
+
+                    #   STEP 100: Check if triangular
+                    if (iTmp_Index < iTmp_Sum):
                         if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["triangle"]["remove slot"]["probability"]):
-                            #   STEP 98: Decrement slots
-                            dOut["items"]   -= 1
+                            #   STEP 101: Get local slot index
+                            iTmp_Index  = rn.randint(0, dOut["triangular"]["items"] - 1)
 
-                            #   STEP 99: If slots not zero
-                            if (dOut["items"] > 0):
-                                #   STEP 100: Loop through remaining slots
-                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
-                                    #   STEP 101: Shift slots
-                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
+                            #   STEP 102: Decrement slots
+                            dOut["triangular"]["items"] -= 1
 
-                            #   STEP 102: Delete slot at end of list
-                            del dOut[ str( dOut["items"] ) ]
+                            #   STEP 103: If slots not zero
+                            if ( dOut["triangular"]["items"] > 0 ):
+                                #   STEP 103: Loop through remaining slots
+                                for i in range(iTmp_Index, dOut["triangular"]["items"] + 1):
+                                    #   STEP 104: Shift slot
+                                    dOut["triangular"][ str(i - 1) ] = dOut["triangular"][ str(i) ]
 
-                    #   STEP 103->115: Check if polygon
-                    elif (dOut[str(iTmp_Index)]["type"] == "polygon"):
-                        #   STEP 104: Check - Slot removal status
+                            #   STEP 105: Remove slot at end of list
+                            del dOut["triangular"][ str( dOut["triangular"]["items"] ) ]
+
+                        return dOut
+
+                    iTmp_Sum += dOut["polygon"]["items"]
+
+                    if (iTmp_Index < iTmp_Sum):
                         if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["polygon"]["remove point"]["probability"]):
-                            #   STEP 105: Decrement slots
-                            dOut["items"]   -= 1
+                            #   STEP 107: Get local slot index
+                            iTmp_Index  = rn.randint(0, dOut["polygonal"]["items"] - 1)
 
-                            #   STEP 106: If slots not zero
-                            if (dOut["items"] > 0):
-                                #   STEP 107: Loop through remaining slots
-                                for i in range(iTmp_Index + 1, dOut["items"] + 1):
-                                    #   STEP 108: Shift slots
-                                    dOut[ str(i - 1) ] = dOut[ str(i) ]
+                            #   STEP 108: Decrement slots
+                            dOut["polygonal"]["items"] -= 1
 
-                            #   STEP 109: Delete slot at end of list
-                            del dOut[ str( dOut["items"] ) ]
+                            #   STEP 109: If slots not zero
+                            if ( dOut["polygonal"]["items"] > 0):
+                                #   STEP 110: Loop through remaining slots
+                                for i in range(iTmp_Index, dOut["polygonal"]["items"] + 1):
+                                    #   STEP 111: Shift slot
+                                    dOut["polygonal"][ str(i - 1) ] = dOut["polygonal"][ str(i) ]
 
-                        #   STEP 110: Check - point removal
-                        elif (rn.uniform(0.0, 1.0) < kwargs["scalars"]["polygon"]["remove point"]["probability"]):
-                            #   STEP 111: Check that there are more than 4 points
-                            if (dOut[iTmp_Index]["items"] > 4):
-                                #   STEP 112: Decrement points
-                                dOut[iTmp_Index]["items"] -= 1
-
-                                #   STEP 113: Loop though remaining points
-                                for i in range(iTmp_Index + 1, dOut[iTmp_Index]["items"] + 1):
-                                    #   STEP 114: Shift point
-                                    dOut[iTmp_Index][ str(i - 1) ] = dOut[ str(i) ]
-
-                                #   STEP 115: Delete point at end of list
-                                del dOut[iTmp_Index][ str( dOut["items"] ) ]
+                            #   STEP 112: Remove slot at end of list
+                            del dOut["polygonal"][ str( dOut["polygonal"]["items"] ) ]
 
         #   STEP 116: Return
         return dOut
@@ -1687,65 +1684,67 @@ class Natalie:
         try:
             iIndex  = kwargs["index"]
 
-            #   STEP 8: Loop through slots
-            for i in range(0, kwargs["data"][0]["items"]):
-                #   STEP 9: Setup - Scope variables
-                dTmp_Slot   = kwargs["data"][0][str(i)]
-                lTmp        = [[], [], [], [], [], []]
+            if (kwargs["data"][0]["elliptical"]["items"] > 0):
+                lTmp    = [[], [], [], []]
 
-                #   STEP 10: Loop through candidates
-                for j in range(0, len( kwargs["data"] ) ):
-                    #   STEP 11: Check if slot is square or elliptical
-                    if ((dTmp_Slot["type"] == "square") or (dTmp_Slot["type"] == "ellipse")):
-                        #   STEP 12: Populate temp list
-                        lTmp[0].append( kwargs["data"][j][str(i)]["l"] )
-                        lTmp[1].append( kwargs["data"][j][str(i)]["w"] )
-                        lTmp[2].append( kwargs["data"][j][str(i)]["x"] )
-                        lTmp[3].append( kwargs["data"][j][str(i)]["y"] )
+                for i in range(0, kwargs["data"][0]["elliptical"]["items"]):
+                    for j in range(0, len( kwargs["data"] ) ):
+                        lTmp[0].append( kwargs["data"][j]["elliptical"][str(i)]["l"])
+                        lTmp[1].append( kwargs["data"][j]["elliptical"][str(i)]["w"])
+                        lTmp[2].append( kwargs["data"][j]["elliptical"][str(i)]["x"])
+                        lTmp[3].append( kwargs["data"][j]["elliptical"][str(i)]["y"])
 
-                    #   STEP 13: Then triangle
-                    else:
-                        #   STEP 14: Populate temp list
-                        lTmp[0].append( kwargs["data"][j][str(i)]["0"]["x"] )
-                        lTmp[1].append( kwargs["data"][j][str(i)]["0"]["y"] )
-                        lTmp[2].append( kwargs["data"][j][str(i)]["1"]["x"] )
-                        lTmp[3].append( kwargs["data"][j][str(i)]["1"]["y"] )
-                        lTmp[4].append( kwargs["data"][j][str(i)]["2"]["x"] )
-                        lTmp[5].append( kwargs["data"][j][str(i)]["2"]["y"] )
+                    lOut.extend(lTmp)
+                    
+                    kwargs["template"]["elliptical"][str(i)]["l"] = "remap-" + str(iIndex + 0)
+                    kwargs["template"]["elliptical"][str(i)]["w"] = "remap-" + str(iIndex + 1)
+                    kwargs["template"]["elliptical"][str(i)]["x"] = "remap-" + str(iIndex + 2)
+                    kwargs["template"]["elliptical"][str(i)]["y"] = "remap-" + str(iIndex + 3)
 
-                #   STEP 15: Shortcut - Check if square/ellipse
-                if (lTmp[4] == []):
-                    #   STEP 16: Pop empty lists
-                    lTmp.pop(4)
-                    lTmp.pop(4)
-
-                #   STEP 17: Extend output
-                lOut.extend(lTmp)
-
-                #   STEP 18: SHortcut - check if square/ellipse
-                if (len(lTmp) == 4):
-                    #   STEP 19: Update - Template
-                    kwargs["template"][str(i)]["l"] = "remap-" + str(iIndex + 0)
-                    kwargs["template"][str(i)]["w"] = "remap-" + str(iIndex + 1)
-                    kwargs["template"][str(i)]["x"] = "remap-" + str(iIndex + 2)
-                    kwargs["template"][str(i)]["y"] = "remap-" + str(iIndex + 3)
-
-                    #   STEP 20: Update - Index
                     iIndex += 4
 
-                #   STEP 21: Then triangle
-                else:
-                    #   STEP 22: Update - Template
-                    kwargs["template"][str(i)]["0"]["x"] = "remap-" + str(iIndex + 0)
-                    kwargs["template"][str(i)]["0"]["y"] = "remap-" + str(iIndex + 1)
-                    kwargs["template"][str(i)]["1"]["x"] = "remap-" + str(iIndex + 2)
-                    kwargs["template"][str(i)]["1"]["y"] = "remap-" + str(iIndex + 3)
-                    kwargs["template"][str(i)]["2"]["x"] = "remap-" + str(iIndex + 4)
-                    kwargs["template"][str(i)]["2"]["y"] = "remap-" + str(iIndex + 5)
-                    
-                    #   STEP 23: Update - Index
-                    iIndex += 6
+            if (kwargs["data"][0]["rectangular"]["items"] > 0):
+                lTmp    = [[], [], [], []]
 
+                for i in range(0, kwargs["data"][0]["rectangular"]["items"]):
+                    for j in range(0, len( kwargs["data"] ) ):
+                        lTmp[0].append( kwargs["data"][j]["rectangular"][str(i)]["l"])
+                        lTmp[1].append( kwargs["data"][j]["rectangular"][str(i)]["w"])
+                        lTmp[2].append( kwargs["data"][j]["rectangular"][str(i)]["x"])
+                        lTmp[3].append( kwargs["data"][j]["rectangular"][str(i)]["y"])
+
+                    lOut.extend(lTmp)
+                    
+                    kwargs["template"]["rectangular"][str(i)]["l"] = "remap-" + str(iIndex + 0)
+                    kwargs["template"]["rectangular"][str(i)]["w"] = "remap-" + str(iIndex + 1)
+                    kwargs["template"]["rectangular"][str(i)]["x"] = "remap-" + str(iIndex + 2)
+                    kwargs["template"]["rectangular"][str(i)]["y"] = "remap-" + str(iIndex + 3)
+
+                    iIndex += 4
+
+            if (kwargs["data"][0]["triangular"]["items"] > 0):
+                lTmp    = [[], [], [], [], [], []]
+
+                for i in range(0, kwargs["data"][0]["triangular"]["items"]):
+                    for j in range(0, len( kwargs["data"] ) ):
+                        lTmp[0].append( kwargs["data"][j]["triangular"][str(i)]["0"]["x"])
+                        lTmp[1].append( kwargs["data"][j]["triangular"][str(i)]["0"]["y"])
+                        lTmp[2].append( kwargs["data"][j]["triangular"][str(i)]["1"]["x"])
+                        lTmp[3].append( kwargs["data"][j]["triangular"][str(i)]["1"]["y"])
+                        lTmp[4].append( kwargs["data"][j]["triangular"][str(i)]["2"]["x"])
+                        lTmp[5].append( kwargs["data"][j]["triangular"][str(i)]["2"]["y"])
+                        
+                    lOut.extend(lTmp)
+                    
+                    kwargs["template"]["triangular"][str(i)]["0"]["x"] = "remap-" + str(iIndex + 0)
+                    kwargs["template"]["triangular"][str(i)]["0"]["y"] = "remap-" + str(iIndex + 1)
+                    kwargs["template"]["triangular"][str(i)]["1"]["x"] = "remap-" + str(iIndex + 0)
+                    kwargs["template"]["triangular"][str(i)]["1"]["y"] = "remap-" + str(iIndex + 1)
+                    kwargs["template"]["triangular"][str(i)]["2"]["x"] = "remap-" + str(iIndex + 0)
+                    kwargs["template"]["triangular"][str(i)]["2"]["y"] = "remap-" + str(iIndex + 1)
+
+                    iIndex += 6
+                
         except Exception as ex:
             print("Initial error: ", ex)
 
@@ -2059,19 +2058,11 @@ class Natalie:
                     surrogate model should be used during the optimization 
                     process
                     ~ Required
-
-                + retension = ( bool ) A flag that specifies whether or not
-                    some data from previous iterations should be saved instead
-                    of discarded
-                    ~ Default = True
         """
 
         #   STEP 0: Local variables
         dBest_Geo               = None
         dBest_Fit               = None
-
-        lRetension_Geo          = []
-        lRetension_Fit          = []
 
         sDir                    = None
 
@@ -2083,7 +2074,6 @@ class Natalie:
         bCull                   = None
         bSave                   = None
         bSurrogate              = None
-        bRetension              = True
 
         #   STEP 1: Setup - Local variables
 
@@ -2130,9 +2120,6 @@ class Natalie:
         bSave           = kwargs["save"]
         bSurrogate      = kwargs["surrogate"]
 
-        if ("retension" in kwargs):
-            bRetension  = kwargs["retension"]
-
         #   STEP 13: Check if stage is primary
         if (kwargs["stage"] == "Primary"):
             iIterations = self.__iTRO_Iterations_Primary
@@ -2169,13 +2156,6 @@ class Natalie:
             dBest_Fit   = kwargs["center"]["fitness"]
 
             iIterations = self.__iTRO_Iterations_Secondary
-
-
-        #   STEP 18: Check if retension arg passed
-        if ("retension" in kwargs):
-            #   STEP 19: Update - Local variables
-            bRetension  = kwargs["retension"]
-
 
         #
         #   endregion
@@ -2266,12 +2246,6 @@ class Natalie:
             lCandidates.append(dBest_Geo)
             lFitness.append(dBest_Fit)
 
-            #   STEP 47: Check - Retension status
-            if (bRetension):
-                #   STEP 48: Append to lists
-                lRetension_Geo.extend(lCandidates)
-                lRetension_Fit.extend(lFitness)
-
             #
             #   endregion
             
@@ -2288,21 +2262,14 @@ class Natalie:
                 lTmp_DataMap_In     = []
                 lTmp_DataMap_Out    = []
                 
-                #   STEP 51: Check - Retension status
-                if (bRetension):
-                    #   STEP 52: Update - Data dictionary
-                    dTmp_Data       = self.__moldData__(candidates=lRetension_Geo, fitness=lRetension_Fit)
-
-                #   STEP 53: Not retension
-                else:
-                    #   STEP 54: Update - Data dictionary
-                    dTmp_Data       = self.__moldData__(candidates=lCandidates,     fitness=lFitness)
+                #   STEP 54: Update - Data dictionary
+                dTmp_Data       = self.__moldData__(candidates=lCandidates,     fitness=lFitness)
 
                 #   STEP 55: Setup - Final data ranges
                 dTmp_DataRange      = {
-                    "lower":        -0.985,
+                    "lower":        -0.99,
                     "center":       0.0,
-                    "upper":        0.985
+                    "upper":        0.99
                 }
 
                 #   STEP 56: Setup - Data maps
@@ -2356,12 +2323,6 @@ class Natalie:
                 lCandidates.extend(dTmp_SrgResults)
                 lFitness.extend(lTmp_SrgFitness)
 
-                #   STEP 71: Check - Retension status
-                if (bRetension):
-                    #   STEP 72: Extend retension lists
-                    lRetension_Geo.extend(dTmp_SrgResults)
-                    lRetension_Fit.extend(lTmp_SrgFitness)
-
                 #
                 #   endregion
 
@@ -2412,6 +2373,29 @@ class Natalie:
             #
             #   endregion
         
+            sFile   = os.path.abspath(".") + "\\Data\\DataSets\\Antenna\\920\\" + Helga.ticks()
+            for j in range(0, len( lCandidates )):
+                sTmp_File = sFile + "_" + str(j) + ".json"
+
+                #   STEP 106: Create file
+                vTmp_File   = open(sTmp_File, "a")
+
+                #   STEP 107: Close file
+                vTmp_File.close()
+                vTmp_File = None
+
+                #   STEP 108: Re-open file
+                with open(sTmp_File, "r+") as vTmp_File:
+                    #   STEP 109: Create temp dictionary
+                    dTmp = {
+                        "geometry": lCandidates[j],
+                        "fitness":  lFitness[j]
+                    }
+
+                    #   STEP 110: Dump data
+                    js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
+            Helga.nop()
+
             #   region STEP 111->116: Cull the unworthy :)
 
             #   STEP 111: Check culling status
@@ -2550,84 +2534,11 @@ class Natalie:
             #
             #   endregion
 
-            #   region STEP 117->120: Retension - Drop off
-
-            #   STEP 117: Check - Retension status
-            if (bRetension):
-                #   STEP ??: Check if surrogate
-                if (bSurrogate):
-                    lTmp_Distance   = None
-
-                    #   STEP ??: Check if index in range
-                    if (iTmp_Index < vData.getLen()):
-                        #   STEP ??: Get distance of candidates from curr best
-                        vData.reset()
-                        lTmp_Distance = vData.getInputDistance(iTmp_Index)
-
-                    #   STEP ??: New best not in data
-                    else:
-                        #   STEP ??: 
-                        dTmp_Data           = None
-                        dTmp_DataRange      = None
-                        dTmp_DataMap        = None
-
-                        lTmp_DataMap_In     = []
-                        lTmp_DataMap_Out    = []
-                        
-                        dTmp_Data       = self.__moldData__(candidates=[dBest_Geo], fitness=[dBest_Fit])
-
-                        #   STEP 55: Setup - Final data ranges
-                        dTmp_DataRange      = {
-                            "lower":        -0.985,
-                            "center":       0.0,
-                            "upper":        0.985
-                        }
-
-                        #   STEP 56: Setup - Data maps
-                        for j in range(0, len( dTmp_Data["in"] ) ):
-                            lTmp_DataMap_In.append(j)
-
-                        for j in range(0, len( dTmp_Data["out"] ) ):
-                            lTmp_DataMap_Out.append(j)
-
-                        dTmp_DataMap    = {
-                            "in": lTmp_DataMap_In,
-                            "out": lTmp_DataMap_Out
-                        }
-
-                        #   STEP 57: Setup - Create new Data container
-                        vTmp_Data   = Data()
-                        vTmp_Data.setData(data=dTmp_Data, automap=False, transpose=True)
-
-                        #   STEP 61: Map data
-                        vTmp_Data.mapData(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=True, output=True)
-
-                        vData.reset()
-                        vData.insert( data= vTmp_Data.pop(used=False, index=0))
-
-                        lTmp_Distance = vData.getInputDistance( vData.getLen() - 1)
-
-                    Helga.nop()
-
-                else:
-                    #   STEP 118: Loop for fall off
-                    for _ in range(0, self.__iTRO_Retension_FallOff):
-                        #   STEP 120: Pop candidates from retension list
-                        lRetension_Geo.pop(0)
-                        lRetension_Fit.pop(0)
-
-            #
-            #   endregion
 
         #   STEP 121: Populate output dictionary
         dOut    = {
             "result":   dBest_Geo,
-            "fitness":  dBest_Fit,
-            "data":
-            {
-                "geometries":   lRetension_Geo,
-                "fitness":      lRetension_Fit
-            }
+            "fitness":  dBest_Fit
         }
 
         #   STEP 122: Return

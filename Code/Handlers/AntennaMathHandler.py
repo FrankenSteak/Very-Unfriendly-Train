@@ -478,7 +478,29 @@ class Matthew:
 
                 "slots":
                 {
-                    "items": 0
+                    "items":    4,
+
+                    "0":        "elliptical",
+                    "1":        "rectangular",
+                    "2":        "triangular",
+                    "3":        "polygonal",
+
+                    "elliptical":
+                    {
+                        "items": 0
+                    },
+                    "rectangular":
+                    {
+                        "items": 0
+                    },
+                    "triangular":
+                    {
+                        "items": 0
+                    },
+                    "polygonal":
+                    {
+                        "items": 0
+                    }
                 }
             },
             "radiating plane":
@@ -498,7 +520,29 @@ class Matthew:
 
                 "slots":
                 {
-                    "items": 0
+                    "items":    4,
+
+                    "0":        "elliptical",
+                    "1":        "rectangular",
+                    "2":        "triangular",
+                    "3":        "polygonal",
+
+                    "elliptical":
+                    {
+                        "items": 0
+                    },
+                    "rectangular":
+                    {
+                        "items": 0
+                    },
+                    "triangular":
+                    {
+                        "items": 0
+                    },
+                    "polygonal":
+                    {
+                        "items": 0
+                    }
                 }
             },
             "substrate":
@@ -1094,106 +1138,149 @@ class Matthew:
             #
             #   endregion
             
-            #   region STEP 28->46: Add slots to ground plane
+            #   region STEP 28->66: Add slots to ground plane
 
-            #   STEP 28: Check if there are slots
-            if (dTmp_Ant["ground plane"]["slots"]["items"] > 0):
-                #   STEP 29: Setup - Scope variables
-                dTmp_Slots  = dTmp_Ant["ground plane"]["slots"]
+            #   STEP 28: Create temp dictionary
+            dSubs   = {
+                "items":    0
+            }
 
-                dSubs   = {
-                    "items": dTmp_Slots["items"]
-                }
+            #   STEP 29: Check if there are elliptical slots
+            if (dTmp_Ant["ground plane"]["slots"]["elliptical"]["items"] > 0):
+                #   STEP 30: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["ground plane"]["slots"]["elliptical"]
 
-                #   STEP 30: Loop through slots
+                #   STEP 31: Loop through slots
                 for j in range(0, dTmp_Slots["items"]):
-                    #   STEP 31: Get curr slot
+                    #   STEP 32: Get - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
+                    
+                    #   STEP 33: Setup - Elliptical slot center
+                    dTmp_Corner = {
+                        "x":    dTmp_CurrSlot["x"],
+                        "y":    dTmp_CurrSlot["y"],
+                        "z":    0.0
+                    }
+
+                    #   STEP 34: Setup - Elliptical slot dimensions
+                    dTmp_Dim    = {
+                        "l":    abs( dTmp_CurrSlot["l"] ),
+                        "w":    abs( dTmp_CurrSlot["w"] )
+                    }
+
+                    #   STEP 35: Setup - Create elliptical surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Ellipse", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(dSubs["items"]))
+
+                    #   STEP 36: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"]  += 1
+
+                    #   STEP 37: Update - Faces
+                    iTmp_Faces      += 1
+
+            #   STEP 38: Check if thera are rectangular slots
+            if (dTmp_Ant["ground plane"]["slots"]["rectangular"]["items"] > 0):
+                #   STEP 39: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["ground plane"]["slots"]["rectangular"]
+
+                #   STEP 40: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 41: Get - Tmp slot
                     dTmp_CurrSlot   = dTmp_Slots[str(j)]
 
-                    #   STEP 32: Check if square
-                    if (dTmp_CurrSlot["type"] == "square"):
-                        #   STEP 33: Setup - Square slot top-left corner
-                        dTmp_Corner = {
-                            "x":    dTmp_CurrSlot["x"],
-                            "y":    dTmp_CurrSlot["y"],
-                            "z":    0.0
-                        }
+                    #   STEP 42: Setup - Square slot top-left corner
+                    dTmp_Corner = {
+                        "x":    dTmp_CurrSlot["x"],
+                        "y":    dTmp_CurrSlot["y"],
+                        "z":    0.0
+                    }
 
-                        #   STEP 34: Setup - Square slot dimenions
-                        dTmp_Dim    = {
-                            "l":    abs( dTmp_CurrSlot["l"] ),
-                            "w":    abs( dTmp_CurrSlot["w"] )
-                        }
+                    #   STEP 43: Setup - Square slot dimenions
+                    dTmp_Dim    = {
+                        "l":    abs( dTmp_CurrSlot["l"] ),
+                        "w":    abs( dTmp_CurrSlot["w"] )
+                    }
 
-                        #   STEP 35: Setup - Create square/rect surface
-                        sTmp_GPSlot     = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(j))
+                    #   STEP 44: Setup - Create square/rect surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(dSubs["items"]))
 
-                        dSubs[str(j)]   = sTmp_GPSlot
+                    #   STEP 45: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"] += 1
 
-                        #   STEP 36: Update - Faces
-                        iTmp_Faces      += 1
+                    #   STEP 46: Update - Faces
+                    iTmp_Faces      += 1
 
-                    #   STEP 37: Check if circle/ellipse
-                    elif (dTmp_CurrSlot["type"] == "ellipse"):
-                        #   STEP 38: Setup - Elliptical slot center
-                        dTmp_Corner = {
-                            "x":    dTmp_CurrSlot["x"],
-                            "y":    dTmp_CurrSlot["y"],
-                            "z":    0.0
-                        }
-
-                        #   STEP 39: Setup - Elliptical slot dimensions
-                        dTmp_Dim    = {
-                            "l":    abs( dTmp_CurrSlot["l"] ),
-                            "w":    abs( dTmp_CurrSlot["w"] )
-                        }
-
-                        #   STEP 40: Setup - Create elliptical surface
-                        sTmp_GPSlot     = lurkhei.newASurface(surface="Ellipse", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(j))
-
-                        dSubs[str(j)]   = sTmp_GPSlot
-
-                        #   STEP 41: Update - Faces
-                        iTmp_Faces      += 1
-
-                    #   STEP 42: Check if triangle or polygon
-                    elif ((dTmp_CurrSlot["type"] == "triangle") or (dTmp_CurrSlot["type"] == "polygon")):
-                        #   STEP 43: Check that there are at least three points in polygon
-                        if (dTmp_CurrSlot["items"] < 3):
-                            #   STEP 44: Error handling
-                            raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 43: Polygon has less than three corners")
-
-                        #   STEP 45: Setup - Create polygonal surface
-                        sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="GPSlot_" + str(j))
-
-                        dSubs[str(j)]   = sTmp_GPSlot
-
-                        #   STEP 42: Update - Faces
-                        iTmp_Faces      += 1
-
-                    #   STEP 43: Unrecognized surface type
-                    else:   
-                        #   STEP 44: Error handling
-                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 44: Unrecognized surface type")
+            #   STEP 47: Check if there are triangular slots
+            if (dTmp_Ant["ground plane"]["slots"]["triangular"]["items"] > 0):
+                #   STEP 48: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["ground plane"]["slots"]["triangular"]
+                
+                #   STEP 49: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 50: Get - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
                     
-                #   STEP 45: Create parts dictionary
+                    #   STPE 51: Check - Required number of corners met
+                    if (dTmp_CurrSlot["items"] < 3):
+                        #   STEP 52: Error handling
+                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 43: Polygon has less than three corners")
+
+                    #   STEP 53: Setup - Create polygonal surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="GPSlot_" + str(dSubs["items"]))
+
+                    #   STEP 54: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"] += 1
+
+                    #   STEP 55: Update - Faces
+                    iTmp_Faces      += 1
+
+            #   STEP 56: Check if there are polygonal slots
+            if (dTmp_Ant["ground plane"]["slots"]["polygonal"]["items"] > 0):
+                #   STEP 57: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["ground plane"]["slots"]["polygonal"]
+                
+                #   STEP 58: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 59: Get - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
+                    
+                    #   STPE 60: Check - Required number of corners met
+                    if (dTmp_CurrSlot["items"] < 3):
+                        #   STEP 61: Error handling
+                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 43: Polygon has less than three corners")
+
+                    #   STEP 62: Setup - Create polygonal surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="GPSlot_" + str(dSubs["items"]))
+
+                    #   STPE 63: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"] += 1
+
+                    #   STEP 64: Update - Faces
+                    iTmp_Faces      += 1
+                    
+
+            if (dSubs["items"] > 0):
+                #   STEP 65: Create part`s dictionary
                 dTmp_Parts = {
                     "target":   sGPlane,
                     "subs":     dSubs
                 }
 
-                #   STEP 46: Perform subtraction
+                #   STEP 66: Perform subtraction
                 sGPlane = lurkhei.newAModification(mod="Subtract", parts=dTmp_Parts, label="GP_Slotted")
 
             #
             #   endregion
 
-            #   region STEP 47->50: Create substrate
+            #   region STEP 67->70: Create substrate
 
-            #   STEP 47: Setup - Create new medium
+            #   STEP 67: Setup - Create new medium
             lurkhei.newAMedium(label=dTmp_Ant["substrate"]["name"], permitivitty=dTmp_Ant["substrate"]["permitivitty"], loss=dTmp_Ant["substrate"]["loss"])
             
-            #   STEP 48: Setup - Substrate args
+            #   STEP 68: Setup - Substrate args
             dTmp_Corner = {
                 "x": dTmp_Ant["substrate"]["x"],
                 "y": dTmp_Ant["substrate"]["y"],
@@ -1206,20 +1293,20 @@ class Matthew:
                 "h": dTmp_Ant["substrate"]["h"]
             }
 
-            #   STEP 49: Setup - Create substrate
+            #   STEP 69: Setup - Create substrate
             sSubstrate  = lurkhei.newASolid(solid="Cuboid", corner=dTmp_Corner, dimensions=dTmp_Dim, label="Substrate")
 
             lurkhei.setASolidMedium(medium=dTmp_Ant["substrate"]["name"], solid=sSubstrate)
 
-            #   STPE 50: Update - Faces
+            #   STPE 70: Update - Faces
             iTmp_Faces  += 6
 
             #
             #   endregion
 
-            #   region STEP 51->53: Create radiating plane
+            #   region STEP 71->73: Create radiating plane
 
-            #   STEP 51: Create RPlane atgs
+            #   STEP 71: Create RPlane atgs
             dTmp_Corner = {
                 "x":    dTmp_Ant["radiating plane"]["x"],
                 "y":    dTmp_Ant["radiating plane"]["y"],
@@ -1231,110 +1318,152 @@ class Matthew:
                 "w":    dTmp_Ant["radiating plane"]["w"]
             }
 
-            #   STEP 52: Create RPlane
+            #   STEP 72: Create RPlane
             sRPlane = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="RP")
 
-            #   STEP 53: Update - Faces
+            #   STEP 73: Update - Faces
             iTmp_Faces  += 1
 
             #
             #   endregion
 
-            #   region STEP 54->76: Create slotted RPlane
+            #   region STEP 74->112: Create slotted RPlane
 
-            #   STEP 54: Check if there are slots in RPlane
-            if (dTmp_Ant["radiating plane"]["slots"]["items"] > 0):
-                #   STEP 55: Setup - Scope variables
-                dTmp_Slots  = dTmp_Ant["radiating plane"]["slots"]
+            #   STEP 74: Create temp dictionary
+            dSubs   = {
+                "items":    0
+            }
 
-                dSubs   = {
-                    "items":    dTmp_Slots["items"]
-                }
+            #   STEP 75: Check if there are elliptical slots
+            if (dTmp_Ant["radiating plane"]["slots"]["elliptical"]["items"] > 0):
+                #   STEP 76: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["radiating plane"]["slots"]["elliptical"]
 
-                #   STEP 56: Loop through slots
+                #   STEP 77: Loop through slots
                 for j in range(0, dTmp_Slots["items"]):
-                    #   STEP 57: Get curr slot
-                    dTmp_CurrSlot = dTmp_Slots[str(j)]
+                    #   STEP 78: Get - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
+                    
+                    #   STEP 79: Setup - Elliptical slot center
+                    dTmp_Corner = {
+                        "x":    dTmp_CurrSlot["x"],
+                        "y":    dTmp_CurrSlot["y"],
+                        "z":    0.0
+                    }
 
-                    #   STEP 58: Check if square
-                    if (dTmp_CurrSlot["type"] == "square"):
-                        #   STEP 59: Setup - Square slot top-left corner
-                        dTmp_Corner = {
-                            "x":    dTmp_CurrSlot["x"],
-                            "y":    dTmp_CurrSlot["y"],
-                            "z":    dTmp_Ant["substrate"]["h"]
-                        }
+                    #   STEP 80: Setup - Elliptical slot dimensions
+                    dTmp_Dim    = {
+                        "l":    abs( dTmp_CurrSlot["l"] ),
+                        "w":    abs( dTmp_CurrSlot["w"] )
+                    }
 
-                        #   STEP 60: Setup - Square slot dimensions
-                        dTmp_Dim    = {
-                            "l":    dTmp_CurrSlot["l"],
-                            "w":    dTmp_CurrSlot["w"]
-                        }
+                    #   STEP 81: Setup - Create elliptical surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Ellipse", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(dSubs["items"]))
 
-                        #   STPE 61: Setup - Create square/rect surface
-                        sTmp_RPSlot     = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="RPSlot_" + str(j))
+                    #   STEP 82: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"]  += 1
 
-                        dSubs[str(j)]   = sTmp_RPSlot
+                    #   STEP 83: Update - Faces
+                    iTmp_Faces      += 1
 
-                        #   STEP 62: Update - Faces
-                        iTmp_Faces      += 1
+            #   STEP 84: Check if thera are rectangular slots
+            if (dTmp_Ant["radiating plane"]["slots"]["rectangular"]["items"] > 0):
+                #   STEP 85: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["radiating plane"]["slots"]["rectangular"]
 
-                    #   STEP 63: Check if ellipse
-                    elif (dTmp_CurrSlot["type"] == "ellipse"):
-                        #   STEP 64: Setup - Elliptical slot center
-                        dTmp_Corner = {
-                            "x":    dTmp_CurrSlot["x"],
-                            "y":    dTmp_CurrSlot["y"],
-                            "z":    dTmp_Ant["substrate"]["h"]
-                        }
+                #   STEP 86: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 87: Get - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
 
-                        #   STEP 65: Setup - Elliptical slot dimensions
-                        dTmp_Dim    = {
-                            "l":    dTmp_CurrSlot["l"],
-                            "w":    dTmp_CurrSlot["w"]
-                        }
+                    #   STEP 88: Setup - Square slot top-left corner
+                    dTmp_Corner = {
+                        "x":    dTmp_CurrSlot["x"],
+                        "y":    dTmp_CurrSlot["y"],
+                        "z":    0.0
+                    }
 
-                        #   STEP 66: Setup - Create elliptical surface
-                        sTmp_RPSlot     = lurkhei.newASurface(surface="Ellipse", corner=dTmp_Corner, dimensions=dTmp_Dim, label="RPSlot_" + str(j))
+                    #   STEP 89: Setup - Square slot dimenions
+                    dTmp_Dim    = {
+                        "l":    abs( dTmp_CurrSlot["l"] ),
+                        "w":    abs( dTmp_CurrSlot["w"] )
+                    }
 
-                        dSubs[str(j)]   = sTmp_RPSlot
+                    #   STEP 90: Setup - Create square/rect surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Rectangle", corner=dTmp_Corner, dimensions=dTmp_Dim, label="GPSlot_" + str(dSubs["items"]))
 
-                        #   STEP 67: Update - Faces
-                        iTmp_Faces      += 1
+                    #   STEP 91: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"] += 1
 
-                    #   STEP 68: Check if triangle or polygon
-                    elif ((dTmp_CurrSlot["type"] == "triangle") or (dTmp_CurrSlot["type"] == "polygon")):
-                        #   STEP 69: Check that there are at least three points in polygon
-                        if (dTmp_CurrSlot["items"] < 3):
-                            #   STEP 70: Error handling
-                            raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Stpe 69: Polygon has less than three corners")
+                    #   STEP 92: Update - Faces
+                    iTmp_Faces      += 1
 
-                        #   STEP 71: Setup - Create polygonal surface
-                        sTmp_RPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="RPSlot_" + str(j))
+            #   STEP 93: Check if there are triangular slots
+            if (dTmp_Ant["radiating plane"]["slots"]["triangular"]["items"] > 0):
+                #   STEP 94: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["radiating plane"]["slots"]["triangular"]
+                
+                #   STEP 95: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 96: Get - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
+                    
+                    #   STPE 97: Check - Required number of corners met
+                    if (dTmp_CurrSlot["items"] < 3):
+                        #   STEP 98: Error handling
+                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 43: Polygon has less than three corners")
 
-                        dSubs[str(j)]   = sTmp_RPSlot
+                    #   STEP 99: Setup - Create polygonal surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="GPSlot_" + str(dSubs["items"]))
 
-                        #   STEP 72: Update - Faces
-                        iTmp_Faces      += 1
+                    #   STEP 100: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"] += 1
 
-                    #   STEP 73: Unrecognized surface type
-                    else:
-                        #   STEP 74: Error handling
-                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 73: Unrecognized surface")
+                    #   STEP 101: Update - Faces
+                    iTmp_Faces      += 1
 
-                #   STEP 75: Create parts dictionary
-                dTmp_Parts  = {
-                    "target":   sRPlane,
+            #   STEP 102: Check if there are polygonal slots
+            if (dTmp_Ant["radiating plane"]["slots"]["polygonal"]["items"] > 0):
+                #   STEP 103: Setup - Tmp variables
+                dTmp_Slots  = dTmp_Ant["radiating plane"]["slots"]["polygonal"]
+                
+                #   STEP 104: Loop through slots
+                for j in range(0, dTmp_Slots["items"]):
+                    #   STEP 105: Get - Tmp slot
+                    dTmp_CurrSlot   = dTmp_Slots[str(j)]
+                    
+                    #   STPE 106: Check - Required number of corners met
+                    if (dTmp_CurrSlot["items"] < 3):
+                        #   STEP 107: Error handling
+                        raise Exception("An error occured in Matthew.simulateCandidates_Json() -> Step 43: Polygon has less than three corners")
+
+                    #   STEP 108: Setup - Create polygonal surface
+                    sTmp_GPSlot     = lurkhei.newASurface(surface="Polygon", corner=cp.deepcopy(dTmp_CurrSlot), label="GPSlot_" + str(dSubs["items"]))
+
+                    #   STPE 109: Add to slot list
+                    dSubs[ str( dSubs["items"] ) ]   = sTmp_GPSlot
+                    dSubs["items"] += 1
+
+                    #   STEP 110: Update - Faces
+                    iTmp_Faces      += 1
+                    
+            if (dSubs["items"] > 0):
+                #   STEP 111: Create parts dictionary
+                dTmp_Parts = {
+                    "target":   sGPlane,
                     "subs":     dSubs
                 }
 
-                #   STEP 76: Perform subtraction
-                sRPlane     = lurkhei.newAModification(mod="Subtract", parts=dTmp_Parts, label="RP_Slotted")
+                #   STEP 112: Perform subtraction
+                sGPlane = lurkhei.newAModification(mod="Subtract", parts=dTmp_Parts, label="GP_Slotted")
 
             #
             #   endregion
 
-            #   region STEP 77: Create union
+            #   region STEP 113: Create union
 
             dParts = {
                 "items": 7,
@@ -1352,7 +1481,7 @@ class Matthew:
             #
             #   endregion
 
-            #   region STEP 78: Reset face media
+            #   region STEP 114: Reset face media
 
             lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iTmp_Faces + 1), union=sUnion)
             lurkhei.setAFaceMedium(medium="Perfect electric conductor", face="Face" + str(iTmp_Faces + 2), union=sUnion)
@@ -1361,7 +1490,7 @@ class Matthew:
             #
             #   endregion
 
-            #   region STEP 79: Create new port
+            #   region STEP 115: Create new port
 
             dTmp_Pos = {
                 "items": 1,
@@ -1378,59 +1507,58 @@ class Matthew:
             #
             #   endregion
 
-            #   region STEP 80: Create voltage source
+            #   region STEP 116: Create voltage source
 
             lurkhei.newASource(source="Voltage", port=sPort, label="VoltageSource")
 
             #
             #   endregion
 
-            #   region STEP 81->83: Set frequency and mesh
+            #   region STEP 117->119: Set frequency and mesh
 
-            #   STEP 81: Check if frequency arg passed
+            #   STEP 117: Check if frequency arg passed
             if ("frequency" in kwargs):
-                #   STEP 82: Set frequency
+                #   STEP 118: Set frequency
                 lurkhei.setAFrequency(start=kwargs["frequency"]["start"], end=kwargs["frequency"]["end"], range_type="Linear", samples=kwargs["frequency"]["samples"])
 
-            #   STEP 83: Set mesh
+            #   STEP 119: Set mesh
             lurkhei.setAMesh(wire_radius=kwargs["mesh"]["wire radius"], size=kwargs["mesh"]["size"])
 
             #
             #   endregion
 
-            #   region STEP 84->86: Save and close project
+            #   region STEP 120->122: Save and close project
 
-            #   STEP 84: Save antenna project
+            #   STEP 120: Save antenna project
             lurkhei.saveAntenna(dir=str(i))
 
-            #   STEP 85: Set project to simulate
+            #   STEP 121: Set project to simulate
             lurkhei.simulateAntenna(parallel=kwargs["runt"]["parallel"])
 
-            #   STEP 86: Close project
+            #   STEP 122: Close project
             lurkhei.closeAntenna()
 
             #
             #   endregion
 
-        #   STEP 87: Run script
+        #   STEP 123: Run script
         lurkhei.exportLua(replace=True, run=kwargs["runt"]["run"], interactive=kwargs["runt"]["interactive"])
 
-        #   STEP 88: Loop through antenna
+        #   STEP 124: Loop through antenna
         for i in range(0, len(kwargs["ant"])):
-            #   STEP 89: Get path for this sim
+            #   STEP 124: Get path for this sim
             sPath = kwargs["dir"] + "\\" + sName + "_" + str(i) + "\\" + str(i) + ".out"
-            #sPath = kwargs["dir"] + sName + "_" + str(i) + "\\" + str(i) + ".out"
 
-            #   STEP 90: Create temp dictionary
+            #   STEP 125: Create temp dictionary
             dTmp = {
                 "dir": sPath,
                 "fitness": Matthew.getFitness(dir=sPath, frequency=kwargs["fitness"], params=vConny.data["parameters"])
             }
 
-            #   STEP 91: Append to output list
+            #   STEP 126: Append to output list
             lOut.append(dTmp)
 
-        #   STEP 92: Return
+        #   STEP 127: Return
         return lOut
 
     #

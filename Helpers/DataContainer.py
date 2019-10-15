@@ -1598,10 +1598,10 @@ class Data:
 
         else:
             #   STEP 9: Use default percent
-            iLen = int( len(self.__lInput) * 0.75)
+            iLen = int( np.floor( self.getLen() * 0.75 ) )
 
         #   STEP 10: Pop iLen data samples
-        for _ in range(0, iLen):
+        for i in range(0, iLen):
             #   STEP 11: Pop goes the data sample
             self.getRandDNR()
 
