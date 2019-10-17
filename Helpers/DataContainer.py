@@ -1006,6 +1006,8 @@ class Data:
 
             #   STEP 17: Check - Noise status
             if (bNoise):
+                lData_Inputs = cp.deepcopy( lData_Inputs )
+                
                 #   STEP 18: Loop through inputs
                 for i in range(0, len( lData_Inputs )):
                     #   STEP 19: Add noise to input

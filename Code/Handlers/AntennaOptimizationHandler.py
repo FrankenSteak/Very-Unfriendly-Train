@@ -904,7 +904,7 @@ class Natalie:
                     
                     "l":        0.0,
                     "w":        0.0,
-                    "h":        self.__getRandVal__(center=dCenter["substrate"]["h"], scalars=dScalars["substrate"]["h"], region=fRegion),
+                    "h":        dCenter["substrate"]["h"],
                     "x":        0.0,
                     "y":        0.0,
 

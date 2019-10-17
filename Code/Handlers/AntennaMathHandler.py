@@ -1731,7 +1731,8 @@ class Matthew:
             lData_S         = None
 
             #   STEP 15: Loop through data
-            for i in range(0, len(lData)):
+            i = 0
+            while (i < len(lData) ):
                 #   STEP 16: Check if this line contains frequency
                 if (" Frequency in Hz:               FREQ =    " in lData[i]):
                     #   STEP 17: Set tmp Frequency var
@@ -1767,6 +1768,8 @@ class Matthew:
                     #   STEP 23: Clear tmp variables
                     lData_F = None
                     lData_S = None
+
+                i += 1
 
             #
             #   endregion

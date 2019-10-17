@@ -255,7 +255,7 @@ class Lana:
 
             #   STEP 32: Reset directory
             os.chdir(sTmp_Dir)
-            #sh.rmtree(sDir)
+            sh.rmtree(sDir)
 
         #   STEP ??: Return
         return
