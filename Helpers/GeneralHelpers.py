@@ -190,6 +190,54 @@ class Helga:
         #   STEP 4: Return
         return lOut
 
+    @classmethod
+    def getValue(self, _sData: str, _iIndex: int) -> vars:
+        """
+        """
+
+        #   STEP 0: Local variables
+        lData                   = []
+
+        sData                   = ""
+        #   STEP 1: Setup - Local variables
+
+        #   STEP 2: Check that input is str
+        if (type(_sData) != str):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Helga.getValue() -> Step 3: Invalid input")
+
+        #   STEP 4: Loop through input
+        for i in range(0, len(_sData)):
+            #   STEP 5: Check if current index empty, tab, or newl
+            if (( _sData[i] == " " ) or ( _sData[i] == "\t" ) or ( _sData[i] == "\n" )):
+                #   STEP 6: Check if there is data to add to the list
+                if (sData != ""):
+                    #   STEP 7: Be safe OwO
+                    try:
+                        #   STEP 8: Append to list
+                        lData.append( float(sData ) )
+
+                    #   STEP 9: Error shortcut
+                    except:
+                        #   STEP 10: APpend to list
+                        lData.append(sData)
+
+                    #   STEP 11: Reset data str
+                    sData   = ""
+
+            #   STEP 12: Not empty, add to data str
+            else:
+                #   STEP 13: Add to data str
+                sData += _sData[i]
+
+        #   STEP 14: Check if index in range
+        if (_iIndex < len( lData )):
+            #   STEP 15: Return
+            return lData[_iIndex]
+
+        #   STEP 16: Return
+        return lData
+
     #
     #   endregion
 

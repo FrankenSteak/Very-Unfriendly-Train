@@ -1,0 +1,152 @@
+{
+    "geometry" : {
+        "items" : 3, 
+        "0" : "feed", 
+        "1" : "ground plane", 
+        "2" : "radiating plane", 
+        "3" : "substrate", 
+        "feed" : {
+            "items" : 2, 
+            "0" : "center", 
+            "1" : "width", 
+            "center" : 49.991, 
+            "width" : 1.66
+        }, 
+        "ground plane" : {
+            "items" : 5, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "y", 
+            "4" : "slots", 
+            "l" : 81.177, 
+            "w" : 106.18, 
+            "x" : -1.113, 
+            "y" : -0.659, 
+            "slots" : {
+                "items" : 4, 
+                "0" : "elliptical", 
+                "1" : "rectangular", 
+                "2" : "triangular", 
+                "3" : "polygonal", 
+                "elliptical" : {
+                    "items" : 0
+                }, 
+                "rectangular" : {
+                    "items" : 1, 
+                    "0" : {
+                        "items" : 4, 
+                        "0" : "x", 
+                        "1" : "y", 
+                        "2" : "l", 
+                        "3" : "w", 
+                        "x" : 30.214, 
+                        "y" : 19.926, 
+                        "z" : 0.0, 
+                        "l" : 21.59, 
+                        "w" : 10.739, 
+                        "type" : "rectangular", 
+                        "id" : "637068871458264576"
+                    }
+                }, 
+                "triangular" : {
+                    "items" : 1, 
+                    "0" : {
+                        "items" : 3, 
+                        "0" : {
+                            "items" : 2, 
+                            "0" : "x", 
+                            "1" : "y", 
+                            "x" : 66.621, 
+                            "y" : 42.661, 
+                            "z" : 0.0
+                        }, 
+                        "1" : {
+                            "items" : 2, 
+                            "0" : "x", 
+                            "1" : "y", 
+                            "x" : 75.742, 
+                            "y" : 55.364, 
+                            "z" : 0.0
+                        }, 
+                        "2" : {
+                            "items" : 2, 
+                            "0" : "x", 
+                            "1" : "y", 
+                            "x" : 70.386, 
+                            "y" : 24.437, 
+                            "z" : 0.0
+                        }, 
+                        "type" : "triangular", 
+                        "id" : "637068870048238592"
+                    }
+                }, 
+                "polygonal" : {
+                    "items" : 0
+                }
+            }
+        }, 
+        "radiating plane" : {
+            "items" : 5, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "y", 
+            "4" : "slots", 
+            "l" : 75.796, 
+            "w" : 95.392, 
+            "x" : 4.218, 
+            "y" : 4.651, 
+            "slots" : {
+                "items" : 4, 
+                "0" : "elliptical", 
+                "1" : "rectangular", 
+                "2" : "triangular", 
+                "3" : "polygonal", 
+                "elliptical" : {
+                    "items" : 0
+                }, 
+                "rectangular" : {
+                    "items" : 0
+                }, 
+                "triangular" : {
+                    "items" : 0
+                }, 
+                "polygonal" : {
+                    "items" : 0
+                }
+            }
+        }, 
+        "substrate" : {
+            "items" : 4, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "h", 
+            "l" : 81.177, 
+            "w" : 106.18, 
+            "h" : 1.6, 
+            "x" : -1.113, 
+            "y" : -0.659, 
+            "permitivitty" : 4.4, 
+            "loss" : 0.02, 
+            "name" : "FR4"
+        }
+    }, 
+    "fitness" : {
+        "items" : 1, 
+        "0" : "final", 
+        "1" : "freq", 
+        "lower" : 0.0, 
+        "desired" : 1.1461510391824676, 
+        "upper" : 0.0, 
+        "area" : 0.9100481749799771, 
+        "freq" : 0.8023057274277273, 
+        "final" : 1.3781327937628913, 
+        "dir" : "C:\\Users\\project\\0. My Work\\1. Repositories\\1. Very Unfriendly Train\\Data\\Simulations\\637068868628158208_Primary\\637068871458284544_4\\4.out", 
+        "h0" : 0.3016190353079346, 
+        "g0" : 0.519196736825811, 
+        "h1" : 0.9569641867634414, 
+        "g1" : 0.5145221194677485
+    }
+}

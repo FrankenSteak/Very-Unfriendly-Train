@@ -1,0 +1,137 @@
+{
+    "geometry" : {
+        "items" : 3, 
+        "0" : "feed", 
+        "1" : "ground plane", 
+        "2" : "radiating plane", 
+        "3" : "substrate", 
+        "feed" : {
+            "items" : 2, 
+            "0" : "center", 
+            "1" : "width", 
+            "center" : 52.756, 
+            "width" : 1.58
+        }, 
+        "ground plane" : {
+            "items" : 5, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "y", 
+            "4" : "slots", 
+            "l" : 83.308, 
+            "w" : 113.855, 
+            "x" : -0.621, 
+            "y" : 0.426, 
+            "slots" : {
+                "items" : 4, 
+                "0" : "elliptical", 
+                "1" : "rectangular", 
+                "2" : "triangular", 
+                "3" : "polygonal", 
+                "elliptical" : {
+                    "items" : 0
+                }, 
+                "rectangular" : {
+                    "items" : 1, 
+                    "0" : {
+                        "items" : 4, 
+                        "0" : "x", 
+                        "1" : "y", 
+                        "2" : "l", 
+                        "3" : "w", 
+                        "x" : 93.363, 
+                        "y" : 77.698, 
+                        "z" : 0.0, 
+                        "l" : 6.459, 
+                        "w" : 32.26, 
+                        "type" : "rectangular", 
+                        "id" : "637068849254395392"
+                    }
+                }, 
+                "triangular" : {
+                    "items" : 0
+                }, 
+                "polygonal" : {
+                    "items" : 0
+                }
+            }
+        }, 
+        "radiating plane" : {
+            "items" : 5, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "y", 
+            "4" : "slots", 
+            "l" : 72.424, 
+            "w" : 93.253, 
+            "x" : 4.886, 
+            "y" : 4.839, 
+            "slots" : {
+                "items" : 4, 
+                "0" : "elliptical", 
+                "1" : "rectangular", 
+                "2" : "triangular", 
+                "3" : "polygonal", 
+                "elliptical" : {
+                    "items" : 0
+                }, 
+                "rectangular" : {
+                    "items" : 1, 
+                    "0" : {
+                        "items" : 4, 
+                        "0" : "x", 
+                        "1" : "y", 
+                        "2" : "l", 
+                        "3" : "w", 
+                        "x" : 5.765, 
+                        "y" : 18.379, 
+                        "z" : 1.6, 
+                        "l" : 1.76, 
+                        "w" : 1.23, 
+                        "type" : "rectangular", 
+                        "id" : "637068849254405376"
+                    }
+                }, 
+                "triangular" : {
+                    "items" : 0
+                }, 
+                "polygonal" : {
+                    "items" : 0
+                }
+            }
+        }, 
+        "substrate" : {
+            "items" : 4, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "h", 
+            "l" : 83.308, 
+            "w" : 113.855, 
+            "h" : 1.6, 
+            "x" : -0.621, 
+            "y" : 0.426, 
+            "permitivitty" : 4.4, 
+            "loss" : 0.02, 
+            "name" : "FR4"
+        }
+    }, 
+    "fitness" : {
+        "items" : 1, 
+        "0" : "final", 
+        "1" : "freq", 
+        "lower" : 0.0, 
+        "desired" : 1.3597363592684677, 
+        "upper" : 0.0, 
+        "area" : 1.0014458719212653, 
+        "freq" : 0.9518154514879273, 
+        "final" : 2.130163205913958, 
+        "dir" : "C:\\Users\\project\\0. My Work\\1. Repositories\\1. Very Unfriendly Train\\Data\\Simulations\\637068847024476416_Primary\\637068849254574848_2\\2.out", 
+        "h0" : 0.9934192234593969, 
+        "g0" : 0.3792179138380423, 
+        "h1" : 0.9901618428950717, 
+        "g1" : 0.35667373834442434
+    }
+}

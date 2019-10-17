@@ -695,7 +695,7 @@ class Natalie:
             
             #   STEP 15: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
-            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.8 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
+            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.425 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -720,7 +720,8 @@ class Natalie:
                 #   STEP 18: Loop through hard data
                 for j in range(0, dTmp_Fit["hard"]["items"] ):
                     #   STEP 19: Add to fitness dictionary
-                    dTmp_Results[ "h" + str( j ) ]  = dTmp_Fit["hard"][ str( j ) ]
+                    dTmp_Results[ "f" + str( j ) ] = dTmp_Fit["hard"][ str( j ) ]["frequency"]
+                    dTmp_Results[ "g" + str( j ) ] = dTmp_Fit["hard"][ str( j ) ]["gain"]
 
                 Helga.nop()
 
@@ -747,7 +748,6 @@ class Natalie:
 
                     "dir":      kwargs["fitness"][i]["dir"]
                 }
-
 
             #   STEP 22: Append to output
             lOut.append(dTmp_Results)
@@ -842,12 +842,10 @@ class Natalie:
         for _ in range(0, iCandidates):
             #   STEP 16: Create new candidate
             dTmp_Candidate = {
-                "items":    3,
+                "items":    2,
                 
-                "0":        "feed",
-                "1":        "ground plane",
-                "2":        "radiating plane",
-                "3":        "substrate",
+                "0":        "ground plane",
+                "1":        "radiating plane",
 
                 "feed":
                 {
@@ -2186,7 +2184,7 @@ class Natalie:
             #   STEP 26: No surrogate
             else:
                 #   STEP 27: Update - Scope variables
-                iTmp_Region     = float(iRegion_Alg) / float(self.__iTRO_Region)
+                iTmp_Region     = 0.5 * float(iRegion_Alg) / float(self.__iTRO_Region)
 
             #   region STEP 28->48: Candidate generations and simulation
 
@@ -2369,52 +2367,32 @@ class Natalie:
 
                     #   STEP 110: Dump data
                     js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
+                    
+                sFile   = os.path.abspath(".") + "\\Data\\DataSets\\Antenna\\920\\" + Helga.ticks()
+                for j in range(0, len( lCandidates )):
+                    sTmp_File = sFile + "_" + str(j) + ".json"
+
+                    #   STEP 106: Create file
+                    vTmp_File   = open(sTmp_File, "a")
+
+                    #   STEP 107: Close file
+                    vTmp_File.close()
+                    vTmp_File = None
+
+                    #   STEP 108: Re-open file
+                    with open(sTmp_File, "r+") as vTmp_File:
+                        #   STEP 109: Create temp dictionary
+                        dTmp = {
+                            "geometry": lCandidates[j],
+                            "fitness":  lFitness[j]
+                        }
+
+                        #   STEP 110: Dump data
+                        js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
 
             #
             #   endregion
         
-            sFile   = os.path.abspath(".") + "\\Data\\DataSets\\Antenna\\920\\" + Helga.ticks()
-            for j in range(0, len( lCandidates )):
-                sTmp_File = sFile + "_" + str(j) + ".json"
-
-                #   STEP 106: Create file
-                vTmp_File   = open(sTmp_File, "a")
-
-                #   STEP 107: Close file
-                vTmp_File.close()
-                vTmp_File = None
-
-                #   STEP 108: Re-open file
-                with open(sTmp_File, "r+") as vTmp_File:
-                    #   STEP 109: Create temp dictionary
-                    dTmp = {
-                        "geometry": lCandidates[j],
-                        "fitness":  lFitness[j]
-                    }
-
-                    #   STEP 110: Dump data
-                    js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
-            Helga.nop()
-
-            #   region STEP 111->116: Cull the unworthy :)
-
-            #   STEP 111: Check culling status
-            if (bCull):
-                #   STEP 112: Loop through candidates
-                for j in range(0, self.__iTRO_Candidates + 1 ):
-                    #   STEP 113: If not current best and not previous best
-                    if ((j != iTmp_Index) and (j != self.__iTRO_Candidates)):
-                        #   STEP 114: Get path for directory
-                        sTmp_Path = os.path.dirname(lFitness[j]["dir"])
-
-                        #   STEP 115: If not center
-                        if ("center" not in sTmp_Path):
-                            #   STEP 116: Delete directory
-                            sh.rmtree(sTmp_Path)
-
-            #
-            #   endregion
-
             #   region STEP 77->99: Region update
 
             #   STEP 77->93: Check surrogate status
@@ -2534,6 +2512,24 @@ class Natalie:
             #
             #   endregion
 
+            #   region STEP 111->116: Cull the unworthy :)
+
+            #   STEP 111: Check culling status
+            if (bCull):
+                #   STEP 112: Loop through candidates
+                for j in range(0, self.__iTRO_Candidates + 1 ):
+                    #   STEP 113: If not current best and not previous best
+                    if ((j != iTmp_Index) and (j != self.__iTRO_Candidates)):
+                        #   STEP 114: Get path for directory
+                        sTmp_Path = os.path.dirname(lFitness[j]["dir"])
+
+                        #   STEP 115: If not center
+                        if ("center" not in sTmp_Path):
+                            #   STEP 116: Delete directory
+                            sh.rmtree(sTmp_Path)
+
+            #
+            #   endregion
 
         #   STEP 121: Populate output dictionary
         dOut    = {

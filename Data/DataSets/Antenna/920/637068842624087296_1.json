@@ -1,0 +1,135 @@
+{
+    "geometry" : {
+        "items" : 3, 
+        "0" : "feed", 
+        "1" : "ground plane", 
+        "2" : "radiating plane", 
+        "3" : "substrate", 
+        "feed" : {
+            "items" : 2, 
+            "0" : "center", 
+            "1" : "width", 
+            "center" : 52.984, 
+            "width" : 1.68
+        }, 
+        "ground plane" : {
+            "items" : 5, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "y", 
+            "4" : "slots", 
+            "l" : 91.7, 
+            "w" : 115.203, 
+            "x" : 0.625, 
+            "y" : -1.072, 
+            "slots" : {
+                "items" : 4, 
+                "0" : "elliptical", 
+                "1" : "rectangular", 
+                "2" : "triangular", 
+                "3" : "polygonal", 
+                "elliptical" : {
+                    "items" : 0
+                }, 
+                "rectangular" : {
+                    "items" : 1, 
+                    "0" : {
+                        "items" : 4, 
+                        "0" : "x", 
+                        "1" : "y", 
+                        "2" : "l", 
+                        "3" : "w", 
+                        "x" : 78.306, 
+                        "y" : 66.838, 
+                        "z" : 0.0, 
+                        "l" : 27.194, 
+                        "w" : 7.663, 
+                        "type" : "rectangular", 
+                        "id" : "637068840972944384"
+                    }
+                }, 
+                "triangular" : {
+                    "items" : 0
+                }, 
+                "polygonal" : {
+                    "items" : 0
+                }
+            }
+        }, 
+        "radiating plane" : {
+            "items" : 5, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "y", 
+            "4" : "slots", 
+            "l" : 76.201, 
+            "w" : 102.619, 
+            "x" : 5.247, 
+            "y" : 4.869, 
+            "slots" : {
+                "items" : 4, 
+                "0" : "elliptical", 
+                "1" : "rectangular", 
+                "2" : "triangular", 
+                "3" : "polygonal", 
+                "elliptical" : {
+                    "items" : 0
+                }, 
+                "rectangular" : {
+                    "items" : 1, 
+                    "0" : {
+                        "items" : 4, 
+                        "0" : "x", 
+                        "1" : "y", 
+                        "2" : "l", 
+                        "3" : "w", 
+                        "x" : 38.122, 
+                        "y" : 56.515, 
+                        "z" : 1.6, 
+                        "l" : 1.652, 
+                        "w" : 7.191, 
+                        "type" : "rectangular", 
+                        "id" : "637068840972954368"
+                    }
+                }, 
+                "triangular" : {
+                    "items" : 0
+                }, 
+                "polygonal" : {
+                    "items" : 0
+                }
+            }
+        }, 
+        "substrate" : {
+            "items" : 4, 
+            "0" : "l", 
+            "1" : "w", 
+            "2" : "x", 
+            "3" : "h", 
+            "l" : 91.7, 
+            "w" : 115.203, 
+            "h" : 1.6, 
+            "x" : 0.625, 
+            "y" : -1.072, 
+            "permitivitty" : 4.4, 
+            "loss" : 0.02, 
+            "name" : "FR4"
+        }
+    }, 
+    "fitness" : {
+        "items" : 1, 
+        "0" : "final", 
+        "1" : "freq", 
+        "lower" : 0.0, 
+        "desired" : 0.7901117348777895, 
+        "upper" : 0.0, 
+        "area" : 1.1153772679067222, 
+        "freq" : 0.5530782144144526, 
+        "final" : 1.5367022563216013, 
+        "dir" : "C:\\Users\\project\\0. My Work\\1. Repositories\\1. Very Unfriendly Train\\Data\\Simulations\\637068839967513984_Primary\\637068840973143680_1\\1.out", 
+        "h0" : 1.2530940205447045, 
+        "h1" : 0.32712944921087456
+    }
+}

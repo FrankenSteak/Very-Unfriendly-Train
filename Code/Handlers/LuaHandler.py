@@ -255,7 +255,7 @@ class Lana:
 
             #   STEP 32: Reset directory
             os.chdir(sTmp_Dir)
-            #sh.rmtree(sDir)
+            sh.rmtree(sDir)
 
         #   STEP ??: Return
         return
@@ -1759,6 +1759,69 @@ class Lana:
     #
     #       endregion
     
+    #       region Front-End-(Antenna): Requrests
+
+    def newARequest(self, **kwargs) -> None:
+        """
+            Description:
+
+                Sets the antenna project to create a new request using the
+                provided arguments.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + request   = ( str ) The type of request that can be made
+                    ~ Requried
+
+                    ~ Possibilities:
+                        - FarField
+
+                + params    = ( dict ) The dictionary that contains the values
+                    to be used in the new request
+                    ~ Required
+        """
+
+        #   STEP 0: Local variables
+
+        #   STEP 1: Setup - Local variables
+
+        #   region STEP 2->7: Error checking
+
+        #   STEP 2: Check if request arg passed
+        if ("request" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Lana.newARequest() -> Step 2: No requeust arg passed")
+
+        #   STPE 4: Check if params arg passed
+        if ("params" not in kwargs):
+            #   STEP 5: Error handling
+            raise Exception("An error occured in Lana.newARequest() -> Step 4: No params arg passed")
+
+        #   STEP 6: Check if ongoing antenna project
+        if (self.__dAntenna == None):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Lana.newARequest() -> Step 6: No ongoing antenna project")
+
+        #
+        #   endregion
+        
+        #   STEP 8: Check if farfields
+        if (kwargs["request"] == "FarField"):
+            #   STEP 9: Outsource and return
+            return self.__newARequest_FarField__(params=kwargs["params"])
+
+        #   STEP 10: Error handling
+        raise Exception("An error occured in Lana.newARequest() -> Step 10: The fuck?")
+
+    #
+    #       endregion
+
     #
     #   endregion
 
@@ -2893,7 +2956,7 @@ class Lana:
         iSteps      = dAnt["steps"]
         iOutput     = dAnt["project output"]["items"]
 
-        sSubtraction    = "VAnt_Subrtaction_" + kwargs["label"]
+        sSubtraction    = "VAnt_Subtraction_" + kwargs["label"]
 
         _target     = kwargs["parts"]["target"]
         _subs       = kwargs["parts"]["subs"]
@@ -3269,6 +3332,95 @@ class Lana:
 
         #   STEP 18: Return
         return sEdgePort
+
+    #
+    #       endregion
+
+    #       region Back-End-(Antenna): Requests
+
+    def __newARequest_FarField__(self, **kwargs) -> None:
+        """
+            Description:
+
+                Sets the antenna project to create a new far field request
+                using the provided arguments.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + params    = ( dict ) The dictionary that contains the values
+                    to be used in the new request
+                    ~ Required
+
+                    ~ "theta start":        ( float )
+                    ~ "phi start":          ( float )
+                    ~ "theta end":          ( float )
+                    ~ "phi end":            ( float )
+                    ~ "theta increments":    ( float )
+                    ~ "phi increments":     ( float )
+        """
+
+        #   region STEP 0->1: Error checking
+
+        #   STEP 0: Check if params arg passed
+        if ("params" not in kwargs):
+            #   STEP 1: Error handling
+            raise Exception("An error occured in Lana.__newARequest_FarField__() -> Step 0: No params arg passed")
+
+        #
+        #   endregion
+
+        #   STEP 2: Local variables
+        dAnt    = self.__dAntenna
+        dParams = kwargs["params"]
+
+        iSteps  = dAnt["steps"]
+        iOutput = dAnt["project output"]["items"]
+
+        #   STEP 3: Setup - Local variables
+
+        #   STEP 4: Check if project config is variable
+        if ("VAnt_Config" not in dAnt["project variables"]):
+            #   STEP 5: Add output for config file
+            dAnt["project output"][str(iOutput + 0)] =  "-- STEP " + str(iSteps) + ": Get config file"
+            dAnt["project output"][str(iOutput + 1)] =  "   VAnt_Config = VAnt_Project.SolutionConfigurations[1]"
+            dAnt["project output"][str(iOutput + 2)] =  "--\n"
+
+            #   STEP 6: Update anntena variables
+            iSteps                                      += 1
+            iOutput                                     += 3
+
+            dAnt["steps"]                               = iSteps
+            dAnt["project output"]["items"]             = iOutput
+
+            #   STEP 7: Add variable to variable list
+            dAnt["project variables"]["VAnt_Config"]    = True
+            dAnt["project variables"]["items"]          += 1
+
+        #   STEP 8: Build string
+        sTmp =  "   VAnt_Config.FarFields:Add(" + str( dParams["theta start"] ) + ", "
+        sTmp += str( dParams["phi start"] ) + ", "
+        sTmp += str( dParams["theta end"] ) + ", "
+        sTmp += str( dParams["phi end"] ) + ", "
+        sTmp += str( dParams["theta increments"] ) + ", "
+        sTmp += str( dParams["phi increments"] ) + ")"
+
+        #   STEP 9: Add output
+        dAnt["project output"][str(iOutput + 0)] =  "-- STEP " + str(iSteps) + ": Create new Far-Field request"
+        dAnt["project output"][str(iOutput + 1)] =  sTmp
+        dAnt["project output"][str(iOutput + 2)] =  "--"
+
+        #   STEP 10: Update antenna variables
+        dAnt["steps"]   += 1
+        dAnt["project output"]["items"] = iOutput + 3
+        
+        #   STEP ??: Return
+        return
 
     #
     #       endregion

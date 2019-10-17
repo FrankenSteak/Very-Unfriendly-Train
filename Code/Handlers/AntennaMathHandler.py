@@ -424,6 +424,24 @@ class Matthew:
         #
         #   endregion
 
+        #   region ??->??: Add far field request
+
+        #   STEP ??: Create tmp params dict
+        dTmp_Params = {
+            "theta start":      0.0,
+            "phi start":        0.0,
+            "theta end":        180.0,
+            "phi end":          360.0,
+            "theta increments": 5.0,
+            "phi increments":   5.0
+        }
+
+        #   STEP ??: Create new far field request
+        lAntenna.newARequest(request="FarField", params=dTmp_Params)
+        
+        #
+        #   endregion
+
         #   region STEP 27: Set frequency and mesh
 
         lAntenna.setAFrequency(start=kwargs["frequency"]["start"], end=kwargs["frequency"]["end"], range_type="Linear", samples=kwargs["frequency"]["samples"])
@@ -1348,7 +1366,7 @@ class Matthew:
                     dTmp_Corner = {
                         "x":    dTmp_CurrSlot["x"],
                         "y":    dTmp_CurrSlot["y"],
-                        "z":    0.0
+                        "z":    dTmp_Ant["substrate"]["h"]
                     }
 
                     #   STEP 80: Setup - Elliptical slot dimensions
@@ -1381,7 +1399,7 @@ class Matthew:
                     dTmp_Corner = {
                         "x":    dTmp_CurrSlot["x"],
                         "y":    dTmp_CurrSlot["y"],
-                        "z":    0.0
+                        "z":    dTmp_Ant["substrate"]["h"]
                     }
 
                     #   STEP 89: Setup - Square slot dimenions
@@ -1453,12 +1471,12 @@ class Matthew:
             if (dSubs["items"] > 0):
                 #   STEP 111: Create parts dictionary
                 dTmp_Parts = {
-                    "target":   sGPlane,
+                    "target":   sRPlane,
                     "subs":     dSubs
                 }
 
                 #   STEP 112: Perform subtraction
-                sGPlane = lurkhei.newAModification(mod="Subtract", parts=dTmp_Parts, label="GP_Slotted")
+                sRPlane = lurkhei.newAModification(mod="Subtract", parts=dTmp_Parts, label="RP_Slotted")
 
             #
             #   endregion
@@ -1515,6 +1533,24 @@ class Matthew:
             #   endregion
 
             #   region STEP 117->119: Set frequency and mesh
+
+            #   region ??->??: Add far field request
+
+            #   STEP ??: Create tmp params dict
+            dTmp_Params = {
+                "theta start":      0.0,
+                "phi start":        0.0,
+                "theta end":        180.0,
+                "phi end":          360.0,
+                "theta increments": 5.0,
+                "phi increments":   5.0
+            }
+
+            #   STEP ??: Create new far field request
+            lurkhei.newARequest(request="FarField", params=dTmp_Params)
+
+            #
+            #   endregion
 
             #   STEP 117: Check if frequency arg passed
             if ("frequency" in kwargs):
@@ -1721,7 +1757,8 @@ class Matthew:
             
         #   STEP 11: Be safe OwO
         try:
-            #   region STEP 12->23: Data acquisition
+
+            #   region STEP 12->41: Data acquisition
 
             #   STEP 12: Open file
             with open(kwargs["dir"], "r+") as vFile:
@@ -1732,19 +1769,87 @@ class Matthew:
             lData_Actual    = []
             lData_F         = None
             lData_S         = None
+            lData_G         = None
 
             #   STEP 15: Loop through data
             i = 0
             while (i < len(lData) ):
-                #   STEP 16: Check if this line contains frequency
-                if (" Frequency in Hz:               FREQ =    " in lData[i]):
-                    #   STEP 17: Set tmp Frequency var
+                #   STEP 16: Check if gain
+                if ("THETA    PHI      magn.    phase     magn.    phase " in lData[i]):
+                    #   STEP 17: Increment 
+                    fTmp_Directivity    = -np.inf
+                    fTmp_Eff            = None
+
+                    #   STEP 18: Loop
+                    while (True):
+                        #   STEP 19: Increment counter
+                        i += 1
+
+                        #   STEP 20: Check if end of gain
+                        if (lData[i] == "\n"):
+                            #   STEP 21: Increment line counter
+                            i += 1
+
+                            #   STEP 22: Get effeciency
+                            fTmp_Eff    = Helga.getValue( lData[i].strip("\n"), 5 )
+
+                            #   STEP 23: Exit loop
+                            break
+                        
+                        #   STEP 24: Not end of gain
+                        else:
+                            #   STEP 25: Strip new line
+                            fTmp_Dir    = Helga.getValue( lData[i].strip("\n"), 8 )
+
+                            #   STEP 26: Check if best directivity
+                            if (fTmp_Dir > fTmp_Directivity):
+                                #   STEP 27: Update - Directivity
+                                fTmp_Directivity = fTmp_Dir
+
+                    #   STEP 28: Calculate gain
+                    lData_G = fTmp_Eff * fTmp_Directivity
+
+                    #   STEP 29: Save to temp dictionary
+                    dTmp_Data = {
+                        "frequency":    float(lData_F),
+                        "fitness":      lData_S,
+                        "gain":         lData_G
+                    }
+
+                    #   STEP 30: Append to actual data list
+                    lData_Actual.append(dTmp_Data)
+
+                    #   STEP 31: Clear tmp variables
+                    lData_F = None
+                    lData_S = None
+                    lData_G = None
+
+                #   STEP 32: Check if this line contains frequency
+                elif (" Frequency in Hz:               FREQ =    " in lData[i]):
+                    #   STEP 33: Check if data still in vars
+                    if (lData_F != None):
+                        #   STEP 34: Save to temp dictionary
+                        dTmp_Data = {
+                            "frequency":    float(lData_F),
+                            "fitness":      lData_S,
+                            "gain":         lData_G
+                        }
+
+                        #   STEP 35: Append to actual data list
+                        lData_Actual.append(dTmp_Data)
+
+                        #   STEP 36: Clear tmp variables
+                        lData_F = None
+                        lData_S = None
+                        lData_G = None
+
+                    #   STEP 37: Set tmp Frequency var
                     lData_F = lData[i].strip(" Frequency in Hz:               FREQ =    ")
                     lData_F = self.__cleanString__(lData_F)
 
-                #   STEP 18: Check if line contains s11 param
+                #   STEP 38: Check if line contains s11 param
                 elif ("         Sum |S|^2 of these S-parameters:    " in lData[i]):
-                    #   STEP 19: Save to tmp S11 var
+                    #   STEP 39: Save to tmp S11 var
                     lData_S = lData[i].strip("         Sum |S|^2 of these S-parameters:    ")
                     lData_S = self.__cleanString__(lData_S)
 
@@ -1752,34 +1857,22 @@ class Matthew:
 
                     lData_S = lData_S[iData_S:]
 
-                    #   STEP 20: Get fitness safely
+                    #   STEP 40: Get fitness safely
                     try:
-                        fTmp_Fitness = float(lData_S)
+                        lData_S = float(lData_S)
                     
                     except:
-                        fTmp_Fitness = 0.0
+                        lData_S = 0.0
 
-                    #   STEP 21: Save to temp dictionary
-                    dTmp_Data = {
-                        "frequency":    float(lData_F),
-                        "fitness":      fTmp_Fitness
-                    }
-
-                    #   STEP 22: Append to actual data list
-                    lData_Actual.append(dTmp_Data)
-
-                    #   STEP 23: Clear tmp variables
-                    lData_F = None
-                    lData_S = None
-
+                #   STEP 41: Increment line counter
                 i += 1
 
             #
             #   endregion
 
-            #   region STEP 24->34: Data modification
+            #   region STEP 42->58: Data modification
 
-            #   STEP 24: Update - Local variables
+            #   STEP 42: Update - Local variables
             fResonant_Fitness   = np.inf
             iTmp_Len            = len( lData_Actual )
 
@@ -1788,40 +1881,57 @@ class Matthew:
             }
 
 
-            #   STEP 25: Loop through actual data
+            #   STEP 43: Loop through actual data
             for i in range(0, iTmp_Len):
-                #   STEP 26: Get tmp var
+                #   STEP 44: Get tmp var
                 dTmp            = lData_Actual[i]
-                fTmp_Fitness    = vActivations.logistic( ( dTmp["fitness"] + kwargs["params"]["offset"] ) / kwargs["params"]["divisor"] )
+                fTmp_Frequency  = vActivations.logistic( ( dTmp["fitness"] + kwargs["params"]["offset"] ) / kwargs["params"]["divisor"] )
+                fTmp_Fitness    = fTmp_Frequency
 
-                #   STEP 27: Check if frequency in lower
+                fTmp_Gain       = 0.0
+
+                #   STEP 45: Check if gain not None
+                if (dTmp["gain"] != None):
+                    #   STEP 46: Setup - Tmp variable
+                    fTmp_Gain       = dTmp["gain"]
+
+                    #   STEP 47: Activate gain
+                    fTmp_Gain       = vActivations.logistic( 1.0 - 2.0 * fTmp_Gain )
+
+                    #   STEP 48: Add to fitness
+                    fTmp_Fitness    += fTmp_Gain
+
+                #   STEP 49: Check if frequency in lower
                 if (dTmp["frequency"] < fDesired_Lower):
-                    #   STEP 28: Update - Local variables
+                    #   STEP 50: Update - Local variables
                     fLower_Sum      += fTmp_Fitness
                     fLower_Samples  += 1
 
-                #   STEP 29: Check if in desired range
+                #   STEP 51: Check if in desired range
                 elif (dTmp["frequency"] < fDesired_Upper):
-                    #   STEP 30: Update - Local variables
+                    #   STEP 52: Update - Local variables
                     fDesired_Sum        += fTmp_Fitness
                     fDesired_Samples    += 1
 
-                #   STEP 31: Then has to be upper range
+                #   STEP 53: Then has to be upper range
                 else:
-                    #   STEP 32: Update - Local variables
+                    #   STEP 54: Update - Local variables
                     fUpper_Sum      += fTmp_Fitness
                     fUpper_Samples  += 1
 
-                #   STEP 33: Check if Fr
+                #   STEP 55: Check if Fr
                 if (dTmp["fitness"] < fResonant_Fitness):
-                    #   STEP 34: Set new Fr
+                    #   STEP 56: Set new Fr
                     fResonant_Frequency = dTmp["frequency"]
                     fResonant_Fitness   = dTmp["fitness"]
 
-                #   STEP ??: Check if hard arg passed
+                #   STEP 57: Check if hard arg passed
                 if ("hard" in kwargs):
-                    #   STEP ??: Populate temp dictionary
-                    lTmp_Data[ str( i ) ] = fTmp_Fitness
+                    #   STEP 58: Populate temp dictionary
+                    lTmp_Data[ str( i ) ] = {
+                        "frequency":    fTmp_Frequency,
+                        "gain":         fTmp_Gain
+                    }
             
             #
             #   endregion
