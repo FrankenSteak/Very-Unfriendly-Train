@@ -1652,12 +1652,15 @@ class Matthew:
         fResonant_Fitness       = None
 
         fLower_Sum              = 0.0
+        fLower_Gain             = 0.0
         fLower_Samples          = 0
 
         fDesired_Sum            = 0.0
+        fDesired_Gain           = 0.0
         fDesired_Samples        = 0
         
         fUpper_Sum              = 0.0
+        fUpper_Gain             = 0.0
         fUpper_Samples          = 0
 
         vActivations            = Antonio()
@@ -1790,14 +1793,6 @@ class Matthew:
                 #   STEP 26: Get tmp var
                 dTmp            = lData_Actual[i]
                 fTmp_Fitness    = vActivations.logistic( ( dTmp["fitness"] + kwargs["params"]["offset"] ) / kwargs["params"]["divisor"] )
-
-                #   STEP ??: Check if bias arg passed
-                if ("bias" in kwargs):
-                    fTmp_Scalar = float( ( iTmp_Len - i ) / iTmp_Len )
-                    fTmp_Scalar = fTmp_Scalar * 2.0 - 1.0
-                    fTmp_Scalar = vActivations.logistic( fTmp_Scalar )
-
-                    fTmp_Fitness = fTmp_Fitness * ( ( 1.0 - kwargs["bias"] ) + kwargs["bias"] * fTmp_Scalar )
 
                 #   STEP 27: Check if frequency in lower
                 if (dTmp["frequency"] < fDesired_Lower):
