@@ -274,6 +274,7 @@ class Natalie:
         #
         #   endregion
         
+
         #   region STEP 14->19: Primary optimization
 
         #   STEP 14: Check if primary is tro
@@ -295,6 +296,7 @@ class Natalie:
         #   endregion
 
         """
+
         #   region STEP 20->25: Secondary optimization
 
         #   STEP 20: Check if secondary is tro
@@ -314,6 +316,7 @@ class Natalie:
 
         #
         #   endregion
+
         """
 
         #   STEP 26: Return
@@ -695,7 +698,7 @@ class Natalie:
             
             #   STEP 15: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
-            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.425 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
+            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.375 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -842,10 +845,11 @@ class Natalie:
         for _ in range(0, iCandidates):
             #   STEP 16: Create new candidate
             dTmp_Candidate = {
-                "items":    2,
+                "items":    3,
                 
-                "0":        "ground plane",
-                "1":        "radiating plane",
+                "0":        "feed",
+                "1":        "ground plane",
+                "2":        "radiating plane",
 
                 "feed":
                 {
@@ -1704,6 +1708,8 @@ class Natalie:
             if (kwargs["data"][0]["rectangular"]["items"] > 0):
                 lTmp    = [[], [], [], []]
 
+                """
+                ToDo:
                 for i in range(0, kwargs["data"][0]["rectangular"]["items"]):
                     for j in range(0, len( kwargs["data"] ) ):
                         lTmp[0].append( kwargs["data"][j]["rectangular"][str(i)]["l"])
@@ -1719,10 +1725,29 @@ class Natalie:
                     kwargs["template"]["rectangular"][str(i)]["y"] = "remap-" + str(iIndex + 3)
 
                     iIndex += 4
+                """
+                
+                i = rn.randint(0, kwargs["data"][0]["rectangular"]["items"] - 1)
+                for j in range(0, len( kwargs["data"] ) ):
+                    lTmp[0].append( kwargs["data"][j]["rectangular"][str(i)]["l"])
+                    lTmp[1].append( kwargs["data"][j]["rectangular"][str(i)]["w"])
+                    lTmp[2].append( kwargs["data"][j]["rectangular"][str(i)]["x"])
+                    lTmp[3].append( kwargs["data"][j]["rectangular"][str(i)]["y"])
+
+                lOut.extend(lTmp)
+                
+                kwargs["template"]["rectangular"][str(i)]["l"] = "remap-" + str(iIndex + 0)
+                kwargs["template"]["rectangular"][str(i)]["w"] = "remap-" + str(iIndex + 1)
+                kwargs["template"]["rectangular"][str(i)]["x"] = "remap-" + str(iIndex + 2)
+                kwargs["template"]["rectangular"][str(i)]["y"] = "remap-" + str(iIndex + 3)
+
+                iIndex += 4
 
             if (kwargs["data"][0]["triangular"]["items"] > 0):
                 lTmp    = [[], [], [], [], [], []]
 
+                """
+                ToDo
                 for i in range(0, kwargs["data"][0]["triangular"]["items"]):
                     for j in range(0, len( kwargs["data"] ) ):
                         lTmp[0].append( kwargs["data"][j]["triangular"][str(i)]["0"]["x"])
@@ -1742,6 +1767,27 @@ class Natalie:
                     kwargs["template"]["triangular"][str(i)]["2"]["y"] = "remap-" + str(iIndex + 1)
 
                     iIndex += 6
+                """
+                
+                i = rn.randint(0, kwargs["data"][0]["triangular"]["items"] - 1)
+                for j in range(0, len( kwargs["data"] ) ):
+                    lTmp[0].append( kwargs["data"][j]["triangular"][str(i)]["0"]["x"])
+                    lTmp[1].append( kwargs["data"][j]["triangular"][str(i)]["0"]["y"])
+                    lTmp[2].append( kwargs["data"][j]["triangular"][str(i)]["1"]["x"])
+                    lTmp[3].append( kwargs["data"][j]["triangular"][str(i)]["1"]["y"])
+                    lTmp[4].append( kwargs["data"][j]["triangular"][str(i)]["2"]["x"])
+                    lTmp[5].append( kwargs["data"][j]["triangular"][str(i)]["2"]["y"])
+                    
+                lOut.extend(lTmp)
+                
+                kwargs["template"]["triangular"][str(i)]["0"]["x"] = "remap-" + str(iIndex + 0)
+                kwargs["template"]["triangular"][str(i)]["0"]["y"] = "remap-" + str(iIndex + 1)
+                kwargs["template"]["triangular"][str(i)]["1"]["x"] = "remap-" + str(iIndex + 0)
+                kwargs["template"]["triangular"][str(i)]["1"]["y"] = "remap-" + str(iIndex + 1)
+                kwargs["template"]["triangular"][str(i)]["2"]["x"] = "remap-" + str(iIndex + 0)
+                kwargs["template"]["triangular"][str(i)]["2"]["y"] = "remap-" + str(iIndex + 1)
+
+                iIndex += 6
                 
         except Exception as ex:
             print("Initial error: ", ex)
@@ -2393,6 +2439,25 @@ class Natalie:
             #
             #   endregion
         
+            #   region STEP 111->116: Cull the unworthy :)
+
+            #   STEP 111: Check culling status
+            if (bCull):
+                #   STEP 112: Loop through candidates
+                for j in range(0, self.__iTRO_Candidates + 1 ):
+                    #   STEP 113: If not current best and not previous best
+                    if ((j != iTmp_Index) and (j != self.__iTRO_Candidates)):
+                        #   STEP 114: Get path for directory
+                        sTmp_Path = os.path.dirname(lFitness[j]["dir"])
+
+                        #   STEP 115: If not center
+                        if ("center" not in sTmp_Path):
+                            #   STEP 116: Delete directory
+                            sh.rmtree(sTmp_Path)
+
+            #
+            #   endregion
+
             #   region STEP 77->99: Region update
 
             #   STEP 77->93: Check surrogate status
@@ -2410,7 +2475,7 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
                         print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
@@ -2432,7 +2497,7 @@ class Natalie:
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates]
-                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_Index]
                         print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
@@ -2459,7 +2524,7 @@ class Natalie:
                             print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region))
 
                             dHold = lFitness[self.__iTRO_Candidates]
-                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 10.0, 3)), sep="\t")
+                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                             
                             dHold = lFitness[iTmp_Index]
                             print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
@@ -2508,25 +2573,6 @@ class Natalie:
                     else:
                         #   STEP 103: Exit loop
                         break
-
-            #
-            #   endregion
-
-            #   region STEP 111->116: Cull the unworthy :)
-
-            #   STEP 111: Check culling status
-            if (bCull):
-                #   STEP 112: Loop through candidates
-                for j in range(0, self.__iTRO_Candidates + 1 ):
-                    #   STEP 113: If not current best and not previous best
-                    if ((j != iTmp_Index) and (j != self.__iTRO_Candidates)):
-                        #   STEP 114: Get path for directory
-                        sTmp_Path = os.path.dirname(lFitness[j]["dir"])
-
-                        #   STEP 115: If not center
-                        if ("center" not in sTmp_Path):
-                            #   STEP 116: Delete directory
-                            sh.rmtree(sTmp_Path)
 
             #
             #   endregion

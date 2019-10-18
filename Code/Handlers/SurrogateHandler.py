@@ -921,6 +921,7 @@ class Golem:
                 if (i == 0):
                     #   STEP 9: Outsource threaded mapping
                     dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])#, optimizer=ga.TRO)
+                    self.__lSRG[i].exportAnnie(file=os.path.abspath(".") + "\\Data\\Simulations\\Annie.json", full_path=True)
 
                 #   STEP 10: Else if accuracy = 100%
                 elif (self.__lSRG_Accuracy[i] == 1.0):
@@ -957,7 +958,6 @@ class Golem:
             print("An error occured in Golem.__map_srgOverseer__()")
 
         #   STEP 15: Return
-        print("")
         return
 
     #

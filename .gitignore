@@ -1,3 +1,5 @@
 .vscode/settings.json
 *_Primary
 *_Secondary
+*.zip
+*.7z

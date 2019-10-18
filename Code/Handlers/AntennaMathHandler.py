@@ -1886,7 +1886,7 @@ class Matthew:
                 #   STEP 44: Get tmp var
                 dTmp            = lData_Actual[i]
                 fTmp_Frequency  = vActivations.logistic( ( dTmp["fitness"] + kwargs["params"]["offset"] ) / kwargs["params"]["divisor"] )
-                fTmp_Fitness    = fTmp_Frequency
+                fTmp_Fitness    = cp.deepcopy( fTmp_Frequency )
 
                 fTmp_Gain       = 0.0
 
