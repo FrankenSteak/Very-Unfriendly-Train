@@ -280,7 +280,7 @@ class Natalie:
         #   STEP 14: Check if primary is tro
         if (kwargs["primary"] == "tro"):
             #   STEP 15: Outsource
-            dPrimary_Results    = self.__tro__(stage="Primary", new=bNew, cull=bCull, save=bSave, surrogate=False)
+            dPrimary_Results    = self.__tro_Primary__(cull=bCull, save=bSave)
 
         #   STEP 16: Check if primary is nm
         elif (kwargs["primary"] == "nm"):
@@ -317,7 +317,7 @@ class Natalie:
         #
         #   endregion
 
-        """
+        #"""
 
         #   STEP 26: Return
         return
@@ -1445,10 +1445,200 @@ class Natalie:
         #   STEP 116: Return
         return dOut
     
+    def __getBestCandidate__(self, _lFitness) -> int:
+        """
+        """
+
+        #   STEP 0: Local variables
+        fBest                   = np.inf
+        
+        iBest                   = 0
+        
+        #   STEP 1: Loop through the fitness list
+        for i in range(0, len( _lFitness ) ):
+            #   STEP 2: Check if less than current best fitness
+            if ( _lFitness[i]["final"] < fBest ):
+                #   STEP 3: Update - Best variables
+                iBest = i
+                fBest = _lFitness[i]["final"]
+
+        #   STEP 4: Return
+        return iBest
+
     #
     #   endregion
 
     #   region Back-End: Data management
+
+    def __saveData__(self, **kwargs) -> None:
+        """
+            Description:
+            
+                Saves the provided data to the appropriate location.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + dir       = ( str ) The direcotry to save the data to
+                    ~ Required
+
+                + bestGeo   = ( dict ) Dictionary containing the geometry of
+                    the current best antenna simulation
+
+                + bestFit   = ( dict ) Dictionary containing the fitness data
+                    for the current best antenna simulation
+
+                + candidates    = ( list ) List of current antenna candidates
+                    to be written to file for data base createion
+
+                + fitness   = ( list ) List of current antenna candidate
+                    fitness evaluations to be written to file for data base
+                    creation
+        """
+
+        #   region STEP 0->7: Error checking
+
+        #   STEP 0: Check if bestGeo arg passed
+        if ("bestGeo" in kwargs):
+            #   STEP 1: Check if bestFit arg passed
+            if ("bestFit" not in kwargs):
+                #   STEP 2: Error handling
+                raise Exception("An error occured in Natalie.__saveData__() -> Step 1: No bestFit arg passed")
+        
+        #   STEP 3: Check if candidates arg passed
+        if ("candidates" in kwargs):
+            #   STEP 4: Check if fitness arg passed
+            if ("fitness" not in kwargs):
+                #   STEP 5: Error handling
+                raise Exception("An error occured in Natalie.__saveData__() -> Step 4: No fitness arg passed")
+
+        #   STEP 6: Check if dir arg passed
+        if ("dir" not in kwargs):
+            #   STEP 7: Error handling
+            raise Exception("An error occured in Natalie.__saveData__() -> Step 6: No dir arg passed")
+
+        #
+        #   endregion
+
+        #   region STEP 8->13: Dump best candidate
+
+        #   STEP 8: Check if bestGeo arg passed
+        if ("bestGeo" in kwargs):
+            #   STEP 9: Setup - File location
+            sTmp_File   = kwargs["dir"] + "\\" + Helga.ticks() + "_best.json"
+
+            #   STEP 10: Create file
+            vTmp_File   = open(sTmp_File, "a")
+            vTmp_File.close()
+            vTmp_File   = None
+
+            #   STEP 11: Re-Open file
+            with open(sTmp_File, "r+") as vTmp_File:
+                #   STEP 12: Setup - Tmp dictionary
+                dTmp = {
+                    "geometry": kwargs["bestGeo"],
+                    "fitness":  kwargs["bestFit"]
+                }
+
+                #   STEP 13: Dump data
+                js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
+        
+        #
+        #   endregion
+
+        #   region STEP 14->??: Dump all sims
+
+        #   STEP 14: Check if candidates arg passed
+        if ("candidates" in kwargs):
+            #   STEP 15: Setup - File Directory
+            sFile   = os.path.abspath(".") + "\\Data\\DataSets\\Antenna\\920\\" + Helga.ticks()
+
+            #   STEP 16: Loop through candidates
+            for i in range(0, len( kwargs["candidates"] ) ):
+                #   STEP 17: Setup - File location
+                sTmp_File   = sFile + "_" + str(i) + ".json"
+
+                #   STEP 18: Create file
+                vTmp_File   = open(sTmp_File, "a")
+                vTmp_File.close()
+                vTmp_File   = None
+
+                #   STEP 19: Re-Open file
+                with open(sTmp_File, "r+") as vTmp_File:
+                    #   STEP 20: Create temp dictionary
+                    dTmp    = {
+                        "geometry": kwargs["candidates"][i],
+                        "fitness":  kwargs["fitness"][i]
+                    }
+
+                    #   STEP 21: Dump data
+                    js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
+
+        #
+        #   endregion
+
+        #   STEP 22: Return
+        return
+
+    def __cullData__(self, **kwargs) -> None:
+        """
+            Description:
+
+                Culls the simulations in the list.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + data  = ( list ) List of candidates dictionaries containing
+                    "dir" entry
+                    ~ Required
+
+                + spare = ( int ) The index of a candidate to spare
+                    ~ Default   = -1
+        """
+
+        #   region STEP 0->1: Error checking
+
+        #   STEP 0: Check if data arg passed
+        if ("data" not in kwargs):
+            #   STEP 1: Error handling
+            raise Exception("An error occured in Natalie.__cullData__() -> Step 0: No data arg passed")
+
+        #
+        #   endregion
+
+        #   STEP 2: Local variables
+        iSpare                  = -1
+
+        #   STEP 3: Check if spare arg passed
+        if ("spare" in kwargs):
+            #   STEP 4: Update - Spare
+            iSpare = kwargs["spare"]
+
+            #   STEP 5: Loop through candidates
+            for i in range(0, self.__iTRO_Candidates + 1 ):
+                #   STEP 6: If not spare and not previous best
+                if ((i != iSpare) and (i != self.__iTRO_Candidates)):
+                    #   STEP 7: Get path for directory
+                    sTmp_Path = os.path.dirname(kwargs["data"][i]["dir"])
+
+                    #   STEP 8: If not center
+                    if ("center" not in sTmp_Path):
+                        #   STEP 9: Delete directory
+                        sh.rmtree(sTmp_Path)
+
+        #   STEP 10: Return
+        return
 
     #       region Back-End-(Data Management): Data molding
 
@@ -1708,8 +1898,6 @@ class Natalie:
             if (kwargs["data"][0]["rectangular"]["items"] > 0):
                 lTmp    = [[], [], [], []]
 
-                """
-                ToDo:
                 for i in range(0, kwargs["data"][0]["rectangular"]["items"]):
                     for j in range(0, len( kwargs["data"] ) ):
                         lTmp[0].append( kwargs["data"][j]["rectangular"][str(i)]["l"])
@@ -1742,12 +1930,12 @@ class Natalie:
                 kwargs["template"]["rectangular"][str(i)]["y"] = "remap-" + str(iIndex + 3)
 
                 iIndex += 4
+                
+                """
 
             if (kwargs["data"][0]["triangular"]["items"] > 0):
                 lTmp    = [[], [], [], [], [], []]
 
-                """
-                ToDo
                 for i in range(0, kwargs["data"][0]["triangular"]["items"]):
                     for j in range(0, len( kwargs["data"] ) ):
                         lTmp[0].append( kwargs["data"][j]["triangular"][str(i)]["0"]["x"])
@@ -1761,10 +1949,10 @@ class Natalie:
                     
                     kwargs["template"]["triangular"][str(i)]["0"]["x"] = "remap-" + str(iIndex + 0)
                     kwargs["template"]["triangular"][str(i)]["0"]["y"] = "remap-" + str(iIndex + 1)
-                    kwargs["template"]["triangular"][str(i)]["1"]["x"] = "remap-" + str(iIndex + 0)
-                    kwargs["template"]["triangular"][str(i)]["1"]["y"] = "remap-" + str(iIndex + 1)
-                    kwargs["template"]["triangular"][str(i)]["2"]["x"] = "remap-" + str(iIndex + 0)
-                    kwargs["template"]["triangular"][str(i)]["2"]["y"] = "remap-" + str(iIndex + 1)
+                    kwargs["template"]["triangular"][str(i)]["1"]["x"] = "remap-" + str(iIndex + 2)
+                    kwargs["template"]["triangular"][str(i)]["1"]["y"] = "remap-" + str(iIndex + 3)
+                    kwargs["template"]["triangular"][str(i)]["2"]["x"] = "remap-" + str(iIndex + 4)
+                    kwargs["template"]["triangular"][str(i)]["2"]["y"] = "remap-" + str(iIndex + 5)
 
                     iIndex += 6
                 """
@@ -1788,6 +1976,7 @@ class Natalie:
                 kwargs["template"]["triangular"][str(i)]["2"]["y"] = "remap-" + str(iIndex + 1)
 
                 iIndex += 6
+                """
                 
         except Exception as ex:
             print("Initial error: ", ex)
@@ -2333,7 +2522,8 @@ class Natalie:
                 vData.setData(data=dTmp_Data, automap=False, transpose=True)
 
                 #   STEP 61: Map data
-                vData.mapData(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=True, output=True)
+                vData.normalize(mapRange=dTmp_DataRange, mapSets=dTmp_DataMap, input=False, output=True)
+                vData.standardize(input=True, output=False)
 
                 #
                 #   endregion
@@ -2584,6 +2774,238 @@ class Natalie:
         }
 
         #   STEP 122: Return
+        return dOut
+
+    def __tro_Primary__(self, **kwargs) -> dict:
+        """
+            Description:
+
+                Performs trust-region optimization of the candidate solution.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + cull  = ( bool ) A flag that specifies whether of not
+                    unworthy antenna candidate simulations should be deleted
+                    from the local drive
+                    ~ Required
+
+                + save  = ( bool ) A flag that specifies whether or not
+                    continuous saving of the best candidate in an algorithm
+                    should be done
+                    ~ Required
+        """
+
+        #   region STEP 0->3: Error checking
+
+        #   STEP 0: Check if cull arg passed
+        if ("cull" not in kwargs):
+            #   STEP 1: Error handling
+            raise Exception("An error occured in Natalie.__tro_Primary__() -> Step 0: No cull arg passed")
+
+        #   STEP 2: Check if save arg passed
+        if ("save" not in kwargs):
+            #   STEP 3: Error handling
+            raise Exception("An error occured in Natalie.__tro_Primary__() -> Step 2: No save arg passed")
+
+        #
+        #   endregion
+
+        #   STEP 4: Local varialbes
+        dBest_Geo               = None
+        dBest_Fit               = None
+
+        sDir                    = None
+
+        iRegion                 = None
+
+        iIterations             = None
+
+        bCull                   = kwargs["cull"]
+        bSave                   = kwargs["save"]
+
+        #   region STEP 5->10: Setup - Local variables
+
+        #   STEP 5: Make optimization project directory
+        sDir    = self.__sDirectory + Helga.ticks() + "_Primary"
+        os.mkdir(sDir)
+
+        #   STEP 6: User output
+        if (self.bShowOutput):
+            print("Natalie (tro-Primary) {" + Helga.time() + "} - Simulating starting antenna geometry")
+
+        #   STEP 7: Outsource - Simulate center
+        self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=sDir, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+        
+        #   STEP 8: Setup - Center geometry
+        dBest_Geo           = cp.deepcopy(self.__dAnt_Center)
+        dBest_Fit           = {
+            "fitness":  dBest_Geo["fitness"],
+            "dir":      dBest_Geo["dir"]
+        }
+
+        del dBest_Geo["fitness"]
+        del dBest_Geo["dir"]
+
+        #   STEP 9: Setup - Center fitness
+        dBest_Fit           = self.__getFitness__(ant=[dBest_Geo], fitness=[dBest_Fit])[0]
+        self.__dAnt_CenterFit   = cp.deepcopy(dBest_Fit)
+
+        #   STEP 10: Setup - Easy variables
+        iRegion             = self.__iTRO_Region
+        iIterations         = self.__iTRO_Iterations_Primary
+        
+        #
+        #   endregion
+
+        #   STEP 11: User output
+        if (self.bShowOutput):
+            print("Natalie (tro-Primary) {" + Helga.time() + "} - Begining Trust-Region Optimization.")
+
+        #   region STEP 12->46: TRO - Primary
+
+        #   STEP 12: Loop
+        for i in range(0, iIterations):
+            #   STEP 13: Setup - Scope variables
+            lCandidates         = []
+            lFitness            = []
+
+            iTmp_Candidates     = self.__iTRO_Candidates
+            iTmp_BestIndex      = 0
+            iTmp_Count          = 0
+
+            iTmp_Region         = 0.5 * float( iRegion ) / float( self.__iTRO_Region )
+
+            #   region STEP 14->27: Candidate generation and simulation
+            
+            #   STEP 14: Loop
+            while (True):
+                #   STEP 15: Setup - Get candidate list
+                lTmp_Candidates = self.__getCandidates__(center=dBest_Geo, region=iTmp_Region, candidates=iTmp_Candidates, slots=True)
+
+                #   STEP 16: User output
+                if (self.bShowOutput):
+                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas")
+
+                #   STEP 17: Simulate antennas
+                lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+
+                #   STEP 18: Evaluate overall fitness of all geometries
+                lTmp_Fitness    = self.__getFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
+
+                #   STEP 19: Loop through all candidates
+                while (iTmp_Count < len( lTmp_Candidates )):
+                    #   STEP 20: Check that default fitness library wasn't returned
+                    if ( lTmp_Fitness[iTmp_Count]["desired"] == np.inf):
+                        #   STEP 21: Pop from list and remove directory
+                        sh.rmtree(os.path.dirname(lTmp_Fitness[iTmp_Count]["dir"]))
+
+                        lTmp_Candidates.pop(iTmp_Count)
+                        lTmp_Fitness.pop(iTmp_Count)
+
+                    #   STEP 22: Not default library
+                    else:
+                        #   STEP 23: Increment counter
+                        iTmp_Count  += 1
+
+                #   STEP 24: Append results and fitnesses to lists
+                lCandidates.extend(lTmp_Candidates)
+                lFitness.extend(lTmp_Fitness)
+
+                #   STEP 25: Check that required number of candidates met
+                if (len( lCandidates ) == self.__iTRO_Candidates):
+                    #   STEP 26: Exit loop
+                    break
+
+                #   STEP 27: Recalculate candidates
+                iTmp_Candidates = self.__iTRO_Candidates - len( lCandidates )
+
+            #
+            #   endregion
+
+            #   STEP 28: Append current center to lists
+            lCandidates.append(dBest_Geo)
+            lFitness.append(dBest_Fit)
+
+            #   STEP 29: Outsource - Candidate evaluation
+            iTmp_BestIndex  = self.__getBestCandidate__(lFitness)
+
+            #   STEP 30: Set new best candidate
+            dBest_Geo   = lCandidates[iTmp_BestIndex]
+            dBest_Fit   = lFitness[iTmp_BestIndex]
+
+            #   STEP 31: Check - Save status
+            if (bSave):
+                #   STEP 32: Outsource - Continuous save
+                self.__saveData__(dir=sDir, bestGeo=dBest_Geo, bestFit=dBest_Fit, candidates=lCandidates, fitness=lFitness)
+
+            #   STEP 33: Check - Culling status
+            if (bCull):
+                #   STEP 34: Outsource - Cull the weak :)
+                self.__cullData__(data=lFitness, spare=iTmp_BestIndex)
+
+            #   region STEP 35->43: Region Update
+
+            #   STEP 35: Check if new best
+            if (iTmp_BestIndex != self.__iTRO_Candidates):
+                #   STEP 36: Update region
+                iRegion += 1
+                iTmp_Region = round( float(iRegion) / float(self.__iTRO_Region ), 3)
+
+                #   STEP 37: User output
+                if (self.bShowOutput):
+                    print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
+
+                    dHold = lFitness[self.__iTRO_Candidates]
+                    print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                    
+                    dHold = lFitness[iTmp_BestIndex]
+                    print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+
+            #   STEP 38: Not new best
+            else:
+                #   STEP 39: Check if region too small
+                if (iRegion_Alg > 0):
+                    #   STEP 40: Update - Decrement region
+                    iRegion_Alg     -= 1
+                    iTmp_Region = round( float(iRegion_Alg) / float(self.__iTRO_Region ), 3)
+
+                    #   STEP 41: User output
+                    if (self.bShowOutput):
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region), end="\n\n")
+                
+                #   STPE 42: Region too small
+                else:
+                    #   STEP 43: Exit loop
+                    break
+
+            #
+            #   endregion
+
+            #   STEP 44: Check if miniaturization goal met
+            if (dBest_Fit["area"] < 0.55):
+                #   STEP 45: User output
+                if (self.bShowOutput):
+                    print("\t{" + Helga.time() + "} - Miniaturization goal met; exiting Primary")
+
+                #   STEP 46: Exit loop
+                break
+
+        #
+        #   endregion
+
+        #   STEP 47: Populate output dictionary
+        dOut    = {
+            "result":   dBest_Geo,
+            "fitness":  dBest_Fit
+        }
+        
+        #   STEP 48: Return
         return dOut
 
     def __nm__(self, **kwargs) -> dict:

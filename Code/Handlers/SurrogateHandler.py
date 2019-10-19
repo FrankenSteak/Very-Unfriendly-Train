@@ -774,11 +774,12 @@ class Golem:
             vSRG    = dSRG["surrogate"]
 
             #   STEP 3 Do necessary pre-training
-            vSRG.bShowOutput            = False
+            vSRG.bShowOutput            = True
             vSRG.bUse_NoiseInjection    = True
+            vSRG.bUse_L1                = True
                 
             #   STEP 4: Train surrogate
-            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=True)
+            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=True)
             fTmp_Fitness    = fTmp_Fitness["fitness"]
 
             #   STEP 5: Get accuracy and fitness
@@ -921,7 +922,6 @@ class Golem:
                 if (i == 0):
                     #   STEP 9: Outsource threaded mapping
                     dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])#, optimizer=ga.TRO)
-                    self.__lSRG[i].exportAnnie(file=os.path.abspath(".") + "\\Data\\Simulations\\Annie.json", full_path=True)
 
                 #   STEP 10: Else if accuracy = 100%
                 elif (self.__lSRG_Accuracy[i] == 1.0):

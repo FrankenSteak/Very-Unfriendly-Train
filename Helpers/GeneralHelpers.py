@@ -26,6 +26,43 @@ class Helga:
     #   region Front-End: List stuff
 
     @classmethod
+    def transpose(self, _lData: list) -> list:
+        """
+            Description:
+            
+                Tronsposes the passed data list.
+        """
+
+        #   STEP 0: Local variables
+        lOut                    = []
+
+        #   STEP 1: Check if 1D
+        if ( type(_lData[0]) == float):
+            #   STEP 2: Loop through parameters
+            for i in range(0, len( _lData ) ):
+                #   STEP 3: Populate output list
+                lOut.append( [ _lData[i] ] )
+
+        #   STEP 4: Then 2D
+        else:
+            #   STEP 5: Loop through candidates
+            for i in range(0, len( _lData[0] ) ):
+                #   STEP 6: Setup - Tmp variable
+                lTmp_Candidate  = []
+
+                #   STEP 7: Loop through parameters
+                for j in range(0, len( _lData ) ):
+                    #   STEP 8: Add to candidate list
+                    lTmp_Candidate.append( _lData[j][i] )
+
+                #   STEP 9: Append to output list
+                lOut.append(lTmp_Candidate)
+
+        #   STEP 10: Return
+        return lOut
+
+
+    @classmethod
     def getCentroid(self, _lCandidates: list) -> list:
         """
             Description:
@@ -306,13 +343,6 @@ class Helga:
 
 if (__name__ == "__main__"):
 
-    ltmp = [[1,1],
-            [2,2],
-            [3,1],
-            [4,0]]
-
-    lTmp = Helga.getCentroid(ltmp)
     Helga.nop()
-    print(lTmp)
 
 #endregion

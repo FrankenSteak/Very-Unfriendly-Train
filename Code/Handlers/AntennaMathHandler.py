@@ -1688,15 +1688,12 @@ class Matthew:
         fResonant_Fitness       = None
 
         fLower_Sum              = 0.0
-        fLower_Gain             = 0.0
         fLower_Samples          = 0
 
         fDesired_Sum            = 0.0
-        fDesired_Gain           = 0.0
         fDesired_Samples        = 0
         
         fUpper_Sum              = 0.0
-        fUpper_Gain             = 0.0
         fUpper_Samples          = 0
 
         vActivations            = Antonio()

@@ -75,6 +75,10 @@ class Data:
         #   region STEP 1.3: Bools
 
         self.__bAllowTesting        = self.__cf.data["parameters"]["allow testing"]
+        self.__bNormalized_In       = False
+        self.__bNormalized_Out      = False
+        self.__bStandardized_In     = False
+        self.__bStandardized_Out    = False
 
         #   endregion
 
@@ -304,7 +308,7 @@ class Data:
                 #   STEP 21: Check if should auto map
                 if (kwargs["automap"] == True):
                     #   STEP 22: Outsource auto mapping
-                    self.autoMapData()
+                    self.autoNormalize()
 
             #   STEP 23: Set data length
             self.__iLen = len(self.__lInput)
@@ -487,15 +491,15 @@ class Data:
             #   STEP 11: Check if tranpose
             if (kwargs["transpose"]):
                 #   STEP 12: Transpose data
-                self.__lInput   = np.ndarray.tolist(np.transpose(self.__lInput))
-                self.__lOutput  = np.ndarray.tolist(np.transpose(self.__lOutput))
+                self.__lInput   = Helga.transpose(self.__lInput)
+                self.__lOutput  = Helga.transpose(self.__lOutput)
         
         #   STEP 7: Check if automap argument passed
         if ("automap" in kwargs):
             #   STEP 8: Check if automap set
             if (kwargs["automap"] == True):
                 #   STEP 9: Outsource automapping
-                self.autoMapData()
+                self.autoNormalize()
 
         #   STEP 13: Set data length
         self.__iLen = len(self.__lInput)
@@ -1182,7 +1186,7 @@ class Data:
 
     #   region Front-End: Data-Manipulation
 
-    def autoMapData(self) -> None:
+    def autoNormalize(self) -> None:
         """
             Description:
 
@@ -1206,12 +1210,12 @@ class Data:
         }
 
         #   STEP 3: Outsource
-        self.mapData(range=dRange, map=dMap)
+        self.normalize(range=dRange, map=dMap)
 
         #   STEP 4: Return
         return
     
-    def mapData(self, **kwargs) -> None:
+    def normalize(self, **kwargs) -> None:
         """
             Description:
 
@@ -1299,17 +1303,17 @@ class Data:
         #   STEP 2: Check if class initialized
         if ((self.__lInput == None) or (self.__lOutput == None)):
             #   STEP 3: Error handling
-            raise Exception("An error occured in Data.mapData() -> Step 2: Class not initialized")
+            raise Exception("An error occured in Data.normalize() -> Step 2: Class not initialized")
 
         #   STEP 4: Check if range passed
         if ("mapRange" not in kwargs):
             #   STEP 5: Error handling
-            raise Exception("An error occured in Data.mapData() -> Step 4: No mapRange argument passed")
+            raise Exception("An error occured in Data.normalize() -> Step 4: No mapRange argument passed")
 
         #   STEP 6: Check if map passed
         if ("mapSets" not in kwargs):
             #   STEP 7: Error handling
-            raise Exception("An error occured in Data.mapData() -> Step 6: No mapSets argument passed")
+            raise Exception("An error occured in Data.normalize() -> Step 6: No mapSets argument passed")
         
         #
         #   endregion
@@ -1333,7 +1337,7 @@ class Data:
         #
         #   endregion
         
-        #   region STEP 14->29: Map input data
+        #   region STEP 14->30: Map input data
 
         #   STEP 14: Check if input
         if (bInput):
@@ -1381,7 +1385,7 @@ class Data:
             #
             #   endregion
 
-            #   region STEP 27->29: Map data
+            #   region STEP 27->30: Map data
 
             #   STEP 27: Outsource input ranges
             lRange_Input        = self.__getDataRange__(data=self.__lInput, map=lMap_Input, range=lRange_Input, min=dMin_Input, max=dMax_Input)
@@ -1394,6 +1398,10 @@ class Data:
             
             self.__lInput       = dTmp_Data["data"]
             self.__lMap_Input   = dTmp_Data["map"]
+
+            #   STEP 30: Set flags
+            self.__bNormalized_In   = True
+            self.__bStandardized_In = False
 
             #
             #   endregion
@@ -1463,6 +1471,10 @@ class Data:
             self.__lOutput      = dTmp_Data["data"]
             self.__lMap_Output  = dTmp_Data["map"]
 
+            #   STEP 47: Set flags
+            self.__bNormalized_Out      = True
+            self.__bStandardized_Out    = False
+
             #
             #   endregion
         
@@ -1475,6 +1487,138 @@ class Data:
         self.__fUpper   = kwargs["mapRange"]["upper"]
         
         #   STEP 48: Return
+        return
+
+    def standardize(self, **kwargs) -> None:
+        """
+            Description:
+
+                Standardizes the data =,=
+
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + input = ( bool ) A flag that indicates whether or not the
+                    input data in this class should be standardized
+                    ~ Default   = False
+                    
+                + output = ( bool ) A flag that indicates whether or not the
+                    output data in this class should be standardized
+                    ~ Default   = False
+
+                + center    = ( float ) The desired mean of the data
+                    ~ Default   = 0.0
+
+                + deviation = ( float ) The desired standard deviation of the
+                    data
+                    ~ Default   = 1.0
+        """
+
+        #   region STEP 0->1: Error checking
+
+        #   STEP 0: Check if class initialized
+        if ((self.__lInput == None) or (self.__lOutput == None)):
+            #   STEP 1: Error handling
+            raise Exception("An error occured in Data.standardize() -> Step 0: Container not initialized")
+
+        #
+        #   endregion
+
+        #   STEP 2: Local variables
+        self.reset()
+
+        fCenter                 = 0.0
+        fDeviation              = 1.0
+
+        bInput                  = False
+        bOutput                 = False
+
+        #   region STEP 3->6: Setup - Local variables
+
+        #   STEP 3: Check if input arg passed
+        if ("input" in kwargs):
+            #   STEP 4: Update - Input
+            bInput = kwargs["input"]
+
+        #   STEP 5: Check if output arg passed
+        if ("output" in kwargs):
+            #   STEP 6: Update - Output
+            bOutput = kwargs["output"]
+        
+        #   STEP 7: Check if center arg passed
+        if ("center" in kwargs):
+            #   STEP 8: Update - Center
+            fCenter     = kwargs["center"]
+        
+        #   STEP 9: Check if deviation arg passed
+        if ("deviation" in kwargs):
+            #   STEP 10: Update - Deviation
+            fDeviation  = kwargs["deviation"]
+
+        #
+        #   endregion
+
+        #   region STEP 11->17: Standardize input data
+
+        #   STEP 11: Check if input
+        if (bInput):
+            #   STEP 12: Get input data statistics
+            lTmp_Stats  = self.__getData_Stats__(data=self.__lInput)
+
+            #   STEP 13: Loop through candidates
+            for i in range(0, len( self.__lInput ) ):
+                #   STEP 14: Loop through parameters
+                for j in range(0, len( self.__lInput[i] ) ):
+                    #   STEP 15: Center param
+                    self.__lInput[i][j] = self.__lInput[i][j] - lTmp_Stats[j]["mean"] + fCenter
+
+                    #   STEP 16: Scale param
+                    self.__lInput[i][j] = ( fDeviation * self.__lInput[i][j] ) / lTmp_Stats[j]["standard deviation"]
+
+                    #   STEP 17: Save mappingand set flag
+                    self.__lMap_Input = cp.deepcopy( lTmp_Stats )
+
+                    #   STEP 18: Set flags
+                    self.__bStandardized_In = True
+                    self.__bNormalized_In   = False
+
+        #
+        #   endregion
+
+        #   region STEP 19->26: Standardize output data
+
+        #   STEP 19: Check if output
+        if (bOutput):
+            #   STEP 20: Get output data statistics
+            lTmp_Stats  = self.__getData_Stats__(data=self.__lOutput)
+
+            #   STEP 21: Loop through candidates
+            for i in range(0, len( self.__lOutput ) ):
+                #   STEP 22: Loop through parameters
+                for j in range(0, len( self.__lOutput[i] ) ):
+                    #   STEP 23: Center param
+                    self.__lOutput[i][j] = self.__lOutput[i][j] - lTmp_Stats[j]["mean"] + fCenter
+
+                    #   STEP 24: Scale param
+                    self.__lOutput[i][j] = ( fDeviation * self.__lOutput[i][j] ) / lTmp_Stats[j]["standard deviation"]
+
+                    #   STEP 25: Save mapping
+                    self.__lMap_Output = cp.deepcopy( lTmp_Stats )
+
+                    #   STEP 26: Set flags
+                    self.__bStandardized_Out    = True
+                    self.__bNormalized_Out      = False
+
+        #
+        #   endregion
+
+        #   STEP 27: Return
         return
 
     def remap(self, **kwargs) -> list:
@@ -1522,15 +1666,27 @@ class Data:
         #
         #   endregion
 
-        #   STEP 8: Loop through input
-        for i in range(0, self.getInputWidth()):
-            #   STEP 9: Get new value
-            fTmp    = self.__lMap_Input[i][4] + ( ( self.__lMap_Input[i][5] / 2.0 ) * kwargs["candidate"][i] )
+        #   STEP 8: Check if normalized input
+        if ((self.__bNormalized_In == True) and (self.__bStandardized_In == False)):
+            #   STEP 9: Loop through input
+            for i in range(0, self.getInputWidth()):
+                #   STEP 10: Get new value
+                fTmp    = self.__lMap_Input[i][4] + ( ( self.__lMap_Input[i][5] / 2.0 ) * kwargs["candidate"][i] )
 
-            #   STEP 10: Append to output
-            lOut.append(fTmp)
+                #   STEP 11: Append to output
+                lOut.append(fTmp)
 
-        #   STEP 11: Return
+        #   STEP 12: Check if standardized input
+        if ((self.__bNormalized_In == False) and (self.__bStandardized_In == True)):
+            #   STEP 13: Loop through input
+            for i in range(0, self.getInputWidth()):
+                #   STEP 14: Get new value
+                fTmp    = kwargs["candidate"][i] * self.__lMap_Input[i]["standard deviation"] + self.__lMap_Input[i]["mean"]
+
+                #   STEP 15: Append to output
+                lOut.append(fTmp)
+
+        #   STEP 16: Return
         return lOut
 
     def splitData(self, **kwargs) -> dict:
@@ -1603,7 +1759,7 @@ class Data:
             iLen = int( np.floor( self.getLen() * 0.75 ) )
 
         #   STEP 10: Pop iLen data samples
-        for i in range(0, iLen):
+        for _ in range(0, iLen):
             #   STEP 11: Pop goes the data sample
             self.getRandDNR()
 
@@ -2061,6 +2217,116 @@ class Data:
     #   endregion
 
     #   region Back-End: Gets
+
+    def __getData_Stats__(self, **kwargs) -> list:
+        """
+            Description:
+
+                Calculates the min, max, mode, mean, and standard deviation of
+                the passed data.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + data  = ( list ) 2D list of data
+                    ~ Required
+        """
+
+        #   region STEP 0: Error chekcing
+
+        #   STEP 0: Check if data arg passed 
+        if ("data" not in kwargs):
+            #   STEP 1: Error handling
+            raise Exception("An erro occured in Data.__getData_Stats__() -> Step 0: No data arg passed")
+
+        #
+        #   endregion
+        
+        #   STEP 2: Local variables
+        lData                   = kwargs["data"]
+        lOut                    = []
+
+        lSum                    = []
+        lMin                    = []
+        lMax                    = []
+        lMode                   = []
+        lMean                   = []
+        lErr                    = []
+        lDev                    = []
+
+        #   region STEP 3->4: Setup - Local variables
+
+        #   STEP 3: Lopo through parameters
+        for i in range(0, len( lData[0] ) ):
+            #   STEP 4: Populate lists
+            lSum.append(0.0)
+            lMin.append(np.inf)
+            lMax.append(-1.0 * np.inf)
+            lMean.append(None)
+            lMode.append(None)
+            lErr.append(0.0)
+            lDev.append(None)
+
+        #
+        #   endregion
+
+        #   STEP 5: Loop through data
+        for i in range(0, len( lData ) ):
+            #   STEP 6: Loop through parameters
+            for j in range(0, len( lData[i] ) ):
+                #   STEP 7: Update - Sum
+                lSum[j] += lData[i][j]
+
+                #   STEP 8: Check if min
+                if (lData[i][j] < lMin[j]):
+                    #   STEP 9: Update - Min
+                    lMin[j] = lData[i][j]
+
+                #   STEP 10: Check if max
+                if (lData[i][j] > lMax[j]):
+                    #   STEP 11: Update - Max
+                    lMax[j] = lData[i][j]
+
+        #   STEP 12: Loop through parameters
+        for i in range(0, len( lSum ) ):
+            #   STEP 13: Update - Mean
+            lMean[i] = lSum[i] / float( len(lData) )
+
+            #   STEP 14: Update - Mode
+            lMode[i] = ( lMax[i] - lMin[i] ) / 2.0
+            lMode[i] = lMin[i] + lMode[i]
+
+        #   STEP 15: Loop through data
+        for i in range(0, len( lData ) ):
+            #   STEP 16: Loop through parameters
+            for j in range(0, len( lData[i] ) ):
+                #   STEP 17: Get error
+                lErr[j] += np.power(lData[i][j] - lMean[j], 2)
+
+        #   STEP 18: Loop through parameters
+        for i in range(0, len( lErr ) ):
+            #   STEP 19: Update - Deviation
+            lDev[i] = np.sqrt( lErr[i] / float( len( lData ) ) )
+
+            #   STEP 20: Populate output dictionary
+            dTmp = {
+                "min":                  lMin[i],
+                "max":                  lMax[i],
+                "mode":                 lMode[i],
+                "mean":                 lMean[i],
+                "standard deviation":   lDev[i]
+            }
+
+            #   STEP 21: Append to output
+            lOut.append(dTmp)
+
+        #   STEP 22: Return
+        return lOut
 
     def __getDefaultMap__(self, **kwargs) -> dict:
         """
