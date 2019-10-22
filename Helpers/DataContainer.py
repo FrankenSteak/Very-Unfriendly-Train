@@ -1879,8 +1879,6 @@ class Data:
                     "out": self.__lOutput.pop(lData[1])
                 }
 
-                self.__lClass.pop(lData[1])
-
         #   STEP 15: Adjust class length
         self.__iLen -= 1
 

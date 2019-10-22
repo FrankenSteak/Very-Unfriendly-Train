@@ -1434,7 +1434,7 @@ class Annie:
 		for i in range(0, len(self.__lWeights)):
 			for j in range(0, len(self.__lWeights[i])):
 				#	STEP 6: Get random value for weight
-				self.__lWeights[i][j] = rn.random() * 2.0 * self.__fWeightRange - self.__fWeightRange
+				self.__lWeights[i][j] = rn.gauss(0.0, self.__fWeightRange)
 
 		#	STEP 7: Return
 		return
@@ -1941,7 +1941,7 @@ class Annie:
 		iBatch_Iterations	= int( np.ceil( dData_Training.getLen() / iBatch_Size ) )
 
 		#	STEP 2: Check for small dataset
-		if ( dData_Training.getLen() < iBatch_Size / 2 ):
+		if ( dData_Training.getLen() < iBatch_Size ):
 			#	STEP 3: Setup - Tmp variable
 			iTmp_BatchSize	= 0
 
@@ -1953,8 +1953,8 @@ class Annie:
 			#	STEP 6: Update - Batch Size
 			iBatch_Size 	= iTmp_BatchSize
 
-			fScalar_Train	= 65.0
-			fScalar_Test	= 35.0
+			fScalar_Train	= 95.0
+			fScalar_Test	= 5.0
 
 		if (self.bUse_Dropout):
 			iEpochs	= int(iEpochs * 0.65)

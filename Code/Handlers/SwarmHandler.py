@@ -273,13 +273,13 @@ class Sarah:
                     #   STEP 7: Check if single data point
                     if (type(lTmp[i]) == float):
                         #   STEP 8: Set value
-                        lTmp[i] = rn.random() * 2.0 * kwargs["params"]["scalar"] - kwargs["params"]["scalar"]
+                        lTmp[i] = rn.gauss(0.0, kwargs["params"]["scalar"])
 
                     else:
                         #   STEP 9: Iterate through list
                         for j in range(0, len(lTmp[i])):
                             #   STEP 10: Set value
-                            lTmp[i][j] = rn.random() * 2.0 * kwargs["params"]["scalar"] - kwargs["params"]["scalar"]
+                            lTmp[i][j] = rn.gauss(0.0, kwargs["params"]["scalar"])
 
                 #   STEP 11: Append the candidate to the output list
                 lCandidates.append(lTmp)
@@ -707,7 +707,7 @@ class Sarah:
         vSRG    = kwargs["surrogate"]
 
         #   STEP 7: Get PSO params
-        dPSO_Params = self.__getParams__(optimizer=sw.PSO)["mapping"]
+        dPSO_Params     = self.__getParams__(optimizer=sw.PSO)["mapping"]
         
         #   STEP 8: Get initial candidate
         iTmp_Candidate  = vData.getInputWidth()

@@ -51,21 +51,40 @@
 
         "trust region":
         {
-            "items":    6,
+            "items":    9,
 
             "0":        "primary iterations",
             "1":        "secondary iterations",
             "2":        "candidates",
             "3":        "algorithm region",
             "4":        "surrogate region",
-            "5":        "retension fall off",
+            "5":        "grace regions",
+            "6":        "primary region scalar",
+            "7":        "secondary region scalar",
+            "8":        "early exit conditions",
 
-            "primary iterations":   75,
-            "secondary iterations": 75,
-            "candidates":           10,
-            "algorithm region":     5,
-            "surrogate region":     5,
-            "retension fall off":   2
+            "primary iterations":       30,
+            "secondary iterations":     75,
+            "candidates":               7,
+            "algorithm region":         5,
+            "surrogate region":         10,
+            "grace regions":            2,
+            "primary region scalar":    0.5,
+            "secondary region scalar":  0.75,
+
+            "early exit conditions":
+            {
+                "items":    2,
+
+                "0":        "area",
+                "1":        "frequency",
+                "2":        "fitness",
+
+                "area":         0.55,
+                "frequency":    0.15,
+                "fitness":      0.35
+            }
+            
         },
         "nelder mead":
         {
