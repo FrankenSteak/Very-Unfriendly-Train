@@ -113,12 +113,14 @@ class Natalie:
 
         self.__iTRO_Iterations_Primary      = None
         self.__iTRO_Iterations_Secondary    = None
+        self.__iTRO_Iterations_Grace        = None
+
         self.__iTRO_Candidates              = None
+        self.__iTRO_Candidates_Secondary    = None
 
         self.__iTRO_Region                  = None
         self.__iTRO_Region_SRG              = None
-        self.__iTRO_Region_Grace            = None
-
+        
         self.__fTRO_RegionScalar_Primary    = None
         self.__fTRO_RegionScalar_Secondary  = None
         
@@ -374,11 +376,14 @@ class Natalie:
 
         self.__iTRO_Iterations_Primary      = self.__cf.data["parameters"]["trust region"]["primary iterations"]
         self.__iTRO_Iterations_Secondary    = self.__cf.data["parameters"]["trust region"]["secondary iterations"]
+        self.__iTRO_Iterations_Grace        = self.__cf.data["parameters"]["trust region"]["grace iterations"]
+
         self.__iTRO_Candidates              = self.__cf.data["parameters"]["trust region"]["candidates"]
+        self.__iTRO_Candidates_Secondary    = self.__cf.data["parameters"]["trust region"]["secondary candidates"]
 
         self.__iTRO_Region                  = self.__cf.data["parameters"]["trust region"]["algorithm region"]
         self.__iTRO_Region_SRG              = self.__cf.data["parameters"]["trust region"]["surrogate region"]
-        self.__iTRO_Region_Grace            = self.__cf.data["parameters"]["trust region"]["grace regions"]
+        
         self.__fTRO_RegionScalar_Primary    = self.__cf.data["parameters"]["trust region"]["primary region scalar"]
         self.__fTRO_RegionScalar_Secondary  = self.__cf.data["parameters"]["trust region"]["secondary region scalar"]
 
@@ -461,15 +466,22 @@ class Natalie:
         }
 
         #   STEP 3: check if number of samples > 2
-        if (self.__cf.data["parameters"]["frequency"]["samples"] >= 5):
+        if (self.__cf.data["parameters"]["frequency"]["samples"] >= 4):
             #   STEP 4: Get offset
-            fTmp_Offset = ( self.__cf.data["parameters"]["frequency"]["lower frequency offset"] * self.__cf.data["parameters"]["frequency"]["samples"] )
+            fTmp_Inner_L    = dFrequency["start"]   + self.__cf.data["parameters"]["frequency"]["lower frequency offset"]
+            fTmp_Inner_H    = dFrequency["end"]     - self.__cf.data["parameters"]["frequency"]["upper frequency offset"]
+
+            fTmp_Range      = ( fTmp_Inner_H - fTmp_Inner_L ) / 3.0
+
+            fTmp_Samples    = np.floor( ( self.__cf.data["parameters"]["frequency"]["samples"] - 3 ) / 2 )
+
+            fTmp_Range      = fTmp_Samples * fTmp_Range
 
             #   STEP 5: Set frequency parameters accordingly
             self.__dAnt_Frequency   = {
                 "center":   round(dFrequency["start"]   + ( dFrequency["end"] - dFrequency["start"] ) / 2.0, 2),
-                "start":    round(dFrequency["start"]   - fTmp_Offset, 2),
-                "end":      round(dFrequency["end"]     + fTmp_Offset, 2),
+                "start":    round(fTmp_Inner_L  - fTmp_Range, 2),
+                "end":      round(fTmp_Inner_H  + fTmp_Range, 2),
                 "samples":  self.__cf.data["parameters"]["frequency"]["samples"]
             }
 
@@ -679,13 +691,13 @@ class Natalie:
             fTmp_Area   = dTmp_Ant["substrate"]["l"] * dTmp_Ant["substrate"]["w"]
 
             #   STEP 10: Get left fitness
-            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.5
+            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.085
 
             #   STEP 11: Get center firness
             fTmp_Mid    = ( dTmp_Fit["desired"]["total"] ) * 0.7
 
             #   STEP 12: Get right fitness
-            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.3
+            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.05
 
             #   STEP 13: Get total area fitness
             fTmp_Area   = fTmp_Area / fOriginal_Area
@@ -695,7 +707,7 @@ class Natalie:
             
             #   STEP 15: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
-            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.34 * fTmp_Freq_Tot  + 0.6 * fTmp_Fitness
+            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.3 * fTmp_Freq_Tot  + 0.65 * fTmp_Fitness
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -714,16 +726,19 @@ class Natalie:
                     "freq":     fTmp_Freq_Tot,
                     "final":    fTmp_Fitness,
 
+                    "resonant": dTmp_Fit["resonant frequency"],
                     "dir":      kwargs["fitness"][i]["dir"] 
                 }
 
                 #   STEP 18: Loop through hard data
                 for j in range(0, dTmp_Fit["hard"]["items"] ):
                     #   STEP 19: Add to fitness dictionary
-                    dTmp_Results[ "f" + str( j ) ] = dTmp_Fit["hard"][ str( j ) ]["frequency"]
-                    dTmp_Results[ "g" + str( j ) ] = dTmp_Fit["hard"][ str( j ) ]["gain"]
+                    dTmp = {
+                        "f":    dTmp_Fit["hard"][ str( j ) ]["fitness"],
+                        "g":    dTmp_Fit["hard"][ str( j ) ]["gain"]
+                    }
 
-                Helga.nop()
+                    dTmp_Results[ dTmp_Fit["hard"][ str( j ) ]["frequency"] ] = dTmp
 
             #   STEP 20: No hard data provided
             else:
@@ -746,6 +761,7 @@ class Natalie:
                     "freq":     fTmp_Freq_Tot,
                     "final":    fTmp_Fitness,
 
+                    "resonant": dTmp_Fit["resonant frequency"],
                     "dir":      kwargs["fitness"][i]["dir"]
                 }
 
@@ -813,7 +829,11 @@ class Natalie:
 
         #   STEP 10: Update - Local variables
         dCenter     = kwargs["center"]
-        dScalars    = self.__cAnt_Default["scalars"]
+
+        cTmp = Conny()
+        cTmp.load("antenna.json")
+        
+        dScalars = cTmp.data["scalars"]
 
         iCandidates = kwargs["candidates"]
 
@@ -967,7 +987,12 @@ class Natalie:
         #
         #   endregion
 
-        #   STEP 6: Local variables
+        #   STEP 6: Check - Number of candidates
+        if (kwargs["candidates"] <= 0):
+            #   STEP 7: Return
+            return []
+
+        #   STEP 8: Local variables
         lOut                    = []
         
         dCenter                 = kwargs["center"]
@@ -975,20 +1000,25 @@ class Natalie:
 
         iCandidates             = self.__iTRO_Candidates
 
-        #   STEP 7: Check if candidates passed
+        #   STEP 9: Check if candidates passed
         if ("candidates" in kwargs):
-            #   STEP 8: Update - Local variables
+            #   STEP 10: Update - Local variables
             iCandidates = kwargs["candidates"]
 
-        #   STEP 9: Loop through candidates
+        #   STEP 11: Loop through candidates
         for _ in range(0, iCandidates):
-            #   STEP 10: Create new candidate
+            #   STEP 12: Create new candidate
             lOut.append( cp.deepcopy( dCenter ) )
 
-        #   STEP 11: Outsource - Recursively
+        #   STEP 13: Outsource - Recursively
         lOut = self.__getCandidates_SecRecurse__(scalars=dScalars, candidates=lOut, parameters=kwargs["parameters"], region=kwargs["region"], template=self.__dAnt_Template)
         
-        #   STEP ??: Return
+        #   STEP 14: Loop through candidates
+        for i in range(0, len( lOut )):
+            #   STEP 15: Remap - substrate
+            lOut[i] = self.__remapData_Substrate__(candidate=lOut[i])
+            
+        #   STEP 16: Return
         return lOut
 
     def __getCandidates_SecRecurse__(self, **kwargs) -> list:
@@ -1078,15 +1108,16 @@ class Natalie:
 
             #   STEP 15: Check if scalars
             try:
+                #   STEP 16: Loop through candidates
+                for j in range(0, len( lCandidates )):
+                    #   STEP 17: Append candidates to list
+                    lTmp_Candidates.append( lCandidates[j][ sTmp_Child ])
+                
+                #   STEP 18: If child is in scalars
                 if (sTmp_Child in dScalars):
-                    #   STEP 15: Loop through candidates
-                    for j in range(0, len( lCandidates )):
-                        #   STEP 16: Append candidates to list
-                        lTmp_Candidates.append( lCandidates[j][ sTmp_Child ])
-
-                    #   STEP 17: Check if dictionary
+                    #   STEP 19: Check if dictionary
                     if ( type(dTemplate[sTmp_Child]) == dict ):
-                        #   STEP 18: Outsource
+                        #   STEP 20: Outsource
                         lTmp_Candidates = self.__getCandidates_SecRecurse__(scalars=dScalars[sTmp_Child], candidates=lTmp_Candidates, parameters=dParams, region=dRegion, template=dTemplate[sTmp_Child])
 
                         #   STEP 20: Loop through candidates
@@ -1419,6 +1450,112 @@ class Natalie:
                         dTmp_CurrSlot[str(j)]["x"]  = self.__getRandVal__(center=dTmp_CurrSlot[str(j)]["x"], region=kwargs["region"], scalars=dTmp_Scalar["x"])
                         dTmp_CurrSlot[str(j)]["y"]  = self.__getRandVal__(center=dTmp_CurrSlot[str(j)]["y"], region=kwargs["region"], scalars=dTmp_Scalar["y"])
 
+        while (True):
+            #   STEP 71->115: Check if force not in kwargs
+            if ("force" not in kwargs):
+                #   STEP 72: Get number of slots
+                iTmp_Slots  =   dOut["elliptical"]["items"]
+                iTmp_Slots  +=  dOut["rectangular"]["items"]
+                iTmp_Slots  +=  dOut["triangular"]["items"]
+                iTmp_Slots  +=  dOut["polygonal"]["items"]
+
+                #   STEP 73: If there are slots
+                if (iTmp_Slots > 0):
+                    #   STEP 81: Get a random slot
+                    iTmp_Index  = rn.randint(0, iTmp_Slots - 1)
+                    iTmp_Sum    = dOut["elliptical"]["items"]
+
+                    #   STEP 82: Check if elliptical
+                    if (iTmp_Index < iTmp_Sum):
+                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["elliptical"]["remove slot"]["probability"]):
+                            #   STEP 83: Get local slot
+                            iTmp_Index  = rn.randint(0, dOut["elliptical"]["items"] - 1)
+
+                            #   STEP 84: Decrement slots
+                            dOut["elliptical"]["items"] -= 1
+
+                            #   STEP 85: If slots not zero
+                            if (dOut["elliptical"]["items"] > 0):
+                                #   STEP 86: Loop through remaining slots
+                                for i in range(iTmp_Index + 1, dOut["elliptical"]["items"] + 1):
+                                    #   STEP 87: Shift slot
+                                    dOut["elliptical"][ str(i - 1) ] = dOut[ str(i) ]
+
+                            #   STEP 88: Remove slot at end of list
+                            del dOut["elliptical"][ str( dOut["elliptical"]["items"] ) ]
+
+                        break
+
+                    #   STEP 90: Add rectangular items to sum
+                    iTmp_Sum    += dOut["rectangular"]["items"]
+
+                    #   STEP 91: Check if rectangular
+                    if (iTmp_Index < iTmp_Sum):
+                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["rectangular"]["remove slot"]["probability"]):
+                            #   STEP 92: Get local slot index
+                            iTmp_Index  = rn.randint(0, dOut["rectangular"]["items"] - 1)
+
+                            #   STEP 93: Decrement slots
+                            dOut["rectangular"]["items"] -= 1
+
+                            #   STEP 94: If slots not zero
+                            if ( dOut["rectangular"]["items"] > 0):
+                                #   STEP 95: Loop through remaining slots
+                                for i in range(iTmp_Index + 1, dOut["rectangular"]["items"] + 1):
+                                    #   STEP 96: Shift slot
+                                    dOut["rectangular"][ str(i - 1) ] = dOut["rectangular"][ str(i) ]
+
+                            #   STEP 97: Remove slot at end of list
+                            del dOut["rectangular"][ str( dOut["rectangular"]["items"] ) ]
+
+                        break
+
+                    #   STEP 99: Add triangular items to sum
+                    iTmp_Sum    += dOut["triangular"]["items"]
+
+                    #   STEP 100: Check if triangular
+                    if (iTmp_Index < iTmp_Sum):
+                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["triangular"]["remove slot"]["probability"]):
+                            #   STEP 101: Get local slot index
+                            iTmp_Index  = rn.randint(0, dOut["triangular"]["items"] - 1)
+
+                            #   STEP 102: Decrement slots
+                            dOut["triangular"]["items"] -= 1
+
+                            #   STEP 103: If slots not zero
+                            if ( dOut["triangular"]["items"] > 0 ):
+                                #   STEP 103: Loop through remaining slots
+                                for i in range(iTmp_Index, dOut["triangular"]["items"] + 1):
+                                    #   STEP 104: Shift slot
+                                    dOut["triangular"][ str(i - 1) ] = dOut["triangular"][ str(i) ]
+
+                            #   STEP 105: Remove slot at end of list
+                            del dOut["triangular"][ str( dOut["triangular"]["items"] ) ]
+
+                        break
+
+                    iTmp_Sum += dOut["polygonal"]["items"]
+
+                    if (iTmp_Index < iTmp_Sum):
+                        if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["polygonal"]["remove point"]["probability"]):
+                            #   STEP 107: Get local slot index
+                            iTmp_Index  = rn.randint(0, dOut["polygonal"]["items"] - 1)
+
+                            #   STEP 108: Decrement slots
+                            dOut["polygonal"]["items"] -= 1
+
+                            #   STEP 109: If slots not zero
+                            if ( dOut["polygonal"]["items"] > 0):
+                                #   STEP 110: Loop through remaining slots
+                                for i in range(iTmp_Index, dOut["polygonal"]["items"] + 1):
+                                    #   STEP 111: Shift slot
+                                    dOut["polygonal"][ str(i - 1) ] = dOut["polygonal"][ str(i) ]
+
+                            #   STEP 112: Remove slot at end of list
+                            del dOut["polygonal"][ str( dOut["polygonal"]["items"] ) ]
+            
+            break
+
         #   STEP 42: Setup - Temp Variables
         iTmp_CreationIterations = 1
 
@@ -1567,109 +1704,6 @@ class Natalie:
                 #   STEP 70: Add to candidate
                 dOut[sTmp][ str( dOut[sTmp]["items"] ) ]    = dTmp_Slot
                 dOut[sTmp]["items"] += 1
-                
-        #   STEP 71->115: Check if force not in kwargs
-        if ("force" not in kwargs):
-            #   STEP 72: Get number of slots
-            iTmp_Slots  =   dOut["elliptical"]["items"]
-            iTmp_Slots  +=  dOut["rectangular"]["items"]
-            iTmp_Slots  +=  dOut["triangular"]["items"]
-            iTmp_Slots  +=  dOut["polygonal"]["items"]
-
-            #   STEP 73: If there are slots
-            if (iTmp_Slots > 0):
-                #   STEP 81: Get a random slot
-                iTmp_Index  = rn.randint(0, iTmp_Slots - 1)
-                iTmp_Sum    = dOut["elliptical"]["items"]
-
-                #   STEP 82: Check if elliptical
-                if (iTmp_Index < iTmp_Sum):
-                    if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["elliptical"]["remove slot"]["probability"]):
-                        #   STEP 83: Get local slot
-                        iTmp_Index  = rn.randint(0, dOut["elliptical"]["items"] - 1)
-
-                        #   STEP 84: Decrement slots
-                        dOut["elliptical"]["items"] -= 1
-
-                        #   STEP 85: If slots not zero
-                        if (dOut["elliptical"]["items"] > 0):
-                            #   STEP 86: Loop through remaining slots
-                            for i in range(iTmp_Index + 1, dOut["elliptical"]["items"] + 1):
-                                #   STEP 87: Shift slot
-                                dOut["elliptical"][ str(i - 1) ] = dOut[ str(i) ]
-
-                        #   STEP 88: Remove slot at end of list
-                        del dOut["elliptical"][ str( dOut["elliptical"]["items"] ) ]
-
-                    return dOut
-
-                #   STEP 90: Add rectangular items to sum
-                iTmp_Sum    += dOut["rectangular"]["items"]
-
-                #   STEP 91: Check if rectangular
-                if (iTmp_Index < iTmp_Sum):
-                    if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["rectangular"]["remove slot"]["probability"]):
-                        #   STEP 92: Get local slot index
-                        iTmp_Index  = rn.randint(0, dOut["rectangular"]["items"] - 1)
-
-                        #   STEP 93: Decrement slots
-                        dOut["rectangular"]["items"] -= 1
-
-                        #   STEP 94: If slots not zero
-                        if ( dOut["rectangular"]["items"] > 0):
-                            #   STEP 95: Loop through remaining slots
-                            for i in range(iTmp_Index + 1, dOut["rectangular"]["items"] + 1):
-                                #   STEP 96: Shift slot
-                                dOut["rectangular"][ str(i - 1) ] = dOut["rectangular"][ str(i) ]
-
-                        #   STEP 97: Remove slot at end of list
-                        del dOut["rectangular"][ str( dOut["rectangular"]["items"] ) ]
-
-                    return dOut
-
-                #   STEP 99: Add triangular items to sum
-                iTmp_Sum    += dOut["triangular"]["items"]
-
-                #   STEP 100: Check if triangular
-                if (iTmp_Index < iTmp_Sum):
-                    if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["triangular"]["remove slot"]["probability"]):
-                        #   STEP 101: Get local slot index
-                        iTmp_Index  = rn.randint(0, dOut["triangular"]["items"] - 1)
-
-                        #   STEP 102: Decrement slots
-                        dOut["triangular"]["items"] -= 1
-
-                        #   STEP 103: If slots not zero
-                        if ( dOut["triangular"]["items"] > 0 ):
-                            #   STEP 103: Loop through remaining slots
-                            for i in range(iTmp_Index, dOut["triangular"]["items"] + 1):
-                                #   STEP 104: Shift slot
-                                dOut["triangular"][ str(i - 1) ] = dOut["triangular"][ str(i) ]
-
-                        #   STEP 105: Remove slot at end of list
-                        del dOut["triangular"][ str( dOut["triangular"]["items"] ) ]
-
-                    return dOut
-
-                iTmp_Sum += dOut["polygonal"]["items"]
-
-                if (iTmp_Index < iTmp_Sum):
-                    if (rn.uniform(0.0, 1.0) < kwargs["scalars"]["polygonal"]["remove point"]["probability"]):
-                        #   STEP 107: Get local slot index
-                        iTmp_Index  = rn.randint(0, dOut["polygonal"]["items"] - 1)
-
-                        #   STEP 108: Decrement slots
-                        dOut["polygonal"]["items"] -= 1
-
-                        #   STEP 109: If slots not zero
-                        if ( dOut["polygonal"]["items"] > 0):
-                            #   STEP 110: Loop through remaining slots
-                            for i in range(iTmp_Index, dOut["polygonal"]["items"] + 1):
-                                #   STEP 111: Shift slot
-                                dOut["polygonal"][ str(i - 1) ] = dOut["polygonal"][ str(i) ]
-
-                        #   STEP 112: Remove slot at end of list
-                        del dOut["polygonal"][ str( dOut["polygonal"]["items"] ) ]
 
         #   STEP 116: Return
         return dOut
@@ -1805,7 +1839,7 @@ class Natalie:
         vData.setData(data=dTmp_Data)
 
         #   STEP 18: Check if last iteration was successful
-        if (vData.getLen() > self.__iTRO_Candidates + 1):
+        if (vData.getLen() > self.__iTRO_Candidates_Secondary + 1):
             #   STEP 19: Setup - Tmp variables
             lInputDistances = vData.getInputDistance( vData.getLen() - 1)
             fTmp_MaxRegion  = float( kwargs["region"]["unscaled-srg"] + 1 ) * ( kwargs["region"]["scaled"] / self.__fTRO_RegionScalar_Secondary )
@@ -1827,7 +1861,12 @@ class Natalie:
                 else:
                     #   STEP 25: Increment counter
                     iTmp_Count += 1
-                
+        
+        #   STPE ??: Check if there is data left
+        if (len(lInputDistances) < 5):
+            #   STEP ??: ERror handling
+            raise Exception("An error occured in Natalie.__getSurrogate_Results__() -> Step ??: Too little data for surrogate training")
+        
         #
         #   endregion
 
@@ -2216,8 +2255,10 @@ class Natalie:
 
         #   STEP 8: Loop through surrogate region
         for i in range(0, kwargs["region"]):
+            iTmp_Index = int( rn.uniform( 0.0, float( len(lUnused) - 1 ) ) )
+
             #   STEP 9: Transfer parameter from unused to current
-            lCurrent.append( lUnused.pop( rn.randint(0, len(lUnused) - 1 ) ) )
+            lCurrent.append( lUnused.pop( iTmp_Index ) )
 
         #   STEP 10: Sort parameters
         lCurrent.sort()
@@ -2567,7 +2608,7 @@ class Natalie:
         #   STEP 10: Loop through candidates
         for i in range(0, len(lOut)):
             #   STEP 11: Outsource - Substrate remapping
-            self.__remapData_Substrate__(candidate=lOut[i])
+            lOut[i] = self.__remapData_Substrate__(candidate=lOut[i])
 
         #   STEP 12: Return
         return lOut
@@ -2730,7 +2771,7 @@ class Natalie:
         #   STEP 18: Return
         return lCandidates
 
-    def __remapData_Substrate__(self, **kwargs) -> None:
+    def __remapData_Substrate__(self, **kwargs) -> dict:
         """
             Description:
 
@@ -2828,7 +2869,7 @@ class Natalie:
         #   endregion
 
         #   STEP 19: Return
-        return
+        return dCandidate
     
     #
     #       endregion
@@ -2911,7 +2952,7 @@ class Natalie:
                 }
 
                 #   STEP 13: Dump data
-                js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
+                js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " :\t"))
         
         #
         #   endregion
@@ -2942,7 +2983,7 @@ class Natalie:
                     }
 
                     #   STEP 21: Dump data
-                    js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " : "))
+                    js.dump(dTmp, vTmp_File, indent=4, separators=(", ", " :\t"))
 
         #
         #   endregion
@@ -3315,11 +3356,11 @@ class Natalie:
 
         sDir                    = None
 
-        iIterations             = cp.deepcopy( self.__iTRO_Iterations_Secondary )
+        iIterations_Main        = cp.deepcopy( self.__iTRO_Iterations_Secondary )
+        iIterations_Grace       = cp.deepcopy( self.__iTRO_Iterations_Grace )
 
-        iRegion_Alg             = cp.deepcopy(self.__iTRO_Region)
-        iRegion_Srg             = cp.deepcopy(self.__iTRO_Region_SRG)
-        iRegion_Grace           = cp.deepcopy(self.__iTRO_Region_Grace)
+        iRegion_Alg             = cp.deepcopy( self.__iTRO_Region )
+        iRegion_Srg             = cp.deepcopy( self.__iTRO_Region_SRG )
 
         bCull                   = kwargs["cull"]
         bSave                   = kwargs["save"]
@@ -3328,275 +3369,247 @@ class Natalie:
         sDir            = self.__sDirectory + Helga.ticks() + "_Secondary"
         os.mkdir(sDir)
 
-        dParameters     = self.__getParameters_Secondary__(center=dBest_Geo, region=iRegion_Srg)
-        
         #   STEP 8: User output
         if (self.bShowOutput):
             print("Natalie (tro-Secondary) {" + Helga.time() + "} - Begining Trust-Region Optimization.")
 
         #   region STEP 9->56: TRO - Secondary
 
-        #   STEP 9->??: Loop
-        for i in range(0, iIterations):
+        #   STEP 9: Loop - Main
+        for _ in range(0, iIterations_Main):
             #   STEP 10: Setup - Scope variables
-            lCandidates         = []
-            lFitness            = []
+            lInputs     = []
+            lOutputs    = []
 
-            iTmp_Candidates     = self.__iTRO_Candidates
-            iTmp_Region         = self.__fTRO_RegionScalar_Secondary * float(iRegion_Srg + iRegion_Alg) / float(self.__iTRO_Region_SRG + self.__iTRO_Region)
+            iRegion_Srg = cp.deepcopy(self.__iTRO_Region_SRG)
 
-            iTmp_BestIndex      = 0
-            iTmp_Count          = 0
+            dParameters = self.__getParameters_Secondary__(center=dBest_Geo, region=iRegion_Srg)
 
-            dTmp_Region         = {
-                "unscaled-srg": iRegion_Srg,
-                "unscaled-alg": iRegion_Alg,
-                "scaled":       iTmp_Region
-            }
+            #   STEP 11: Loop - Grace
+            for j in range(0, iIterations_Grace):
+                #   STEP 12: Setup - Scope variables
+                lCandidates         = []
+                lFitness            = []
 
-            #   region STEP 11->25: Candidate generation and simulation
+                iTmp_Candidates     = self.__iTRO_Candidates_Secondary
+                iTmp_Region         = self.__fTRO_RegionScalar_Secondary * float(iRegion_Srg + iRegion_Alg) / float(self.__iTRO_Region_SRG + self.__iTRO_Region)
 
-            #   STEP 12: Loop
-            while (True):
-                #   STEP 13: Setup - Temp variables
-                lTmp_Candidates = self.__getCandidates_Secondary__(center=dBest_Geo, region=dTmp_Region, candidates=iTmp_Candidates, parameters=dParameters)
+                iTmp_BestIndex      = 0
+                iTmp_Count          = 0
 
-                #   STEP 14: User output
-                if (self.bShowOutput):
-                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas")
+                dTmp_Region         = {
+                    "unscaled-srg": iRegion_Srg,
+                    "unscaled-alg": iRegion_Alg,
+                    "scaled":       iTmp_Region
+                }
 
-                #   STEP 15: Simulate antennas
-                lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+                #   region STEP 11->26: Candidate generation and simulation
 
-                #   STEP 16: Evaluate overall fitness of all geometries
-                lTmp_Fitness    = self.__getFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
+                #   STEP 13: Loop
+                while (True):
+                    #   STEP 14: Setup - Temp variables
+                    lTmp_Candidates = self.__getCandidates_Secondary__(center=dBest_Geo, region=dTmp_Region, candidates=iTmp_Candidates, parameters=dParameters)
 
-                #   STEP 17: Loop through all candidates
-                while (iTmp_Count < len( lTmp_Candidates )):
-                    #   STEP 18: Check that default fitness library wasn't returned
-                    if ( lTmp_Fitness[iTmp_Count]["desired"] == np.inf):
-                        #   STEP 19: Pop from list
-                        sh.rmtree(os.path.dirname(lTmp_Fitness[iTmp_Count]["dir"]))
+                    #   STEP 15: User output
+                    if (self.bShowOutput):
+                        print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas")
 
-                        lTmp_Candidates.pop(iTmp_Count)
-                        lTmp_Fitness.pop(iTmp_Count)
+                    #   STEP 16: Simulate antennas
+                    lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
 
-                    #   STEP 20: Not default library
-                    else:
-                        #   STEP 21: Increment counter
-                        iTmp_Count  += 1
+                    #   STEP 17: Evaluate overall fitness of all geometries
+                    lTmp_Fitness    = self.__getFitness__(ant=lTmp_Candidates, fitness=lTmp_Fitness)
 
-                #   STEP 22: Append results and fitnesses to lists
-                lCandidates.extend(lTmp_Candidates)
-                lFitness.extend(lTmp_Fitness)
+                    #   STEP 18: Loop through all candidates
+                    while (iTmp_Count < len( lTmp_Candidates )):
+                        #   STEP 19: Check that default fitness library wasn't returned
+                        if ( lTmp_Fitness[iTmp_Count]["desired"] == np.inf):
+                            #   STEP 20: Pop from list
+                            sh.rmtree(os.path.dirname(lTmp_Fitness[iTmp_Count]["dir"]))
 
-                #   STEP 23: Check that required number of candidates met
-                if (len( lCandidates ) == self.__iTRO_Candidates):
-                    #   STEP 24: Exit loop
-                    break
+                            lTmp_Candidates.pop(iTmp_Count)
+                            lTmp_Fitness.pop(iTmp_Count)
 
-                #   STEP 25: Recalculate candidates
-                iTmp_Candidates = self.__iTRO_Candidates - len( lCandidates )
+                        #   STEP 21: Not default library
+                        else:
+                            #   STEP 22: Increment counter
+                            iTmp_Count  += 1
 
-            #
-            #   endregion
+                    #   STEP 23: Append results and fitnesses to lists
+                    lCandidates.extend(lTmp_Candidates)
+                    lFitness.extend(lTmp_Fitness)
 
-            #   STEP 26: Append current best to lists
-            lCandidates.append(dBest_Geo)
-            lFitness.append(dBest_Fit)
-
-            #   STEP 27: Mold current data set
-            dTmp_MoldedData     = self.__moldData__(candidates=lCandidates, fitness=lFitness)
-
-            #   STEP 28: Add new data to data list
-            lInputs.extend( Helga.transpose( dTmp_MoldedData["in"]) )
-            lOutputs.extend( Helga.transpose( dTmp_MoldedData["out"]) )
-
-            #   region STEP 29->45: Surrogate stuffs
-
-            #   STEP 29: Be safe OwO
-            try:
-                #   STEP 30: Get surrogate results
-                lTmp_SrgCandidates  = self.__getSurrogate_Results__(center=dBest_Geo, inputs=cp.deepcopy(lInputs), outputs=cp.deepcopy(lOutputs), parameters=dParameters, region=dTmp_Region)
-                
-                #   STEP 31: User output
-                if (self.bShowOutput):
-                    print("\n\n\t{" + Helga.time() + "} - Simulating " + str(len(lTmp_SrgCandidates)) + " surrogate candidate antennas")
-
-                #   STEP 32: Simulate antennas
-                lTmp_SrgFitness     = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_SrgCandidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
-                lTmp_SrgFitness    = self.__getFitness__(ant=lTmp_SrgCandidates, fitness=lTmp_SrgFitness)
-
-                #   STEP 33: Append to candidate and fitness lists
-                lCandidates.extend( lTmp_SrgCandidates )
-                lFitness.extend( lTmp_SrgFitness )
-
-                #   STEP 34: Mold surrogate data list
-                dTmp_MoldedData     = self.__moldData__(candidates=lTmp_SrgCandidates, fitness=lTmp_SrgFitness)
-
-                #   STEP 35: Add new data to data list
-                lInputs.extend( Helga.transpose( dTmp_MoldedData["in"]) )
-                lOutputs.extend( Helga.transpose( dTmp_MoldedData["out"]) )
-            
-            except:
-                #   STEP 36: Error handling
-                print("\t{" + Helga.time() + "} - An error occured during surrogate tnm")
-
-                #   STEP 37: Check surrogate region
-                if (iRegion_Srg > 0):
-                    #   STEP 38: Decrement surrogate region
-                    iRegion_Srg -= 1
-
-                #   STEP 39: Outsource - Candidate evaluation
-                iTmp_BestIndex  = self.__getCandidate_Best__(lFitness)
-
-                #   STEP 40: Set new best candidate
-                dBest_Geo   = lCandidates[iTmp_BestIndex]
-                dBest_Fit   = lFitness[iTmp_BestIndex]
-                
-                #   STEP 41: Check - Save status
-                if (bSave):
-                    #   STEP 42: Outsource - Continuous save
-                    self.__saveData__(dir=sDir, bestGeo=dBest_Geo, bestFit=dBest_Fit, candidates=lCandidates, fitness=lFitness)
-
-                #   STEP 43: Check - Culling status
-                if (bCull):
-                    #   STEP 44: Outsource - Cull the weak :)
-                    self.__cullData__(data=lFitness, spare=iTmp_BestIndex)
-                
-                #   STEP 45: Skip region update
-                continue
-
-            #
-            #   endregion
-
-            #   STEP 46: Outsource - Candidate evaluation
-            iTmp_BestIndex  = self.__getCandidate_Best__(lFitness)
-
-            #   STEP 47: Set new best candidate
-            dBest_Geo   = lCandidates[iTmp_BestIndex]
-            dBest_Fit   = lFitness[iTmp_BestIndex]
-            
-            #   STEP 48: Check - Save status
-            if (bSave):
-                #   STEP 49: Outsource - Continuous save
-                self.__saveData__(dir=sDir, bestGeo=dBest_Geo, bestFit=dBest_Fit, candidates=lCandidates, fitness=lFitness)
-
-            #   STEP 50: Check - Culling status
-            if (bCull):
-                #   STEP 51: Outsource - Cull the weak :)
-                self.__cullData__(data=lFitness, spare=iTmp_BestIndex)
-
-            #   region STEP 52->55: Region update
-
-            #   STEP 52: Check if best is surrogate candidates
-            if (iTmp_BestIndex > self.__iTRO_Candidates):
-                #   STEP 53: Update - Region
-                iRegion_Alg         += 1
-                iRegion_Srg         += 1
-                
-                #   STEP 54: Update - Parameters
-                self.__updateParameters_Secondary__(region=iRegion_Srg, grace=iRegion_Grace, parameters=dParameters, action="increase")
-
-                #   STEP 55: User output
-                if (self.bShowOutput):
-                    #   STEP 56: Get current region
-                    iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
-
-                    #   STEP 57: Print output
-                    print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
-
-                    dHold = lFitness[self.__iTRO_Candidates]
-                    print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                    
-                    dHold = lFitness[iTmp_BestIndex]
-                    print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
-
-            #   STEP 58: Check if new best isn't old best
-            elif (iTmp_BestIndex != self.__iTRO_Candidates):
-                #   STEP 59: Update region
-                iRegion_Alg     += 1
-
-                #   STEP 60: Check if surrogate region not too small
-                if (iRegion_Srg > 0):
-                    #   STEP 61: Update surrogate region
-                    iRegion_Srg     -= 1
-
-                    lInputs         = []
-                    lOutputs        = []
-
-                #   STEP 62: Update parameters                
-                dTmp_Update = self.__updateParameters_Secondary__(region=iRegion_Srg, grace=iRegion_Grace, parameters=dParameters, action="decrease")
-                
-                #   STEP 63: Check if surrogate died too many times
-                if (dTmp_Update == None):
-                    #   STEP 64: Exit loop
-                    break
-
-                #   STEP 65: User output
-                if (self.bShowOutput):
-                    #   STEP 66: Get new region
-                    iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
-                    
-                    #   STEP 67: Print output
-                    print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
-
-                    dHold = lFitness[self.__iTRO_Candidates]
-                    print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                    
-                    dHold = lFitness[iTmp_BestIndex]
-                    print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
-                    
-                    dHold = lFitness[len(lFitness) - 1]
-                    print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
-
-            #   STEP 68: Bad region
-            else:
-                #   STEP 69: Check if alg region not too small
-                if (iRegion_Alg > 0):
-                    #   STEP 70: Update region
-                    iRegion_Alg     -= 1
-
-                    #   STEP 71: Check if surrogate region not too small
-                    if (iRegion_Srg > 0):
-                        #   STEP 72: Update surrogate region
-                        iRegion_Srg     -= 1
-                        
-                        lInputs         = []
-                        lOutputs        = []
-
-                    #   STEP 73: Update - Parameters                
-                    dTmp_Update = self.__updateParameters_Secondary__(region=iRegion_Srg, grace=iRegion_Grace, parameters=dParameters, action="decrease")
-                
-                    #   STEP 74: Check if surrogate died too many times
-                    if (dTmp_Update == None):
-                        #   STEP 75: Exit loop
+                    #   STEP 24: Check that required number of candidates met
+                    if (len( lCandidates ) == self.__iTRO_Candidates_Secondary):
+                        #   STEP 25: Exit loop
                         break
 
-                    #   STEP 76: User output
-                    if (self.bShowOutput):
-                        #   STEP 77: Get new region
-                        iTmp_Region = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
-                        
-                        #   STEP 78: Print output
-                        print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region))
+                    #   STEP 26: Recalculate candidates
+                    iTmp_Candidates =  iTmp_Candidates - len( lCandidates )
 
-                        dHold = lFitness[self.__iTRO_Candidates]
+                #
+                #   endregion
+
+                #   STEP 27: Append current best to lists
+                lCandidates.append(dBest_Geo)
+                lFitness.append(dBest_Fit)
+
+                #   STEP 28: Mold current data set
+                dTmp_MoldedData     = self.__moldData__(candidates=lCandidates, fitness=lFitness)
+
+                #   STEP 29: Add new data to data list
+                lInputs.extend( Helga.transpose( dTmp_MoldedData["in"]) )
+                lOutputs.extend( Helga.transpose( dTmp_MoldedData["out"]) )
+
+                #   region STEP 30->39: Surrogate stuffs
+
+                #   STEP 30: Be safe OwO
+                try:
+                    #   STEP 31: Get surrogate results
+                    lTmp_SrgCandidates  = self.__getSurrogate_Results__(center=dBest_Geo, inputs=cp.deepcopy(lInputs), outputs=cp.deepcopy(lOutputs), parameters=dParameters, region=dTmp_Region)
+                    
+                    #   STEP 32: User output
+                    if (self.bShowOutput):
+                        print("\n\n\t{" + Helga.time() + "} - Simulating " + str(len(lTmp_SrgCandidates)) + " surrogate candidate antennas")
+
+                    #   STEP 33: Simulate antennas
+                    lTmp_SrgFitness     = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_SrgCandidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+                    lTmp_SrgFitness    = self.__getFitness__(ant=lTmp_SrgCandidates, fitness=lTmp_SrgFitness)
+
+                    #   STEP 34: Append to candidate and fitness lists
+                    lCandidates.extend( lTmp_SrgCandidates )
+                    lFitness.extend( lTmp_SrgFitness )
+
+                    #   STEP 35: Mold surrogate data list
+                    dTmp_MoldedData     = self.__moldData__(candidates=lTmp_SrgCandidates, fitness=lTmp_SrgFitness)
+
+                    #   STEP 36: Add new data to data list
+                    lInputs.extend( Helga.transpose( dTmp_MoldedData["in"]) )
+                    lOutputs.extend( Helga.transpose( dTmp_MoldedData["out"]) )
+                
+                except Exception as ex:
+                    #   STEP 37: Error handling
+                    print("\t{" + Helga.time() + "} - An error occured during surrogate tnm")
+                    print("\t\t-Error:", ex, sep="\t")
+
+                    #   STEP 38: Check surrogate region
+                    if (iRegion_Srg > 0):
+                        #   STEP 39: Decrement surrogate region
+                        iRegion_Srg -= 1
+
+                #
+                #   endregion
+
+                #   region STEP 40->45: Candidate evaluation
+
+                finally:
+                    #   STEP 40: Outsource - Candidate evaluation
+                    iTmp_BestIndex  = self.__getCandidate_Best__(lFitness)
+
+                    #   STEP 41: Set new best candidate
+                    dBest_Geo   = lCandidates[iTmp_BestIndex]
+                    dBest_Fit   = lFitness[iTmp_BestIndex]
+                    
+                    #   STEP 42: Check - Save status
+                    if (bSave):
+                        #   STEP 43: Outsource - Continuous save
+                        self.__saveData__(dir=sDir, bestGeo=dBest_Geo, bestFit=dBest_Fit, candidates=lCandidates, fitness=lFitness)
+
+                    #   STEP 44: Check - Culling status
+                    if (bCull):
+                        #   STEP 45: Outsource - Cull the weak :)
+                        self.__cullData__(data=lFitness, spare=iTmp_BestIndex)
+
+                #
+                #   endregion
+
+                #   region STEP 46->67: Region Update
+                    
+                #   STEP 46: Check if best is surrogate candidates
+                if (iTmp_BestIndex > self.__iTRO_Candidates_Secondary):
+                    #   STEP 47: Update - Region
+                    iRegion_Alg         += 1
+                    iRegion_Srg         += 1
+                    
+                    #   STEP 48: User output
+                    if (self.bShowOutput):
+                        #   STEP 49: Get current region
+                        iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+
+                        #   STEP 50: Print output
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
+
+                        dHold = lFitness[self.__iTRO_Candidates_Secondary]
+                        print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                        
+                        dHold = lFitness[iTmp_BestIndex]
+                        print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+
+                #   STEP 51: Check if new best isn't old best
+                elif (iTmp_BestIndex != self.__iTRO_Candidates_Secondary):
+                    #   STEP 52: Update region
+                    iRegion_Alg     += 1
+
+                    #   STEP 53: Check if surrogate region not too small
+                    if (iRegion_Srg > 0):
+                        #   STEP 54: Update surrogate region
+                        iRegion_Srg     -= 1
+
+                    #   STEP 55: User output
+                    if (self.bShowOutput):
+                        #   STEP 56: Get new region
+                        iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+                        
+                        #   STEP 57: Print output
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + ") : Increasing region -> " + str(iTmp_Region))
+
+                        dHold = lFitness[self.__iTRO_Candidates_Secondary]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
                         dHold = lFitness[iTmp_BestIndex]
                         print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                         
-                        dHold = lFitness[len(lTmp_Candidates) - 1]
+                        dHold = lFitness[len(lFitness) - 1]
                         print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
-                #   STEP 79: Region too small
+                #   STEP 58: Bad region
                 else:
-                    #   STEP 80: Exit loop
-                    break
+                    #   STEP 59: Check if alg region not too small
+                    if (iRegion_Alg > 0):
+                        #   STEP 60: Update region
+                        iRegion_Alg     -= 1
 
-            #
-            #   endregion
+                        #   STEP 61: Check if surrogate region not too small
+                        if (iRegion_Srg > 0):
+                            #   STEP 62: Update surrogate region
+                            iRegion_Srg     -= 1
+
+                        #   STEP 63: User output
+                        if (self.bShowOutput):
+                            #   STEP 64: Get new region
+                            iTmp_Region = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+                            
+                            #   STEP 65: Print output
+                            print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + ") : Decreasing region -> " + str(iTmp_Region))
+
+                            dHold = lFitness[self.__iTRO_Candidates]
+                            print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
+                            
+                            dHold = lFitness[ iTmp_BestIndex ]
+                            print("\t\t-SRG:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
+
+                    #   STEP 66: Region too small
+                    else:
+                        #   STEP 67: Exit loop
+                        break
+
+                #
+                #   endregion
+
+            #   STEP 68: Check if region too small
+            if (iRegion_Alg <= 0):
+                #   STEP 69: Exit loop
+                break
 
         #
         #   endregion

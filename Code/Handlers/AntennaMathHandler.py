@@ -1709,8 +1709,6 @@ class Matthew:
 
         #   STEP 4: Check if file exists
         if (os.path.exists(kwargs["dir"]) == False):
-            print("\n\n\tAn error occured in Matthew.__getFitness_Frequency__() -> Step 4: Specified .out file does not exist")
-            
             dOut ={
                 "lower":
                 {
@@ -1926,7 +1924,8 @@ class Matthew:
                 if ("hard" in kwargs):
                     #   STEP 58: Populate temp dictionary
                     lTmp_Data[ str( i ) ] = {
-                        "frequency":    fTmp_Frequency,
+                        "frequency":    dTmp["frequency"],
+                        "fitness":      fTmp_Frequency,
                         "gain":         fTmp_Gain
                     }
             

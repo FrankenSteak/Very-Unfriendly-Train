@@ -21,10 +21,10 @@
             "2": "samples",
             "3": "accuracy check samples",
 
-            "lower frequency offset":   0.0065e9,
-            "upper frequency offset":   0.0065e9,
-            "samples":                  2,
-            "accuracy check samples":   2
+            "lower frequency offset":   0.002e9,
+            "upper frequency offset":   0.002e9,
+            "samples":                  5,
+            "accuracy check samples":   5
         },
         "mesh":
         {
@@ -51,26 +51,34 @@
 
         "trust region":
         {
-            "items":    9,
+            "items":    10,
 
             "0":        "primary iterations",
             "1":        "secondary iterations",
-            "2":        "candidates",
-            "3":        "algorithm region",
-            "4":        "surrogate region",
-            "5":        "grace regions",
-            "6":        "primary region scalar",
-            "7":        "secondary region scalar",
-            "8":        "early exit conditions",
+            "2":        "grace iterations",
 
-            "primary iterations":       30,
-            "secondary iterations":     75,
+            "3":        "candidates",
+            "4":        "secondary candidates",
+            
+            "5":        "algorithm region",
+            "6":        "surrogate region",
+            
+            "7":        "primary region scalar",
+            "8":        "secondary region scalar",
+            "9":        "early exit conditions",
+
+            "primary iterations":       3,
+            "secondary iterations":     10,
+            "grace iterations":         7,
+
             "candidates":               7,
+            "secondary candidates":     20,
+
             "algorithm region":         5,
             "surrogate region":         10,
-            "grace regions":            2,
+
             "primary region scalar":    0.5,
-            "secondary region scalar":  0.75,
+            "secondary region scalar":  0.25,
 
             "early exit conditions":
             {
