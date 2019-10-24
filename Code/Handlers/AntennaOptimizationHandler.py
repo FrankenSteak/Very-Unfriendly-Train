@@ -707,7 +707,7 @@ class Natalie:
             
             #   STEP 15: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
-            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.3 * fTmp_Freq_Tot  + 0.65 * fTmp_Fitness
+            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.3 * fTmp_Freq_Tot  + 0.8 * fTmp_Fitness
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -1862,10 +1862,10 @@ class Natalie:
                     #   STEP 25: Increment counter
                     iTmp_Count += 1
         
-        #   STPE ??: Check if there is data left
-        if (len(lInputDistances) < 5):
-            #   STEP ??: ERror handling
-            raise Exception("An error occured in Natalie.__getSurrogate_Results__() -> Step ??: Too little data for surrogate training")
+            #   STPE ??: Check if there is data left
+            if (len(lInputDistances) < 5):
+                #   STEP ??: ERror handling
+                raise Exception("An error occured in Natalie.__getSurrogate_Results__() -> Step ??: Too little data for surrogate training")
         
         #
         #   endregion
@@ -1900,7 +1900,7 @@ class Natalie:
         }
 
         #   STEP 32: Check if normalizaing or standardizing
-        if (rn.uniform(0.0, 1.0) < 0.5):
+        if (True):
             #   STEP 33: User output
             if (self.bShowOutput):
                 print("\t{" + Helga.time() + "} - Standardizing data")
@@ -3032,9 +3032,9 @@ class Natalie:
             iSpare = kwargs["spare"]
 
             #   STEP 5: Loop through candidates
-            for i in range(0, self.__iTRO_Candidates + 1 ):
+            for i in range(0, len( kwargs["data"] ) ):
                 #   STEP 6: If not spare and not previous best
-                if ((i != iSpare) and (i != self.__iTRO_Candidates)):
+                if (i != iSpare):
                     #   STEP 7: Get path for directory
                     sTmp_Path = os.path.dirname(kwargs["data"][i]["dir"])
 
@@ -3592,7 +3592,7 @@ class Natalie:
                             #   STEP 65: Print output
                             print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + ") : Decreasing region -> " + str(iTmp_Region))
 
-                            dHold = lFitness[self.__iTRO_Candidates]
+                            dHold = lFitness[ self.__iTRO_Candidates ]
                             print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
                             
                             dHold = lFitness[ iTmp_BestIndex ]
