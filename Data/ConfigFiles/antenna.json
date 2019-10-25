@@ -139,12 +139,12 @@
             },
             "x":
             {
-                "region":   0.25,
+                "region":   0.5,
                 "range":    0.4
             },
             "y":
             {
-                "region":   0.25,
+                "region":   0.5,
                 "range":    0.4
             },
             "slots":

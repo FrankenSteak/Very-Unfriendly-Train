@@ -67,7 +67,7 @@
             "8":        "secondary region scalar",
             "9":        "early exit conditions",
 
-            "primary iterations":       30,
+            "primary iterations":       75,
             "secondary iterations":     15,
             "grace iterations":         3,
 
@@ -75,7 +75,7 @@
             "secondary candidates":     20,
 
             "algorithm region":         5,
-            "surrogate region":         5,
+            "surrogate region":         4,
 
             "primary region scalar":    0.5,
             "secondary region scalar":  0.25,

@@ -1922,8 +1922,8 @@ class Annie:
 		lBest_Set			= self.getWeights(password=self.__iPassword)
 		fBest_Fitness		= np.inf
 
-		fScalar_Train		= 10.0
-		fScalar_Test		= 90.0
+		fScalar_Train		= 30.0
+		fScalar_Test		= 70.0
 
 		iBatch_Iterations	= None
 		iBatch_Size			= self.__iBatchSize
@@ -1953,8 +1953,8 @@ class Annie:
 			#	STEP 6: Update - Batch Size
 			iBatch_Size 	= iTmp_BatchSize
 
-			fScalar_Train	= 95.0
-			fScalar_Test	= 5.0
+			fScalar_Train	= 80.0
+			fScalar_Test	= 20.0
 
 		if (self.bUse_Dropout):
 			iEpochs	= int(iEpochs * 0.65)
@@ -2833,7 +2833,7 @@ class Annie:
 		print("Momentum: ", 		self.__fMomentum)
 
 		print("\n-----------------------------", "\tResult Comparison\t", "-----------------------------")
-		for _ in range(0, min(20, _dData.getLen())):
+		for _ in range(0, min(10, _dData.getLen())):
 			dDNR = _dData.getRandDNR()
 
 			self.__propagateForward__(dDNR["in"])

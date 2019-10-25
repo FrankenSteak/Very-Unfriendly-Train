@@ -707,7 +707,7 @@ class Natalie:
             
             #   STEP 15: Get overall fitness
             fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
-            fTmp_Fitness    = fTmp_Fitness * fTmp_Freq_Tot +  0.3 * fTmp_Freq_Tot  + 0.8 * fTmp_Fitness
+            fTmp_Fitness    = 1.0 * fTmp_Fitness * fTmp_Freq_Tot +  0.3 * fTmp_Freq_Tot  + 0.7 * fTmp_Fitness
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -3011,6 +3011,9 @@ class Natalie:
 
                 + spare = ( int ) The index of a candidate to spare
                     ~ Default   = -1
+
+                + num   = ( int ) The number of candidates to cull
+                    ~ Default   = len( <data> )
         """
 
         #   region STEP 0->1: Error checking
@@ -3025,22 +3028,28 @@ class Natalie:
 
         #   STEP 2: Local variables
         iSpare                  = -1
+        iNum                    = len(kwargs["data"])
 
-        #   STEP 3: Check if spare arg passed
+        #   STEP 3: Check if num arg passed
+        if ("num" in kwargs):
+            #   STEP 4: Update - Local varaibles
+            iNum     = kwargs["num"]
+
+        #   STEP 5: Check if spare arg passed
         if ("spare" in kwargs):
-            #   STEP 4: Update - Spare
+            #   STEP 6: Update - Spare
             iSpare = kwargs["spare"]
 
-            #   STEP 5: Loop through candidates
-            for i in range(0, len( kwargs["data"] ) ):
-                #   STEP 6: If not spare and not previous best
+            #   STEP 7: Loop through candidates
+            for i in range(0, iNum ):
+                #   STEP 8: If not spare and not previous best
                 if (i != iSpare):
-                    #   STEP 7: Get path for directory
+                    #   STEP 9: Get path for directory
                     sTmp_Path = os.path.dirname(kwargs["data"][i]["dir"])
 
-                    #   STEP 8: If not center
+                    #   STEP 10: If not center
                     if ("center" not in sTmp_Path):
-                        #   STEP 9: Delete directory
+                        #   STEP 11: Delete directory
                         sh.rmtree(sTmp_Path)
 
         #   STEP 10: Return
@@ -3220,7 +3229,7 @@ class Natalie:
             #   STEP 33: Check - Culling status
             if (bCull):
                 #   STEP 34: Outsource - Cull the weak :)
-                self.__cullData__(data=lFitness, spare=iTmp_BestIndex)
+                self.__cullData__(data=lFitness, spare=iTmp_BestIndex, num=self.__iTRO_Candidates)
 
             #   region STEP 35->43: Region Update
 
@@ -3518,7 +3527,7 @@ class Natalie:
                     #   STEP 44: Check - Culling status
                     if (bCull):
                         #   STEP 45: Outsource - Cull the weak :)
-                        self.__cullData__(data=lFitness, spare=iTmp_BestIndex)
+                        self.__cullData__(data=lFitness, spare=iTmp_BestIndex, num=self.__iTRO_Candidates_Secondary)
 
                 #
                 #   endregion
