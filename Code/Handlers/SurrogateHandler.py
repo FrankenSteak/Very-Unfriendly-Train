@@ -785,7 +785,9 @@ class Golem:
             vSRG.bUse_L1                = True
                 
             #   STEP 4: Train surrogate
-            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=True, compare=True)
+            fTmp_Fitness    = None
+
+            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=False)
             fTmp_Fitness    = fTmp_Fitness["fitness"]
 
             #   STEP 5: Get accuracy and fitness
@@ -928,12 +930,12 @@ class Golem:
                 #   STEP 8: Best candidate
                 if (i == 0):
                     #   STEP 9: Outsource threaded mapping
-                    dTmp_MapResults = optimizer.mapSurrogate(threading=True, data=kwargs["data"], surrogate=self.__lSRG[i])
+                    dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])
 
                 #   STEP 10: Else if accuracy = 100%
                 elif ((self.__lSRG_Accuracy[i] == 1.0) or (self.__lSRG_FItness[i] == self.__lSRG_FItness[0])):
                     #   STEP 11: Outsource mapping
-                    dTmp_MapResults = optimizer.mapSurrogate(threading=True, data=kwargs["data"], surrogate=self.__lSRG[i])
+                    dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])
 
                 #   STPE 12: CHeck if there are results
                 if (dTmp_MapResults != None):
