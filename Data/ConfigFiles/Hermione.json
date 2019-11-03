@@ -6,7 +6,7 @@
         "1": "show output",
 
         "allow testing": false,
-        "show output": false
+        "show output": true
     },
     "menus":
     {

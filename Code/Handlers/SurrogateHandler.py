@@ -248,6 +248,9 @@ class Golem:
         #   STEP 9: Train surrogates
         self.__train_srgOverseer__(data=kwargs["data"], region=kwargs["region"])
 
+        if  ( True ):
+            print("\t\t- Fitness: " + str(self.__lSRG_FItness[0]), "Accuracy: " + str(self.__lSRG_Accuracy[0]), sep="\t", end="\n\n")
+
         #   STEP 10: Map surrogates
         self.__map_srgOverseer__(data=kwargs["data"])
 

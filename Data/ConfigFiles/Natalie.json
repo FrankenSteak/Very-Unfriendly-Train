@@ -23,8 +23,8 @@
 
             "lower frequency offset":   0.002e9,
             "upper frequency offset":   0.002e9,
-            "samples":                  5,
-            "accuracy check samples":   5
+            "samples":                  7,
+            "accuracy check samples":   7
         },
         "mesh":
         {
@@ -34,7 +34,7 @@
             "1":        "size",
 
             "wire radius":  0.001,
-            "size":         "Coarse"
+            "size":         "Fine"
         },
         "runt":
         {
@@ -67,18 +67,18 @@
             "8":        "secondary region scalar",
             "9":        "early exit conditions",
 
-            "primary iterations":       5,
-            "secondary iterations":     42,
-            "grace iterations":         1,
+            "primary iterations":       45,
+            "secondary iterations":     15,
+            "grace iterations":         3,
 
-            "candidates":               8,
+            "candidates":               10,
             "secondary candidates":     10,
 
             "algorithm region":         5,
             "surrogate region":         4,
 
             "primary region scalar":    0.5,
-            "secondary region scalar":  0.25,
+            "secondary region scalar":  0.01,
 
             "early exit conditions":
             {

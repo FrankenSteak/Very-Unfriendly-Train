@@ -289,7 +289,7 @@ class Natalie:
 
         #
         #   endregion
-
+        
         #   region STEP 16->19: Secondary optimization
 
         #   STEP 16: Check if secondary is tro
@@ -304,7 +304,7 @@ class Natalie:
 
         #
         #   endregion
-
+        
         #   STEP 20: Return
         return
         
@@ -691,13 +691,13 @@ class Natalie:
             fTmp_Area   = dTmp_Ant["substrate"]["l"] * dTmp_Ant["substrate"]["w"]
 
             #   STEP 10: Get left fitness
-            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.085
+            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.15
 
             #   STEP 11: Get center firness
             fTmp_Mid    = ( dTmp_Fit["desired"]["total"] ) * 0.7
 
             #   STEP 12: Get right fitness
-            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.05
+            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.15
 
             #   STEP 13: Get total area fitness
             fTmp_Area   = fTmp_Area / fOriginal_Area
@@ -706,8 +706,16 @@ class Natalie:
             fTmp_Freq_Tot   = fTmp_Left + fTmp_Mid + fTmp_Right
             
             #   STEP 15: Get overall fitness
-            fTmp_Fitness    = self.__aActivation.logistic( fTmp_Area * 8.0  - 6.0 ) 
-            fTmp_Fitness    = ( 1.0 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.4 * fTmp_Freq_Tot )  + ( 0.6 * fTmp_Fitness )
+            fTmp_Fitness    = cp.deepcopy( fTmp_Area )
+
+            if ( fTmp_Area < 0.55 ):
+                fTmp_Fitness    = 0.5
+                
+                fTmp_Fitness    = ( 0.3 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.5 * fTmp_Freq_Tot )  + ( 0.9 * fTmp_Fitness )
+
+            else:
+                fTmp_Fitness    = ( 0.3 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.325 * fTmp_Freq_Tot )  + ( 1.4 * fTmp_Fitness )
+                fTmp_Fitness    = min( 200.0, fTmp_Fitness )
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -1828,6 +1836,8 @@ class Natalie:
 
         #   region STEP 16->25: Setup - Data container
 
+        #   region STEP 26->38: Data mapping
+
         #   STEP 16: Create temp data dictionary
         dTmp_Data   = {
             "in":   lData_In,
@@ -1837,38 +1847,6 @@ class Natalie:
         #   STEP 17: Create data container
         vData   = Data()
         vData.setData(data=dTmp_Data)
-
-        #   STEP 19: Setup - Tmp variables
-        lInputDistances = vData.getInputDistance( vData.getLen() - 1)
-        fTmp_MaxRegion  = max(0.125, float( kwargs["region"]["unscaled-srg"] - 1 ) * ( kwargs["region"]["scaled"] / self.__fTRO_RegionScalar_Secondary ) )
-        iTmp_Count      = 0
-        
-        #   STEP 20: Loop through input distances
-        while (iTmp_Count < len(lInputDistances) - 1):
-            #   STEP 21: Check if outside region
-            if (( lInputDistances[iTmp_Count] > fTmp_MaxRegion ) or ( lInputDistances[iTmp_Count] == 0.0 )):
-                #   STEP 22: Pop from data set
-                vData.pop(used=False, index=iTmp_Count)
-                iTmp_Distance = lInputDistances.pop(iTmp_Count)
-
-                #   STEP 23: User output
-                if (self.bShowOutput):
-                    print("\t{" + Helga.time() + "} - Removing input-output pair <" + str(iTmp_Count) + ":" + str( round(iTmp_Distance, 2) ) + ":" + str( round(fTmp_MaxRegion, 2)) + ">")
-
-            #   STPE 24: Not outside region
-            else:
-                #   STEP 25: Increment counter
-                iTmp_Count += 1
-    
-        #   STPE ??: Check if there is data left
-        if (len(lInputDistances) < 5):
-            #   STEP ??: ERror handling
-            raise Exception("An error occured in Natalie.__getSurrogate_Results__() -> Step ??: Too little data for surrogate training")
-        
-        #
-        #   endregion
-
-        #   region STEP 26->38: Data mapping
 
         #   STEP 26: Setup - Tmp variables
         dData_Range = {
@@ -1897,14 +1875,41 @@ class Natalie:
             "in":   lTmp_DataMap_In
         }
 
-        #   STEP 33: User output
-        if (self.bShowOutput):
-            print("\t{" + Helga.time() + "} - Standardizing data")
-
         #   STEP 34: Standardize data
         vData.normalize(mapRange=dData_Range, mapSets=dData_Map, input=False, output=True)
         vData.standardize(input=True)
 
+        #
+        #   endregion
+
+        #   STEP 19: Setup - Tmp variables
+        lInputDistances = vData.getInputDistance( vData.getLen() - 1)
+        fTmp_MaxRegion  = 4.0 * kwargs["region"]["scaled"] * float( len(lData_In[0]) )
+        #fTmp_MaxRegion  = max(0.125, float( kwargs["region"]["unscaled-srg"] - 1 ) * ( kwargs["region"]["scaled"] / self.__fTRO_RegionScalar_Secondary ) )
+        iTmp_Count      = 0
+        
+        #   STEP 20: Loop through input distances
+        while (iTmp_Count < len(lInputDistances) - 1):
+            #   STEP 21: Check if outside region
+            if (( lInputDistances[iTmp_Count] > fTmp_MaxRegion ) or ( lInputDistances[iTmp_Count] == 0.0 )):
+                #   STEP 22: Pop from data set
+                vData.pop(used=False, index=iTmp_Count)
+                iTmp_Distance = lInputDistances.pop(iTmp_Count)
+
+                #   STEP 23: User output
+                if (False): #(self.bShowOutput):
+                    print("\t{" + Helga.time() + "} - Removing input-output pair <" + str(iTmp_Count) + ":" + str( round(iTmp_Distance, 2) ) + ":" + str( round(fTmp_MaxRegion, 2)) + ">")
+
+            #   STPE 24: Not outside region
+            else:
+                #   STEP 25: Increment counter
+                iTmp_Count += 1
+    
+        #   STPE ??: Check if there is data left
+        if (len(lInputDistances) < 5):
+            #   STEP ??: ERror handling
+            raise Exception("An error occured in Natalie.__getSurrogate_Results__() -> Step ??: Too little data for surrogate training")
+        
         #
         #   endregion
 
@@ -3090,6 +3095,8 @@ class Natalie:
         iRegion                 = cp.deepcopy( self.__iTRO_Region )
         iIterations             = cp.deepcopy( self.__iTRO_Iterations_Primary )
 
+        iReductions             = 0
+
         bCull                   = kwargs["cull"]
         bSave                   = kwargs["save"]
 
@@ -3209,15 +3216,18 @@ class Natalie:
                 #   STEP 34: Outsource - Cull the weak :)
                 self.__cullData__(data=lFitness, spare=iTmp_BestIndex, num=self.__iTRO_Candidates)
 
-            #   region STEP 35->43: Region Update
+            #   region STEP 35->47: Region Update
 
             #   STEP 35: Check if new best
             if (iTmp_BestIndex != self.__iTRO_Candidates):
                 #   STEP 36: Update region
-                iRegion += 1
+                iRegion     += 1
                 iTmp_Region = round( float(iRegion) / float(self.__iTRO_Region ), 3)
 
-                #   STEP 37: User output
+                #   STEP 37: Reset - Number of reductions
+                iReductions = max( 0, iReductions - 1 )
+
+                #   STEP 38: User output
                 if (self.bShowOutput):
                     print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
 
@@ -3227,46 +3237,57 @@ class Natalie:
                     dHold = lFitness[iTmp_BestIndex]
                     print("\t\t-New:\t",    "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t", end="\n\n")
 
-            #   STEP 38: Not new best
+            #   STEP 39: Not new best
             else:
-                #   STEP 39: Check if region too small
+                #   STEP 40: Check if region too small
                 if (iRegion > 0):
-                    #   STEP 40: Update - Decrement region
-                    iRegion     -= 1
+                    #   STEP 41: check if region greater than starting region and two consecutive reductions
+                    if ( (iReductions >= 2) and (iRegion > 3) ):
+                        #   STEP 42: Reset - Number of reductions and region
+                        iReductions = 0
+                        iRegion     = max( 3, iRegion - self.__iTRO_Region )
+
+                    #   STEP 42: Not consecutive reductions
+                    else:
+                        #   STEP 43: Update - Decrement region
+                        iRegion     -= 1
+                        iReductions += 1
+
+                    #   STEP 44: Recalculate temp region
                     iTmp_Region = round( float(iRegion) / float(self.__iTRO_Region ), 3)
 
-                    #   STEP 41: User output
+                    #   STEP 45: User output
                     if (self.bShowOutput):
                         print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Decreasing region -> " + str(iTmp_Region), end="\n\n")
                 
-                #   STPE 42: Region too small
+                #   STPE 46: Region too small
                 else:
-                    #   STEP 43: Exit loop
+                    #   STEP 47: Exit loop
                     break
 
             #
             #   endregion
 
-            #   region STEP 44->50: Early Exit
+            #   region STEP 48->54: Early Exit
 
-            #   STEP 44: Check - Early Exit status
+            #   STEP 48: Check - Early Exit status
             if (self.bEarlyExit):
-                #   STEP 45: Check area
+                #   STEP 49: Check area
                 if (dBest_Fit["area"] <= self.__fTRO_EarlyExit_Area):
-                    #   STEP 46: User output
+                    #   STEP 50: User output
                     if (self.bShowOutput):
                         print("\t{" + Helga.time() + "} - Miniaturization goal met; exiting Primary Optimization early")
 
-                    #   STEP 47: Exit loop
+                    #   STEP 51: Exit loop
                     break
 
-                #   STEP 48: Check fitness
+                #   STEP 52: Check fitness
                 if (dBest_Fit["final"] <= self.__fTRO_EarlyExit_Fitness):
-                    #   STEP 49: User output
+                    #   STEP 53: User output
                     if (self.bShowOutput):
                         print("\t{" + Helga.time() + "} - Fitness goal met; exiting Primary Optimization early")
 
-                    #   STEP 50: User output
+                    #   STEP 54: User output
                     break
             
             #
@@ -3275,13 +3296,13 @@ class Natalie:
         #
         #   endregion
 
-        #   STEP 51: Populate output dictionary
+        #   STEP 55: Populate output dictionary
         dOut    = {
             "result":   dBest_Geo,
             "fitness":  dBest_Fit
         }
         
-        #   STEP 52: Return
+        #   STEP 56: Return
         return dOut
 
     def __tro_Secondary__(self, **kwargs) -> dict:
@@ -3363,14 +3384,14 @@ class Natalie:
         #   region STEP 9->56: TRO - Secondary
 
         #   STEP 9: Loop - Main
-        for _ in range(0, iIterations_Main):
+        for i in range(0, iIterations_Main):
             #   STEP 10: Setup - Scope variables
             lInputs     = []
             lOutputs    = []
 
             iRegion_Srg = cp.deepcopy(self.__iTRO_Region_SRG)
 
-            dParameters = self.__getParameters_Secondary__(center=dBest_Geo, region=2)
+            dParameters = self.__getParameters_Secondary__(center=dBest_Geo, region=6)
 
             #   STEP 11: Loop - Grace
             for j in range(0, iIterations_Grace):
@@ -3521,10 +3542,10 @@ class Natalie:
                     #   STEP 48: User output
                     if (self.bShowOutput):
                         #   STEP 49: Get current region
-                        iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+                        iTmp_Region         = round( float(iRegion_Alg) / float(self.__iTRO_Region), 3)
 
                         #   STEP 50: Print output
-                        print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + " - " + str(i + 1) + "/" + str(iIterations_Main) + ") : Increasing region via surrogate -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates_Secondary]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
@@ -3534,9 +3555,6 @@ class Natalie:
 
                 #   STEP 51: Check if new best isn't old best
                 elif (iTmp_BestIndex != self.__iTRO_Candidates_Secondary):
-                    #   STEP 52: Update region
-                    iRegion_Alg     += 0
-
                     #   STEP 53: Check if surrogate region not too small
                     if (iRegion_Srg > 0):
                         #   STEP 54: Update surrogate region
@@ -3545,10 +3563,10 @@ class Natalie:
                     #   STEP 55: User output
                     if (self.bShowOutput):
                         #   STEP 56: Get new region
-                        iTmp_Region         = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+                        iTmp_Region         = round( float(iRegion_Alg) / float(self.__iTRO_Region), 3)
                         
                         #   STEP 57: Print output
-                        print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + ") : Increasing region -> " + str(iTmp_Region))
+                        print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + " - " + str(i + 1) + "/" + str(iIterations_Main) + ") : Maintaining region -> " + str(iTmp_Region))
 
                         dHold = lFitness[self.__iTRO_Candidates_Secondary]
                         print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
@@ -3574,10 +3592,10 @@ class Natalie:
                         #   STEP 63: User output
                         if (self.bShowOutput):
                             #   STEP 64: Get new region
-                            iTmp_Region = round( float(iRegion_Alg + iRegion_Srg) / float(self.__iTRO_Region + self.__iTRO_Region_SRG), 3)
+                            iTmp_Region         = round( float(iRegion_Alg) / float(self.__iTRO_Region), 3)
                             
                             #   STEP 65: Print output
-                            print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + ") : Decreasing region -> " + str(iTmp_Region))
+                            print("\t{" + Helga.time() + "} - Iteration (" + str(j + 1) + "/" + str(iIterations_Grace) + " - " + str(i + 1) + "/" + str(iIterations_Main) + ") : Decreasing region -> " + str(iTmp_Region))
 
                     #   STEP 66: Region too small
                     else:
@@ -3646,9 +3664,11 @@ if (__name__ == "__main__"):
         os.system("cls")
 
         nat = Natalie(ant=dAnt)
-        nat.bEarlyExit  = True
+        nat.bEarlyExit  = False
 
         nat.optimizeAntenna(primary="tro", secondary="tro", surrogate=True)
+
+        input("\t> Continue")
 
 #
 #endregion
