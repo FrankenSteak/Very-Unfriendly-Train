@@ -21,10 +21,10 @@
             "2": "samples",
             "3": "accuracy check samples",
 
-            "lower frequency offset":   0.0065e9,
-            "upper frequency offset":   0.0065e9,
-            "samples":                  2,
-            "accuracy check samples":   2
+            "lower frequency offset":   0.002e9,
+            "upper frequency offset":   0.002e9,
+            "samples":                  7,
+            "accuracy check samples":   7
         },
         "mesh":
         {
@@ -34,7 +34,7 @@
             "1":        "size",
 
             "wire radius":  0.001,
-            "size":         "Coarse"
+            "size":         "Fine"
         },
         "runt":
         {
@@ -51,21 +51,48 @@
 
         "trust region":
         {
-            "items":    6,
+            "items":    10,
 
             "0":        "primary iterations",
             "1":        "secondary iterations",
-            "2":        "candidates",
-            "3":        "algorithm region",
-            "4":        "surrogate region",
-            "5":        "retension fall off",
+            "2":        "grace iterations",
 
-            "primary iterations":   75,
-            "secondary iterations": 75,
-            "candidates":           10,
-            "algorithm region":     5,
-            "surrogate region":     5,
-            "retension fall off":   2
+            "3":        "candidates",
+            "4":        "secondary candidates",
+            
+            "5":        "algorithm region",
+            "6":        "surrogate region",
+            
+            "7":        "primary region scalar",
+            "8":        "secondary region scalar",
+            "9":        "early exit conditions",
+
+            "primary iterations":       45,
+            "secondary iterations":     15,
+            "grace iterations":         3,
+
+            "candidates":               10,
+            "secondary candidates":     10,
+
+            "algorithm region":         5,
+            "surrogate region":         4,
+
+            "primary region scalar":    0.5,
+            "secondary region scalar":  0.01,
+
+            "early exit conditions":
+            {
+                "items":    2,
+
+                "0":        "area",
+                "1":        "frequency",
+                "2":        "fitness",
+
+                "area":         0.55,
+                "frequency":    0.15,
+                "fitness":      0.35
+            }
+            
         },
         "nelder mead":
         {

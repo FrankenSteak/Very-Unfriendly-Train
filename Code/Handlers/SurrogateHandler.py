@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath("."))
 
 from    Code.Enums.Enums                import  Enums           as en
 from    Code.Enums.Surrogates           import  Surrogates
-from    Code.Enums.Swarms               import  Swarms
+from    Code.Enums.Swarms               import  Swarms              as  sw
 from    Code.Enums.GeneticAlgorithms    import  GeneticAlgorithms   as  ga
 
 from    Code.Handlers.AntennaMathHandler                        import  Matthew
@@ -248,6 +248,9 @@ class Golem:
         #   STEP 9: Train surrogates
         self.__train_srgOverseer__(data=kwargs["data"], region=kwargs["region"])
 
+        if  ( True ):
+            print("\t\t- Fitness: " + str(self.__lSRG_FItness[0]), "Accuracy: " + str(self.__lSRG_Accuracy[0]), sep="\t", end="\n\n")
+
         #   STEP 10: Map surrogates
         self.__map_srgOverseer__(data=kwargs["data"])
 
@@ -263,7 +266,13 @@ class Golem:
                     #   STEP 15: Outsource - Remapping
                     self.lMap_Results[i] = kwargs["data"].remap( candidate=cp.deepcopy( self.lMap_Results[i] ))
 
-        #   STEP 14: Populate output dict
+        #   STEP 16: User output
+        if ( self.bShowOutput ):
+            print("\n\t~ Train and Map results:")
+            print("\t\t- Candidate: ", Helga.round(self.lMap_Results[0], 2))
+            print("\t\t- Fitness: ", round(self.lMap_Fitness[0], 2), end="\n\n")
+
+        #   STEP 17: Populate output dict
         dOut = {
             "result":   self.vBest,
             "fitness":  self.vFitness
@@ -774,12 +783,14 @@ class Golem:
             vSRG    = dSRG["surrogate"]
 
             #   STEP 3 Do necessary pre-training
-            vSRG.bShowOutput            = True
+            vSRG.bShowOutput            = False
             vSRG.bUse_NoiseInjection    = True
             vSRG.bUse_L1                = True
                 
             #   STEP 4: Train surrogate
-            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=True)
+            fTmp_Fitness    = None
+
+            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=False)
             fTmp_Fitness    = fTmp_Fitness["fitness"]
 
             #   STEP 5: Get accuracy and fitness
@@ -889,6 +900,7 @@ class Golem:
 
         #   STEP 0: Local variables
         optimizer               = Hermione()
+        optimizer.bShowOutput   = False
 
         self.vBest              = None
         self.vFitness           = np.inf
@@ -921,10 +933,10 @@ class Golem:
                 #   STEP 8: Best candidate
                 if (i == 0):
                     #   STEP 9: Outsource threaded mapping
-                    dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])#, optimizer=ga.TRO)
+                    dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])
 
                 #   STEP 10: Else if accuracy = 100%
-                elif (self.__lSRG_Accuracy[i] == 1.0):
+                elif ((self.__lSRG_Accuracy[i] == 1.0) or (self.__lSRG_FItness[i] == self.__lSRG_FItness[0])):
                     #   STEP 11: Outsource mapping
                     dTmp_MapResults = optimizer.mapSurrogate(threading=False, data=kwargs["data"], surrogate=self.__lSRG[i])
 

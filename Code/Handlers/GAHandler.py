@@ -290,26 +290,14 @@ class SpongeBob:
                 for i in range(0, len(lTmp)):
                     #   STEP 14: Check if single point
                     if (type(lTmp[i]) == float):
-                        #   STEP 15: Get random value in range [-1, 1]
-                        fTmp = (rn.random() * 2.0) - 1.0
-
                         #   STEP 16: Modify value using region and scalar
-                        fTmp = kwargs["params"]["scalar"] * kwargs["region"] * fTmp
+                        lTmp[i] = rn.gauss(kwargs["initial"][i], kwargs["params"]["scalar"] * kwargs["region"])
 
-                        #   STEP 17: Set new weight
-                        lTmp[i] = kwargs["initial"][i] + fTmp
 
                     else:
                         #   STEP 18: Iterate through list
                         for j in range(0, len(lTmp[i])):
-                            #   STEP 19: Get random value in range [1, 1]
-                            fTmp = rn.random() * 2.0 - 1.0
-
-                            #   STEP 20: Modify using region and scalar
-                            fTmp = kwargs["params"]["scalar"] * kwargs["region"] * fTmp
-
-                            #   STEP 21: Set new candidate value
-                            lTmp[i][j] = kwargs["initial"][i][j] + fTmp
+                            lTmp[i][j] = rn.gauss(kwargs["initial"][i][j], kwargs["params"]["scalar"] * kwargs["region"])
 
                 #   STEP 22: Append new candidate to output list
                 lCandidates.append(lTmp)

@@ -470,7 +470,7 @@ class Annie:
 
 	#	region Front-End: Is-type-statements
 
-	def isAccurate(self, _lfExpectedOutput: list) -> bool:
+	def isAccurate(self, _lfExpectedOutput: list, **kwargs) -> bool:
 		"""
 			Description:
 
@@ -486,35 +486,86 @@ class Annie:
 			Returns:
 
 				+ bAccurate	= ( bool )
+
+				+ RMSD	= ( bool ) Flag to indicate if the RMSD should be used
+					~ Default	= False
 		"""
 
 		#	STEP 0: Local variables
-		lTmp					= self.getOutput()
+		lOutputs				= self.getOutput()
 
-		fMargin					= self.__config.data["parameters"]["accuracy margin"]
+		bRMSD					= False
 
-		iCorrect				= 0
+		#	STEP 1: Check if RMSD arg passed
+		if ("RMSD" in kwargs):
+			#	STEP 2: Update - Local variables
+			bRMSD	= True
 
-		#	STEP 1: Setup - Local variables
+		#	region STEP 3->11: Not RMSD
 
-		#	STEP 2: Loop through outputs
-		for i in range(0, len(lTmp)):
-			#	STEP 3: Get difference between output and actual
-			fTmp = lTmp[i] - _lfExpectedOutput[i]
+		#	STEP 3: Check if not RMSD
+		if (bRMSD == False):
+			#	STEP 4: Setup - Tmp variables
+			fTmp_Margin					= self.__config.data["parameters"]["accuracy margin"]
 
-			#	STEP 4: If withing margin
-			if ((fTmp <= fMargin) and (fTmp >= -1.0 * fMargin)):
-				#	STEP 5: Increment number of correct outputs
-				iCorrect += 1
+			iTmp_Correct				= 0
+
+			#	STEP 5: Loop through outputs
+			for i in range(0, len( lOutputs ) ):
+				#	STEP 6: Get difference between output and actual
+				fTmp_Error = lOutputs[i] - _lfExpectedOutput[i]
+
+				#	STEP 7: If within margin
+				if ((fTmp_Error <= fTmp_Margin) and (fTmp_Error >= -1.0 * fTmp_Margin)):
+					#	STEP 8: Increment number of correct outputs
+					iTmp_Correct += 1
+				
+			#	STEP 9: If all outputs were accurate
+			if (iTmp_Correct == len( lOutputs ) ):
+				#	STEP 10: Return
+				return True
 			
-		#	STEP 6: If all outputs were accurate
-		if (iCorrect == len(lTmp)):
-			#	STEP 7: Return
-			return True
+			#	STEP 11: Return not correct
+			return False
+
+		#
+		#	endregion
+
+		#	region STEP 12->??: RMSD
+
+		#	STEP 12: Then RMSD
+		else:
+			#	STEP 13: Setup - Tmp variables
+			fTmp_Sum	= 0.0
+
+			#	STEP 14: Loop through outputs
+			for i in range(0, len( lOutputs ) ):
+				#	STEP 15: Get MSE
+				fTmp_MSE	= np.power( _lfExpectedOutput[i] - lOutputs[i], 2)
+
+				#	STEP 16: Add MSE to sum
+				fTmp_Sum	+= fTmp_MSE
+
+			#	STEP 17: Average MSE sum
+			fTmp_Avg	= fTmp_Sum / float( len( lOutputs ) )
+
+			#	STEP 18: Sqrt MSE average
+			fTmp_RMSD	= np.sqrt( fTmp_Avg )
+
+			#	STEP 19: Calculate the error margin
+			fTmp_Margin	= self.__config.data["parameters"]["accuracy margin"]
+			
+			#	STEP 20: Check if RMSD within error
+			if (fTmp_RMSD <= fTmp_Margin):
+				#	STEP 21: Return correct
+				return True
+
+			#	STEP 22: Return incorrect
+			return False
 		
-		#	STEP 8: Return not correct
-		return False
-		
+		#
+		#	endregion
+
 	#
 	#	endregion
 
@@ -648,7 +699,7 @@ class Annie:
 			self.__propagateForward__(dDNR["in"])
 
 			#	STEP 22: Get accuracy
-			if (self.isAccurate(dDNR["out"])):
+			if (self.isAccurate(dDNR["out"], RMSD=True)):
 				iAccurate += 1
 
 			else:
@@ -1434,7 +1485,7 @@ class Annie:
 		for i in range(0, len(self.__lWeights)):
 			for j in range(0, len(self.__lWeights[i])):
 				#	STEP 6: Get random value for weight
-				self.__lWeights[i][j] = rn.random() * 2.0 * self.__fWeightRange - self.__fWeightRange
+				self.__lWeights[i][j] = rn.gauss(0.0, self.__fWeightRange)
 
 		#	STEP 7: Return
 		return
@@ -1679,7 +1730,7 @@ class Annie:
 			self.__propagateForward__(dDNR["in"])
 
 			#	STEP 9: Check if accurate
-			if (self.isAccurate(dDNR["out"])):
+			if (self.isAccurate(dDNR["out"], RMSD=True)):
 				#	STEP 10: Create temp dictionary
 				dTmp = {
 					"in": dDNR["in"],
@@ -1922,8 +1973,8 @@ class Annie:
 		lBest_Set			= self.getWeights(password=self.__iPassword)
 		fBest_Fitness		= np.inf
 
-		fScalar_Train		= 10.0
-		fScalar_Test		= 90.0
+		fScalar_Train		= 30.0
+		fScalar_Test		= 70.0
 
 		iBatch_Iterations	= None
 		iBatch_Size			= self.__iBatchSize
@@ -1941,20 +1992,9 @@ class Annie:
 		iBatch_Iterations	= int( np.ceil( dData_Training.getLen() / iBatch_Size ) )
 
 		#	STEP 2: Check for small dataset
-		if ( dData_Training.getLen() < iBatch_Size / 2 ):
-			#	STEP 3: Setup - Tmp variable
-			iTmp_BatchSize	= 0
-
-			#	STEP 4: Iterate 
-			while (iTmp_BatchSize < iBatch_Size):
-				#	STEP 5: Increment batch size by data length
-				iTmp_BatchSize += dData_Training.getLen()
-
-			#	STEP 6: Update - Batch Size
-			iBatch_Size 	= iTmp_BatchSize
-
-			fScalar_Train	= 65.0
-			fScalar_Test	= 35.0
+		if ( dData_Training.getLen() < iBatch_Size ):
+			fScalar_Train	= 80.0
+			fScalar_Test	= 20.0
 
 		if (self.bUse_Dropout):
 			iEpochs	= int(iEpochs * 0.65)
@@ -2025,7 +2065,7 @@ class Annie:
 						print("\t{" + Helga.time() + "} -", "Fitness: " + str( round( fBest_Fitness, 2 ) ) + "\t", "Test: " + str( round( dTmp_AccTest["percent accuracy"], 2) ), "Train: " + str( round( dTmp_AccTrain["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
 
 				#	STEP 22: If temp fitness not converging
-				elif ( fTmp_Fitness > 10.0 * fBest_Fitness ):
+				elif ( fTmp_Fitness > 5.0 * fBest_Fitness ):
 					#	STEP 23: User output
 					if (self.bShowOutput):
 						print("\t{" + Helga.time() + "} - \tEnding epoch " + str(i) + " early by " + str( iBatch_Iterations - j ) + " batch iterations")
@@ -2359,20 +2399,6 @@ class Annie:
 				if (self.bUse_L2):
 					#	STEP 17: Update - Delta
 					fDelta -= 2.0 * self.__fLearningRate * self.__fLambda_2 * self.__lWeights[i][j]
-
-				"""
-				#	STEP 18: Check - Drop Out status
-				if (self.bUse_Dropout):
-					#	STEP 19: Check if first weight leayer
-					if (i == 0):
-						#	STEP 20: Update - Delta
-						fDelta *= ( 1.0 - self.__fDropOut_Input )
-
-					#	STEP 21: Not first weight layer
-					else:
-						#	STEP 22: Update - Delta
-						fDelta *= ( 1.0 - self.__fDropOut_Hidden )
-				"""
 					
 				#	STEP 23: Set new weight
 				self.__lWeights[i][j] = round(self.__lWeights[i][j] + fDelta, 6)
@@ -2833,7 +2859,7 @@ class Annie:
 		print("Momentum: ", 		self.__fMomentum)
 
 		print("\n-----------------------------", "\tResult Comparison\t", "-----------------------------")
-		for _ in range(0, min(20, _dData.getLen())):
+		for _ in range(0, min(10, _dData.getLen())):
 			dDNR = _dData.getRandDNR()
 
 			self.__propagateForward__(dDNR["in"])
@@ -2875,9 +2901,9 @@ if (__name__ == "__main__"):
 		fire = Annie()
 		
 		fire.bShowOutput 	= True
-		fire.bUse_L1		= True
+		fire.bUse_L1		= False
 
-		y = fire.trainSet(cp.deepcopy(dat), advanced_training=True, compare=True)
+		y = fire.trainSet(cp.deepcopy(dat), advanced_training=False, compare=True)
 
 		print("---", "---", sep="\n", end="\n\n")
 

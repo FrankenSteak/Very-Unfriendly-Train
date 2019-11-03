@@ -108,12 +108,12 @@
 
             "center":
             {
-                "region":   0.0,
-                "range":    1.0
+                "region":   0.35,
+                "range":    0.35
             },
             "width":
             {
-                "region":   0.9,
+                "region":   0.5,
                 "range":    0.05
             }
         },
@@ -129,34 +129,34 @@
 
             "l":
             {
-                "region":   0.3,
-                "range":    4.0
+                "region":   0.4,
+                "range":    3.5
             },
             "w":
             {
-                "region":   0.3,
-                "range":    4.0
+                "region":   0.4,
+                "range":    3.5
             },
             "x":
             {
-                "region":   0.25,
+                "region":   0.5,
                 "range":    0.4
             },
             "y":
             {
-                "region":   0.25,
+                "region":   0.5,
                 "range":    0.4
             },
             "slots":
             {
                 "items":    4,
 
-                "0":        "square",
-                "1":        "ellipse",
-                "2":        "triangle",
-                "4":        "polygon",
+                "0":        "rectangular",
+                "1":        "elliptical",
+                "2":        "triangular",
+                "4":        "polygonal",
 
-                "square":
+                "rectangular":
                 {
                     "items":    4,
 
@@ -206,7 +206,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.25
+                        "probability":  0.4
                     },
                     "change slot":
                     {
@@ -242,7 +242,7 @@
                         }
                     }
                 },
-                "ellipse":
+                "elliptical":
                 {
                     "items":    4,
 
@@ -292,7 +292,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.25
+                        "probability":  0.4
                     },
                     "change slot":
                     {
@@ -328,7 +328,7 @@
                         }
                     }
                 },
-                "triangle":
+                "triangular":
                 {
                     "items":    4,
 
@@ -367,7 +367,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.25
+                        "probability":  0.4
                     },
                     "change slot":
                     {
@@ -392,7 +392,7 @@
                     }
 
                 },
-                "polygon":
+                "polygonal":
                 {
                     "items":    4,
 
@@ -430,7 +430,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.25
+                        "probability":  0.4
                     },
                     "change point":
                     {
@@ -476,24 +476,24 @@
             },
             "x":
             {
-                "region":   0.3,
-                "range":    0.75
+                "region":   0.35,
+                "range":    1.0
             },
             "y":
             {
-                "region":   0.3,
-                "range":    0.75
+                "region":   0.35,
+                "range":    1.0
             },
             "slots":
             {
                 "items":    4,
 
-                "0":        "square",
-                "1":        "ellipse",
-                "2":        "triangle",
-                "4":        "polygon",
+                "0":        "rectangular",
+                "1":        "elliptical",
+                "2":        "triangular",
+                "4":        "polygonal",
 
-                "square":
+                "rectangular":
                 {
                     "items":    4,
 
@@ -543,7 +543,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.2
+                        "probability":  0.4
                     },
                     "change slot":
                     {
@@ -579,7 +579,7 @@
                         }
                     }
                 },
-                "ellipse":
+                "elliptical":
                 {
                     "items":    4,
 
@@ -629,7 +629,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.2
+                        "probability":  0.4
                     },
                     "change slot":
                     {
@@ -665,7 +665,7 @@
                         }
                     }
                 },
-                "triangle":
+                "triangular":
                 {
                     "items":    4,
 
@@ -704,7 +704,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.2
+                        "probability":  0.4
                     },
                     "change slot":
                     {
@@ -729,7 +729,7 @@
                     }
 
                 },
-                "polygon":
+                "polygonal":
                 {
                     "items":    4,
 
@@ -767,7 +767,7 @@
 
                         "0":        "probability",
 
-                        "probability":  0.22
+                        "probability":  0.4
                     },
                     "change point":
                     {
