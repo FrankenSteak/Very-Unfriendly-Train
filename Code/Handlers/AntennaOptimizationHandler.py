@@ -709,13 +709,12 @@ class Natalie:
             fTmp_Fitness    = cp.deepcopy( fTmp_Area )
 
             if ( fTmp_Area < 0.55 ):
-                fTmp_Fitness    = 0.5
                 
-                fTmp_Fitness    = ( 0.3 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.5 * fTmp_Freq_Tot )  + ( 0.9 * fTmp_Fitness )
+                fTmp_Fitness    = cp.deepcopy( fTmp_Freq_Tot )
 
             else:
-                fTmp_Fitness    = ( 0.3 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.325 * fTmp_Freq_Tot )  + ( 1.4 * fTmp_Fitness )
-                fTmp_Fitness    = min( 200.0, fTmp_Fitness )
+
+                fTmp_Fitness    = ( 0.4 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.4 * fTmp_Freq_Tot )  + ( 1.2 * fTmp_Fitness )
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -3668,7 +3667,6 @@ if (__name__ == "__main__"):
 
         nat.optimizeAntenna(primary="tro", secondary="tro", surrogate=True)
 
-        input("\t> Continue")
 
 #
 #endregion
