@@ -3114,7 +3114,7 @@ class Natalie:
             print("Natalie (tro-Primary) {" + Helga.time() + "} - Simulating starting antenna geometry")
 
         #   STEP 7: Outsource - Simulate center
-        self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=sDir, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+        self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=sDir, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh_Fine, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
         
         #   STEP 8: Setup - Center geometry
         dBest_Geo           = cp.deepcopy(self.__dAnt_Center)
@@ -3160,7 +3160,7 @@ class Natalie:
 
                 #   STEP 16: User output
                 if (self.bShowOutput):
-                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas ~ Low Fidelity")
+                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas \t\t~ Low Fidelity")
 
                 #   STEP 17: Simulate antennas
                 lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
@@ -3205,14 +3205,14 @@ class Natalie:
             #   STEP 29: Outsource - Candidate evaluation
             iTmp_BestIndex  = self.__getCandidate_Best__(lFitness)
 
-            #   region STEP 30->37: High-fidelity validation
+            #   region STEP 30->41: High-fidelity validation
 
             #   STEP 30: Get best candidate
             lTmp_Candidates_Best    = [ lCandidates[iTmp_BestIndex] ]
 
             #   STEP 31: User output
             if (self.bShowOutput):
-                print("\t{" + Helga.time() + "} - Simulating best candidate antenna ~ High Fidelity")
+                print("\t{" + Helga.time() + "} - Simulating candidate antenna #" + str(iTmp_BestIndex) + "\t\t~ High Fidelity\t\t~ ", end="")
 
             #   STEP 32: Simulate best candidate with higher fidelity
             lTmp_Fitness_Best       = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates_Best, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh_Fine, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
@@ -3226,23 +3226,37 @@ class Natalie:
                 dBest_Geo   = lTmp_Candidates_Best[0]
                 dBest_Fit   = lTmp_Fitness_Best[0]
 
-            #   STEP 36: Not higher - Check if improvement
+                #   STEP 36: User output
+                if (self.bShowOutput):
+                    print("!")
+
+            #   STEP 37: Not higher - Check if improvement
             elif (lTmp_Fitness_Best[0]["final"] < dBest_Fit["final"]):
-                #   STEP 37: Set best as higher fidelity version
+                #   STEP 38: Set best as higher fidelity version
                 dBest_Geo   = lTmp_Candidates_Best[0]
                 dBest_Fit   = lTmp_Fitness_Best[0]
                 
+                #   STEP 39: User output
+                if (self.bShowOutput):
+                    print(".")
+
+            #   STEP 40: Bad joo joo
+            else:
+                #   STEP 41: User output
+                if (self.bShowOutput):
+                    print("x")
+
             #
             #   endregion
 
-            #   STEP 38: Check - Save status
+            #   STEP 42: Check - Save status
             if (bSave):
-                #   STEP 39: Outsource - Continuous save
+                #   STEP 43: Outsource - Continuous save
                 self.__saveData__(dir=sDir, bestGeo=dBest_Geo, bestFit=dBest_Fit, candidates=lCandidates, fitness=lFitness)
 
-            #   STEP 40: Check - Culling status
+            #   STEP 44: Check - Culling status
             if (bCull):
-                #   STEP 41: Outsource - Cull the weak :)
+                #   STEP 44: Outsource - Cull the weak :)
                 self.__cullData__(data=lFitness, spare=iTmp_BestIndex, num=self.__iTRO_Candidates)
 
             #   region STEP 35->47: Region Update
@@ -3258,7 +3272,7 @@ class Natalie:
 
                 #   STEP 38: User output
                 if (self.bShowOutput):
-                    print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
+                    print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region \t-> " + str(iTmp_Region))
 
                     dHold = lFitness[self.__iTRO_Candidates]
                     print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
