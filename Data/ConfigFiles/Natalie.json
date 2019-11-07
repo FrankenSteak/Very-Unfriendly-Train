@@ -34,7 +34,7 @@
             "1":        "size",
 
             "wire radius":  0.001,
-            "size":         "Fine"
+            "size":         "Coarse"
         },
         "runt":
         {

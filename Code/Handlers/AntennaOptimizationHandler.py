@@ -691,13 +691,13 @@ class Natalie:
             fTmp_Area   = dTmp_Ant["substrate"]["l"] * dTmp_Ant["substrate"]["w"]
 
             #   STEP 10: Get left fitness
-            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.15
+            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.4
 
             #   STEP 11: Get center firness
-            fTmp_Mid    = ( dTmp_Fit["desired"]["total"] ) * 0.7
+            fTmp_Mid    = ( dTmp_Fit["desired"]["total"] ) * 0.5
 
             #   STEP 12: Get right fitness
-            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.15
+            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.1
 
             #   STEP 13: Get total area fitness
             fTmp_Area   = fTmp_Area / fOriginal_Area
@@ -714,7 +714,7 @@ class Natalie:
 
             else:
 
-                fTmp_Fitness    = ( 0.4 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.4 * fTmp_Freq_Tot )  + ( 1.2 * fTmp_Fitness )
+                fTmp_Fitness    = ( 0.25 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.35 * fTmp_Freq_Tot )  + ( 1.4 * fTmp_Fitness )
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -3241,10 +3241,10 @@ class Natalie:
                 #   STEP 40: Check if region too small
                 if (iRegion > 0):
                     #   STEP 41: check if region greater than starting region and two consecutive reductions
-                    if ( (iReductions >= 2) and (iRegion > 3) ):
+                    if ( (iReductions >= 3) and (iRegion > 4) ):
                         #   STEP 42: Reset - Number of reductions and region
                         iReductions = 0
-                        iRegion     = max( 3, iRegion - self.__iTRO_Region )
+                        iRegion     = max( 4, iRegion - self.__iTRO_Region )
 
                     #   STEP 42: Not consecutive reductions
                     else:

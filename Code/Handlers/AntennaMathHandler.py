@@ -1542,8 +1542,8 @@ class Matthew:
                 "phi start":        0.0,
                 "theta end":        180.0,
                 "phi end":          360.0,
-                "theta increments": 5.0,
-                "phi increments":   5.0
+                "theta increments": 45.0,
+                "phi increments":   45.0
             }
 
             #   STEP ??: Create new far field request
