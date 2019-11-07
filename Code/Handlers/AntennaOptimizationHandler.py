@@ -97,6 +97,7 @@ class Natalie:
         self.__dAnt_Substrate   = None
         self.__dAnt_Frequency   = None
         self.__dAnt_Mesh        = None
+        self.__dAnt_Mesh_Fine   = None
         self.__dAnt_Runt        = None
         self.__dAnt_Fitness     = None
 
@@ -367,6 +368,9 @@ class Natalie:
             "wire radius":      self.__cf.data["parameters"]["mesh"]["wire radius"],
             "size":             self.__cf.data["parameters"]["mesh"]["size"]
         }
+
+        self.__dAnt_Mesh_Fine = cp.deepcopy( self.__dAnt_Mesh )
+        self.__dAnt_Mesh_Fine["size"] = "Fine"
 
         self.__dAnt_Runt = {
             "parallel":         self.__cf.data["parameters"]["runt"]["parallel"],
@@ -3156,7 +3160,7 @@ class Natalie:
 
                 #   STEP 16: User output
                 if (self.bShowOutput):
-                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas")
+                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas ~ Low Fidelity")
 
                 #   STEP 17: Simulate antennas
                 lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
@@ -3201,18 +3205,44 @@ class Natalie:
             #   STEP 29: Outsource - Candidate evaluation
             iTmp_BestIndex  = self.__getCandidate_Best__(lFitness)
 
-            #   STEP 30: Set new best candidate
-            dBest_Geo   = lCandidates[iTmp_BestIndex]
-            dBest_Fit   = lFitness[iTmp_BestIndex]
+            #   region STEP 30->37: High-fidelity validation
 
-            #   STEP 31: Check - Save status
+            #   STEP 30: Get best candidate
+            lTmp_Candidates_Best    = [ lCandidates[iTmp_BestIndex] ]
+
+            #   STEP 31: User output
+            if (self.bShowOutput):
+                print("\t{" + Helga.time() + "} - Simulating best candidate antenna ~ High Fidelity")
+
+            #   STEP 32: Simulate best candidate with higher fidelity
+            lTmp_Fitness_Best       = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates_Best, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh_Fine, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+
+            #   STEP 33: Evaluate overall fitness of best with higher fidelity
+            lTmp_Fitness_Best       = self.__getFitness__(ant=lTmp_Candidates_Best, fitness=lTmp_Fitness_Best)
+
+            #   STEP 34: Check if the higher fidelity is better
+            if (lTmp_Fitness_Best[0]["final"] < lFitness[iTmp_BestIndex]["final"]):
+                #   STEP 35: Set best as higher fidelity version
+                dBest_Geo   = lTmp_Candidates_Best[0]
+                dBest_Fit   = lTmp_Fitness_Best[0]
+
+            #   STEP 36: Not higher - Check if improvement
+            elif (lTmp_Fitness_Best[0]["final"] < dBest_Fit["final"]):
+                #   STEP 37: Set best as higher fidelity version
+                dBest_Geo   = lTmp_Candidates_Best[0]
+                dBest_Fit   = lTmp_Fitness_Best[0]
+                
+            #
+            #   endregion
+
+            #   STEP 38: Check - Save status
             if (bSave):
-                #   STEP 32: Outsource - Continuous save
+                #   STEP 39: Outsource - Continuous save
                 self.__saveData__(dir=sDir, bestGeo=dBest_Geo, bestFit=dBest_Fit, candidates=lCandidates, fitness=lFitness)
 
-            #   STEP 33: Check - Culling status
+            #   STEP 40: Check - Culling status
             if (bCull):
-                #   STEP 34: Outsource - Cull the weak :)
+                #   STEP 41: Outsource - Cull the weak :)
                 self.__cullData__(data=lFitness, spare=iTmp_BestIndex, num=self.__iTRO_Candidates)
 
             #   region STEP 35->47: Region Update
