@@ -1038,11 +1038,15 @@ class Annie:
 			if (self.bShowOutput):
 				print("Annie (train-set) {" + Helga.time() + "} - Training via Trust-Region Optimization assisted Default training")
 
+			#	STEP 21: Outsoruce def training
+			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
+
 			#	STEP 20: Outsource tro training
 			self.__trainTro__(_dData)
 
 			#	STEP 21: Outsoruce def training
 			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
+
 			
 		#
 		#	endregion
@@ -1055,11 +1059,14 @@ class Annie:
 			if (self.bShowOutput):
 				print("Annie (train-set) {" + Helga.time() + "} - Training via Particle-Swarm Optimization assisted Default training")
 
-			#	STEP 24: Outsource pso training
-			self.__trainPso__(_dData)
-			
 			#	STEP 25: Outsource def training
 			dTmp_Out 	= self.__trainDef__(_dData, bCheckAcc)
+
+			#	STEP 24: Outsource pso training
+			self.__trainPso__(_dData)
+
+			#	STEP 21: Outsoruce def training
+			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
 
 		#
 		#	endregion
@@ -2902,8 +2909,9 @@ if (__name__ == "__main__"):
 		
 		fire.bShowOutput 	= True
 		fire.bUse_L1		= False
+		fire.bUse_L2		= True
 
-		y = fire.trainSet(cp.deepcopy(dat), advanced_training=False, compare=True)
+		y = fire.trainSet(cp.deepcopy(dat), advanced_training=True, compare=True)
 
 		print("---", "---", sep="\n", end="\n\n")
 
