@@ -2890,7 +2890,7 @@ class Annie:
 if (__name__ == "__main__"):
 
 	dat = Data()
-	dat.importData(file="Testing\\4.json")
+	dat.importData(file="5x - Mammographic Masses\\mammographic_masses_0.json")
 
 	x = ""
 
@@ -2901,7 +2901,7 @@ if (__name__ == "__main__"):
 		fire = Annie()
 		
 		fire.bShowOutput 	= True
-		fire.bUse_L1		= False
+		fire.bUse_L1		= True
 
 		y = fire.trainSet(cp.deepcopy(dat), advanced_training=False, compare=True)
 
