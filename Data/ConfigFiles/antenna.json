@@ -139,13 +139,13 @@
             },
             "x":
             {
-                "region":   0.5,
-                "range":    0.4
+                "region":   0.6,
+                "range":    0.3
             },
             "y":
             {
-                "region":   0.5,
-                "range":    0.4
+                "region":   0.6,
+                "range":    0.3
             },
             "slots":
             {
@@ -502,7 +502,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.25,
+                    "probability":  0.0,
 
                     "create slot":
                     {
@@ -674,7 +674,7 @@
                     "2":        "remove slot",
                     "3":        "change slot",
 
-                    "probability":  0.25,
+                    "probability":  0.0,
 
                     "create slot":
                     {

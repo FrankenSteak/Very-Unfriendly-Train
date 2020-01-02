@@ -1,5 +1,7 @@
 .vscode/settings.json
 *_Primary
 *_Secondary
+*ignore
+*_ignore
 *ignore.zip
-*Datasets
+*.pyc

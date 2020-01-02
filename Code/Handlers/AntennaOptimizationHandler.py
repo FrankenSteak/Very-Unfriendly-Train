@@ -97,6 +97,7 @@ class Natalie:
         self.__dAnt_Substrate   = None
         self.__dAnt_Frequency   = None
         self.__dAnt_Mesh        = None
+        self.__dAnt_Mesh_Fine   = None
         self.__dAnt_Runt        = None
         self.__dAnt_Fitness     = None
 
@@ -367,6 +368,9 @@ class Natalie:
             "wire radius":      self.__cf.data["parameters"]["mesh"]["wire radius"],
             "size":             self.__cf.data["parameters"]["mesh"]["size"]
         }
+
+        self.__dAnt_Mesh_Fine = cp.deepcopy( self.__dAnt_Mesh )
+        self.__dAnt_Mesh_Fine["size"] = "Fine"
 
         self.__dAnt_Runt = {
             "parallel":         self.__cf.data["parameters"]["runt"]["parallel"],
@@ -691,13 +695,13 @@ class Natalie:
             fTmp_Area   = dTmp_Ant["substrate"]["l"] * dTmp_Ant["substrate"]["w"]
 
             #   STEP 10: Get left fitness
-            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.15
+            fTmp_Left   = ( dTmp_Fit["lower"]["total"] ) * 0.4
 
             #   STEP 11: Get center firness
-            fTmp_Mid    = ( dTmp_Fit["desired"]["total"] ) * 0.7
+            fTmp_Mid    = ( dTmp_Fit["desired"]["total"] ) * 0.5
 
             #   STEP 12: Get right fitness
-            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.15
+            fTmp_Right  = ( dTmp_Fit["upper"]["total"] ) * 0.1
 
             #   STEP 13: Get total area fitness
             fTmp_Area   = fTmp_Area / fOriginal_Area
@@ -709,13 +713,12 @@ class Natalie:
             fTmp_Fitness    = cp.deepcopy( fTmp_Area )
 
             if ( fTmp_Area < 0.55 ):
-                fTmp_Fitness    = 0.5
                 
-                fTmp_Fitness    = ( 0.3 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.5 * fTmp_Freq_Tot )  + ( 0.9 * fTmp_Fitness )
+                fTmp_Fitness    = cp.deepcopy( fTmp_Freq_Tot )
 
             else:
-                fTmp_Fitness    = ( 0.3 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.325 * fTmp_Freq_Tot )  + ( 1.4 * fTmp_Fitness )
-                fTmp_Fitness    = min( 200.0, fTmp_Fitness )
+
+                fTmp_Fitness    = ( 0.25 * fTmp_Fitness * fTmp_Freq_Tot ) + ( 0.35 * fTmp_Freq_Tot )  + ( 1.4 * fTmp_Fitness )
 
             #   STEP 16: Check if hard data provided
             if ("hard" in dTmp_Fit):
@@ -3111,7 +3114,7 @@ class Natalie:
             print("Natalie (tro-Primary) {" + Helga.time() + "} - Simulating starting antenna geometry")
 
         #   STEP 7: Outsource - Simulate center
-        self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=sDir, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+        self.__dAnt_Center  = Matthew.getPatch_Default(name="center", dir=sDir, substrate=self.__dAnt_Substrate, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh_Fine, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
         
         #   STEP 8: Setup - Center geometry
         dBest_Geo           = cp.deepcopy(self.__dAnt_Center)
@@ -3157,7 +3160,7 @@ class Natalie:
 
                 #   STEP 16: User output
                 if (self.bShowOutput):
-                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas")
+                    print("\n\t{" + Helga.time() + "} - Simulating " + str(iTmp_Candidates) + " candidate antennas \t\t~ Low Fidelity")
 
                 #   STEP 17: Simulate antennas
                 lTmp_Fitness    = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
@@ -3202,18 +3205,58 @@ class Natalie:
             #   STEP 29: Outsource - Candidate evaluation
             iTmp_BestIndex  = self.__getCandidate_Best__(lFitness)
 
-            #   STEP 30: Set new best candidate
-            dBest_Geo   = lCandidates[iTmp_BestIndex]
-            dBest_Fit   = lFitness[iTmp_BestIndex]
+            #   region STEP 30->41: High-fidelity validation
 
-            #   STEP 31: Check - Save status
+            #   STEP 30: Get best candidate
+            lTmp_Candidates_Best    = [ lCandidates[iTmp_BestIndex] ]
+
+            #   STEP 31: User output
+            if (self.bShowOutput):
+                print("\t{" + Helga.time() + "} - Simulating candidate antenna #" + str(iTmp_BestIndex) + "\t\t~ High Fidelity\t\t~ ", end="")
+
+            #   STEP 32: Simulate best candidate with higher fidelity
+            lTmp_Fitness_Best       = Matthew.simulateCandidates_Json(dir=sDir, ant=lTmp_Candidates_Best, frequency=self.__dAnt_Frequency, mesh=self.__dAnt_Mesh_Fine, runt=self.__dAnt_Runt, fitness=self.__dAnt_Fitness)
+
+            #   STEP 33: Evaluate overall fitness of best with higher fidelity
+            lTmp_Fitness_Best       = self.__getFitness__(ant=lTmp_Candidates_Best, fitness=lTmp_Fitness_Best)
+
+            #   STEP 34: Check if the higher fidelity is better
+            if (lTmp_Fitness_Best[0]["final"] < lFitness[iTmp_BestIndex]["final"]):
+                #   STEP 35: Set best as higher fidelity version
+                dBest_Geo   = lTmp_Candidates_Best[0]
+                dBest_Fit   = lTmp_Fitness_Best[0]
+
+                #   STEP 36: User output
+                if (self.bShowOutput):
+                    print("!")
+
+            #   STEP 37: Not higher - Check if improvement
+            elif (lTmp_Fitness_Best[0]["final"] < dBest_Fit["final"]):
+                #   STEP 38: Set best as higher fidelity version
+                dBest_Geo   = lTmp_Candidates_Best[0]
+                dBest_Fit   = lTmp_Fitness_Best[0]
+                
+                #   STEP 39: User output
+                if (self.bShowOutput):
+                    print(".")
+
+            #   STEP 40: Bad joo joo
+            else:
+                #   STEP 41: User output
+                if (self.bShowOutput):
+                    print("x")
+
+            #
+            #   endregion
+
+            #   STEP 42: Check - Save status
             if (bSave):
-                #   STEP 32: Outsource - Continuous save
+                #   STEP 43: Outsource - Continuous save
                 self.__saveData__(dir=sDir, bestGeo=dBest_Geo, bestFit=dBest_Fit, candidates=lCandidates, fitness=lFitness)
 
-            #   STEP 33: Check - Culling status
+            #   STEP 44: Check - Culling status
             if (bCull):
-                #   STEP 34: Outsource - Cull the weak :)
+                #   STEP 44: Outsource - Cull the weak :)
                 self.__cullData__(data=lFitness, spare=iTmp_BestIndex, num=self.__iTRO_Candidates)
 
             #   region STEP 35->47: Region Update
@@ -3229,7 +3272,7 @@ class Natalie:
 
                 #   STEP 38: User output
                 if (self.bShowOutput):
-                    print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region -> " + str(iTmp_Region))
+                    print("\t{" + Helga.time() + "} - Iteration (" + str(i + 1) + "/" + str(iIterations) + ") : Increasing region \t-> " + str(iTmp_Region))
 
                     dHold = lFitness[self.__iTRO_Candidates]
                     print("\t\t-Initial:",  "area=" + str(round(dHold["area"] * 100.0, 3)), "freq=" + str(round(dHold["freq"] * 100.0, 3)), "final=" + str(round(dHold["final"] * 100.0, 3)), sep="\t")
@@ -3242,10 +3285,10 @@ class Natalie:
                 #   STEP 40: Check if region too small
                 if (iRegion > 0):
                     #   STEP 41: check if region greater than starting region and two consecutive reductions
-                    if ( (iReductions >= 2) and (iRegion > 3) ):
+                    if ( (iReductions >= 3) and (iRegion > 4) ):
                         #   STEP 42: Reset - Number of reductions and region
                         iReductions = 0
-                        iRegion     = max( 3, iRegion - self.__iTRO_Region )
+                        iRegion     = max( 4, iRegion - self.__iTRO_Region )
 
                     #   STEP 42: Not consecutive reductions
                     else:
@@ -3668,7 +3711,6 @@ if (__name__ == "__main__"):
 
         nat.optimizeAntenna(primary="tro", secondary="tro", surrogate=True)
 
-        input("\t> Continue")
 
 #
 #endregion

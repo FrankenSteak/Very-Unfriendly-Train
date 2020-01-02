@@ -34,7 +34,7 @@
             "1":        "size",
 
             "wire radius":  0.001,
-            "size":         "Fine"
+            "size":         "Coarse"
         },
         "runt":
         {
@@ -71,8 +71,8 @@
             "secondary iterations":     15,
             "grace iterations":         3,
 
-            "candidates":               10,
-            "secondary candidates":     10,
+            "candidates":               8,
+            "secondary candidates":     8,
 
             "algorithm region":         5,
             "surrogate region":         4,
