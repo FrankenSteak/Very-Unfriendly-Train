@@ -322,7 +322,7 @@ class Hermione:
                 sarah       = Sarah()
 
                 #   STEP 28: Outsource and return
-                return sarah.trainSurrogate(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["optimizer"], optimizer=eOptimizer)
+                return sarah.trainSurrogate(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["password"], optimizer=eOptimizer)
 
         #   STEP 29: Unidentified optimizer - Error handling
         print("Initial error: ", eOptimizer)
