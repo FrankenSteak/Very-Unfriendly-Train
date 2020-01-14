@@ -622,12 +622,6 @@ class Sarah:
             "scalar":       dPsoParams["scalar"],
             "surrogate":    surrogate
         }
-        
-        print()
-        print()
-        Helga.print2DArray(swarm.lBestSolution)
-        print()
-        print()
 
         #   STEP 27: Check that iAcc > 0
         if (iAcc <= 0):
