@@ -760,6 +760,7 @@ class Sarah:
             #   STEP 16: Iterate through candidates
             for j in range(0, dPSO_Params["candidates"]):
                 #   STPE 17: Get particle fitness
+                vSwarm.lParticles[j].lCurrPosition = self.__limit_candidate_to_trust_region__(candidate=vSwarm.lParticles[j].lCurrPosition)
                 lFitness.append( vSRG.getPointOutput( vSwarm.lParticles[j].lCurrPosition ) )
 
             #   STEP 18: Update swarm fitness

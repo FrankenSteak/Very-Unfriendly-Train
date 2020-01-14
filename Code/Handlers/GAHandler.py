@@ -293,11 +293,32 @@ class SpongeBob:
                         #   STEP 16: Modify value using region and scalar
                         lTmp[i] = rn.gauss(kwargs["initial"][i], kwargs["params"]["scalar"] * kwargs["region"])
 
+                        #   STEP 17: Check if value above upper limit
+                        if (lTmp[i] > 1.0):
+                            #   STEP 18: Limit value
+                            lTmp[i] = 1.0
+
+                        #   STEP 19: Check if value below lower limit
+                        if (lTmp[i] < -1.0):
+                            #   STEP 20: Limit value
+                            lTmp[i] = -1.0
 
                     else:
-                        #   STEP 18: Iterate through list
+                        #   STEP 21: Iterate through list
                         for j in range(0, len(lTmp[i])):
+                            #   STEP 22: Modify value using region and sacalar
                             lTmp[i][j] = rn.gauss(kwargs["initial"][i][j], kwargs["params"]["scalar"] * kwargs["region"])
+                            
+                            #   STEP 23: Check if value above upper limit
+                            if (lTmp[i][j] > 1.0):
+                                #   STEP 24: Limit value
+                                lTmp[i][j] = 1.0
+
+                            #   STEP 25: Check if value below lower limit
+                            if (lTmp[i][j] < -1.0):
+                                #   STEP 26: Limit value
+                                lTmp[i][j] = -1.0
+
 
                 #   STEP 22: Append new candidate to output list
                 lCandidates.append(lTmp)
@@ -782,6 +803,81 @@ class SpongeBob:
 
         #   STEP ??: Return
         return dOut
+
+    #
+    #   endregion
+
+    #   region Back-end: Other
+
+    def __limit_candidate_to_trust_region__(self, **kwargs) -> list:
+        """
+            Description:
+
+                Limits the provided candidate to the range of -1 and 1.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Args:
+            
+                + candidate     = ( list ) The candidate to be adjusted
+                    ~ Required
+            
+            |\n
+
+            Returns:
+
+                + dictionary        = ( dict ) A dict instance containing
+                    ~ surrogate     = ( vars ) The trained surrogate
+                    ~ iterations    = ( int ) The training iterations
+                    ~ scalar        = ( float ) The surrogate intstance's scalar
+        """
+
+        #   region STEP 0->1: Error handling
+
+        #   STEP 0: Check if candidate arg passed
+        if ("candidate" not in kwargs):
+            #   STEP 1: Error handling
+            raise Exception("An error occured in Sarah.__limit_candidate_to_trust_region__() -> Step 0: No candidate arg passed")
+
+        #
+        #   endregion
+        
+        #   STEP 2: Local variables
+        lCandidate                  = kwargs["candidate"]
+
+        #   STEP 3: Loop through candidate
+        for i in range(0, len(lCandidate)):
+            #   STEP 4: Check if single data point
+            if (type(lCandidate[i]) == float):
+                #   STEP 5: Check if value over limit
+                if (lCandidate[i] > 1.0):
+                    #   STEP 6: Limit value
+                    lCandidate[i] = 1.0
+                
+                #   STEP 7: Check if value below lower limit
+                elif (lCandidate[i] < -1.0):
+                    #   STEP 8: Limit value
+                    lCandidate[i] = -1.0
+
+            else:
+                #   STEP 9: Loop through data point
+                for j in range(0, len(lCandidate[i])):
+                    #   STEP 10: Check if value over upper limit
+                    if (lCandidate[i][j] > 1.0):
+                        #   STEP 11: Limit value
+                        lCandidate[i][j] = 1.0
+                    
+                    #   STEP 12: Check if value below lower limit
+                    elif (lCandidate[i][j] < -1.0):
+                        #   STEP 13: Limit value
+                        lCandidate[i][j] = -1.0
+
+        #   STEP 14: Return
+        return lCandidate
 
     #
     #   endregion
