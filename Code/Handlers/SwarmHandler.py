@@ -273,13 +273,13 @@ class Sarah:
                     #   STEP 7: Check if single data point
                     if (type(lTmp[i]) == float):
                         #   STEP 8: Set value
-                        lTmp[i] = rn.gauss(0.0, kwargs["params"]["scalar"])
+                        lTmp[i] = rn.uniform(-1.0, 1.0)
 
                     else:
                         #   STEP 9: Iterate through list
                         for j in range(0, len(lTmp[i])):
                             #   STEP 10: Set value
-                            lTmp[i][j] = rn.gauss(0.0, kwargs["params"]["scalar"])
+                            lTmp[i][j] = rn.uniform(-1.0, 1.0)
 
                 #   STEP 11: Append the candidate to the output list
                 lCandidates.append(lTmp)
@@ -475,7 +475,6 @@ class Sarah:
                     ~ surrogate     = ( vars ) The trained surrogate
                     ~ iterations    = ( int ) The training iterations
                     ~ scalar        = ( float ) The surrogate intstance's scalar
-
         """
 
         #   STEP 0: Local variables
@@ -575,6 +574,7 @@ class Sarah:
             #   STEP 6: Iterate through all particles
             for j in range(0, dPsoParams["candidates"]):
                 #   STEP 7: Append particle to list
+                swarm.lParticles[j].lCurrPosition = self.__limit_candidate_to_trust_region__(candidate=swarm.lParticles[j].lCurrPosition)
                 lCandidates.append(swarm.lParticles[j].lCurrPosition)
 
             #   STEP 8: Get updated fitness values
@@ -608,7 +608,6 @@ class Sarah:
 
         #   STEP 23: User Output
         if (self.bShowOutput):
-
             #   STEP 25: Print output
             print("\tSarah (train-srg-pso) {" + Helga.time() + "} - Particle-Swarm Optimization Unsuccessful")
             print("\t\tTotal iterations: " + str(i))
@@ -624,6 +623,11 @@ class Sarah:
             "surrogate":    surrogate
         }
         
+        print()
+        print()
+        Helga.print2DArray(swarm.lBestSolution)
+        print()
+        print()
 
         #   STEP 27: Check that iAcc > 0
         if (iAcc <= 0):
@@ -786,6 +790,81 @@ class Sarah:
         #   STEP ??: Return
         return {}
         
+    #
+    #   endregion
+    
+    #   region Back-End: Other
+
+    def __limit_candidate_to_trust_region__(self, **kwargs) -> list:
+        """
+            Description:
+
+                Limits the provided candidate to the range of -1 and 1.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Args:
+            
+                + candidate     = ( list ) The candidate to be adjusted
+                    ~ Required
+            
+            |\n
+
+            Returns:
+
+                + dictionary        = ( dict ) A dict instance containing
+                    ~ surrogate     = ( vars ) The trained surrogate
+                    ~ iterations    = ( int ) The training iterations
+                    ~ scalar        = ( float ) The surrogate intstance's scalar
+        """
+
+        #   region STEP 0->1: Error handling
+
+        #   STEP 0: Check if candidate arg passed
+        if ("candidate" not in kwargs):
+            #   STEP 1: Error handling
+            raise Exception("An error occured in Sarah.__limit_candidate_to_trust_region__() -> Step 0: No candidate arg passed")
+
+        #
+        #   endregion
+        
+        #   STEP 2: Local variables
+        lCandidate                  = kwargs["candidate"]
+
+        #   STEP 3: Loop through candidate
+        for i in range(0, len(lCandidate)):
+            #   STEP 4: Check if single data point
+            if (type(lCandidate[i]) == float):
+                #   STEP 5: Check if value over limit
+                if (lCandidate[i] > 1.0):
+                    #   STEP 6: Limit value
+                    lCandidate[i] = 1.0
+                
+                #   STEP 7: Check if value below lower limit
+                elif (lCandidate[i] < -1.0):
+                    #   STEP 8: Limit value
+                    lCandidate[i] = -1.0
+
+            else:
+                #   STEP 9: Loop through data point
+                for j in range(0, len(lCandidate[i])):
+                    #   STEP 10: Check if value over upper limit
+                    if (lCandidate[i][j] > 1.0):
+                        #   STEP 11: Limit value
+                        lCandidate[i][j] = 1.0
+                    
+                    #   STEP 12: Check if value below lower limit
+                    elif (lCandidate[i][j] < -1.0):
+                        #   STEP 13: Limit value
+                        lCandidate[i][j] = -1.0
+
+        #   STEP 14: Return
+        return lCandidate
+
     #
     #   endregion
 
