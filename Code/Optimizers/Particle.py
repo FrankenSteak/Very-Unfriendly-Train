@@ -44,7 +44,7 @@ class UwU:
 
         #   region STEP 1.1: Bools
 
-        self.__bAllowTesting        = False# self.__cf.data["parameters"]["allow testing"]
+        self.__bAllowTesting        = False
 
         #   endregion
 
