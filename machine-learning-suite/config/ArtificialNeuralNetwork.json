@@ -1,0 +1,213 @@
+{
+  "parameters": {
+    "items": 14,
+
+    "0": "allow testing",
+    "1": "show output",
+    "2": "activation function",
+    "3": "weight range",
+    "4": "learning",
+
+    "5": "accuracy margin",
+    "6": "accuracy sample size",
+    "7": "fitness sample size",
+
+    "8": "hidden details",
+    "9": "output details",
+
+    "10": "momentum",
+    "11": "training methods",
+    "12": "children",
+    "13": "bias",
+
+    "allow testing": false,
+    "show output": false,
+
+    "activation function": 2,
+
+    "weight range": 1.0,
+    "learning": 0.05,
+
+    "accuracy margin": 0.09,
+    "accuracy sample size": 150,
+    "fitness sample size": 15,
+
+    "hidden details": {
+      "items": 3,
+
+      "0": "is shallow",
+      "1": "probabilities",
+      "2": "width",
+
+      "is shallow": true,
+
+      "probabilities": {
+        "1": 0.03,
+        "2": 0.8,
+        "3": 0.17
+      },
+      "width": {
+        "no change": 0.6,
+        "decrease": 0.35,
+        "increase": 0.05
+      }
+    },
+    "output details": {
+      "items": 3,
+
+      "default": 6,
+      "c": {
+        "lower": -0.15,
+        "center": 2.0,
+        "upper": -0.15
+      },
+      "boundary": {
+        "lower": -1.2,
+        "upper": 1.2
+      }
+    },
+
+    "momentum": {
+      "items": 2,
+
+      "0": "momentum scalar",
+      "1": "is active",
+
+      "momentum scalar": 0.001,
+      "is active": true
+    },
+    "bias": {
+      "items": 3,
+
+      "0": "use bias",
+      "1": "clear bias",
+      "2": "bias start value",
+
+      "use bias": true,
+      "clear bias": false,
+      "bias value": 1.0
+    },
+    "training methods": {
+      "items": 1,
+
+      "0": "def",
+
+      "def": {
+        "items": 7,
+
+        "0": "epochs",
+        "1": "batch size",
+        "2": "acc requirement",
+        "3": "weight decay",
+        "4": "lambda1",
+        "5": "lambda2",
+        "6": "drop out",
+
+        "epochs": 30,
+        "batch size": 20,
+        "acc requirement": 0.97,
+        "weight decay": 0.001,
+        "lambda1": 0.01,
+        "lambda2": 0.005,
+        "drop out": {
+          "items": 2,
+
+          "0": "input drop out",
+          "1": "hidden drop out",
+
+          "input drop out": 0.2,
+          "hidden drop out": 0.5
+        }
+      }
+    },
+    "children": {
+      "items": 3,
+      "0": "is fertile",
+      "1": "is classifier",
+      "2": "is child",
+      "3": "generation iterations",
+
+      "is fertile": false,
+      "is classifier": false,
+      "is child": false,
+      "generation iterations": 15
+    }
+  },
+  "scalars": {
+    "items": 4,
+
+    "0": "weight range",
+    "1": "learning",
+    "2": "momentum",
+    "3": "training methods",
+
+    "weight range": {
+      "region": 1.0,
+      "range": {
+        "positive": 5.0,
+        "negative": 5.0
+      }
+    },
+    "learning": {
+      "region": 0.5,
+      "range": {
+        "positive": 0.01,
+        "negative": 0.01
+      }
+    },
+    "momentum": {
+      "items": 1,
+
+      "0": "momentum scalar",
+
+      "momentum scalar": {
+        "region": 0.5,
+        "range": {
+          "positive": 0.001,
+          "negative": 0.0003
+        }
+      }
+    },
+    "training methods": {
+      "items": 1,
+      "0": "def",
+
+      "def": {
+        "items": 3,
+        "0": "epochs",
+        "1": "batch size",
+        "2": "acc requirement",
+
+        "epochs": {
+          "region": 0.0,
+          "range": {
+            "positive": 40,
+            "negative": 15
+          },
+          "type": "int"
+        },
+        "batch size": {
+          "region": 0.0,
+          "range": {
+            "positive": 5,
+            "negative": 10
+          },
+          "type": "int"
+        },
+        "acc requirement": {
+          "region": 0.1,
+          "range": {
+            "positive": 0.01,
+            "negative": 0.285
+          }
+        }
+      }
+    }
+  },
+  "menus": {
+    "items": 0
+  },
+  "help": {
+    "items": 0
+  }
+}

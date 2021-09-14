@@ -1,47 +1,42 @@
 {
-    "parameters":
-    {
-        "items": 4,
+  "parameters": {
+    "items": 4,
 
-        "0":    "allow testing",
-        "1":    "show output",
+    "0": "allow testing",
+    "1": "show output",
 
-        "2":    "surrogates",
-        "3":    "bools",
+    "2": "surrogates",
+    "3": "bools",
 
-        "allow testing": false,
-        "show output": false,
-        
-        "surrogates":
-        {
-            "items": 3,
+    "allow testing": false,
+    "show output": false,
 
-            "0":    "min",
-            "1":    "max",
-            "2":    "accuracy requirement",
+    "surrogates": {
+      "items": 3,
 
-            "min":  6,
-            "max":  10,
-            "accuracy requirement": 0.75
-        },
-        "bools":
-        {
-            "items": 3,
-            "0": "rand surrogate params",
-            "1": "rand surrogate seed",
-            "2": "rand surrogate",
-    
-            "rand surrogate params":    false,
-            "rand surrogate seed":      true,
-            "rand surrogate":           false
-        }
+      "0": "min",
+      "1": "max",
+      "2": "accuracy requirement",
+
+      "min": 6,
+      "max": 10,
+      "accuracy requirement": 0.75
     },
-    "menus":
-    {
-        "items": 0
-    },
-    "help":
-    {
-        "items": 0
+    "bools": {
+      "items": 3,
+      "0": "rand surrogate params",
+      "1": "rand surrogate seed",
+      "2": "rand surrogate",
+
+      "rand surrogate params": false,
+      "rand surrogate seed": true,
+      "rand surrogate": false
     }
+  },
+  "menus": {
+    "items": 0
+  },
+  "help": {
+    "items": 0
+  }
 }

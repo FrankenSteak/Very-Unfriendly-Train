@@ -1,198 +1,159 @@
 {
-    "parameters":
-    {
-        "items": 3,
-        "0": "allow testing",
-        "1": "show output",
-        "2": "algorithms",
+  "parameters": {
+    "items": 3,
+    "0": "allow testing",
+    "1": "show output",
+    "2": "algorithms",
 
-        "allow testing":
-        {
-            "default": false
-        },
-        "show output":
-        {
-            "default": false
-        },
-        "algorithms":
-        {
-            "items": 1,
-            "0": "tro",
+    "allow testing": {
+      "default": false
+    },
+    "show output": {
+      "default": false
+    },
+    "algorithms": {
+      "items": 1,
+      "0": "tro",
 
-            "tro":
-            {
-                "items": 2,
+      "tro": {
+        "items": 2,
 
-                "0":    "training",
-                "1":    "mapping",
+        "0": "training",
+        "1": "mapping",
 
-                "training":
-                {
-                    "items": 6,
+        "training": {
+          "items": 6,
 
-                    "0":    "iterations",
-                    "1":    "candidates",
-                    "2":    "region",
-                    "3":    "candidate scalar",
-                    "4":    "acc check point",
-                    "5":    "acc requirement",
+          "0": "iterations",
+          "1": "candidates",
+          "2": "region",
+          "3": "candidate scalar",
+          "4": "acc check point",
+          "5": "acc requirement",
 
-                    "iterations":
-                    {
-                        "items": 2,
-                        "0": "algorithm",
-                        "1": "back propagation",
+          "iterations": {
+            "items": 2,
+            "0": "algorithm",
+            "1": "back propagation",
 
-                        "algorithm":
-                        {
-                            "default": 15
-                        },
-                        "back propagation":
-                        {
-                            "default": 40
-                        }
-                    },
-                    "candidates":
-                    {
-                        "default": 25
-                    },
-                    "region":
-                    {
-                        "default": 5
-                    },
-                    "candidate scalar":
-                    {
-                        "default": 1.0
-                    },
-                    "acc check point":
-                    {
-                        "default": 5
-                    },
-                    "acc requirement":
-                    {
-                        "default": 0.75
-                    }
-                },
-                "mapping":
-                {
-                    "items":    4,
-
-                    "0":    "candidates",
-                    "1":    "iterations",
-                    "2":    "region",
-                    "3":    "scalar",
-
-                    "candidates":       50,
-                    "iterations":       50,
-                    "region":           5,
-                    "scalar":           1.0
-
-                }
+            "algorithm": {
+              "default": 15
+            },
+            "back propagation": {
+              "default": 40
             }
+          },
+          "candidates": {
+            "default": 25
+          },
+          "region": {
+            "default": 5
+          },
+          "candidate scalar": {
+            "default": 1.0
+          },
+          "acc check point": {
+            "default": 5
+          },
+          "acc requirement": {
+            "default": 0.75
+          }
+        },
+        "mapping": {
+          "items": 4,
 
+          "0": "candidates",
+          "1": "iterations",
+          "2": "region",
+          "3": "scalar",
+
+          "candidates": 50,
+          "iterations": 50,
+          "region": 5,
+          "scalar": 1.0
         }
-    },
-    "scalars":
-    {
-        "items": 1,
-        "0": "algorithms",
-
-        "algorithms":
-        {
-            "items": 1,
-            "0": "tro",
-            
-            "tro":
-            {
-                "items": 6,
-                "0": "iterations",
-                "1": "candidates",
-                "2": "region",
-                "3": "candidate scalar",
-                "4": "acc check point",
-                "5": "acc requirement",
-
-                "iterations":
-                {
-                    "items": 2,
-                    "0": "algorithm",
-                    "1": "back propagation",
-
-                    "algorithm":
-                    {
-                        "use scalar": true,
-                        "scalar":
-                        {
-                            "region": 0.25,
-                            "range": 35
-                        }
-                    },
-                    "back propagation":
-                    {
-                        "use scalar": true,
-                        "scalar":
-                        {
-                            "region": 0.05,
-                            "range": 100
-                        }
-                    }
-                },
-                "candidates":
-                {
-                    "use scalar": true,
-                    "scalar":
-                    {
-                        "region": 0.35,
-                        "range": 50
-                    }
-                },
-                "region":
-                {
-                    "use scalar": true,
-                    "scalar": 
-                    {
-                        "region": 0.15,
-                        "range": 22
-                    }
-                },
-                "candidate scalar":
-                {
-                    "use scalar": true,
-                    "scalar":
-                    {
-                        "region": 0.9,
-                        "range": 1.0
-                    }
-                },
-                "acc check point":
-                {
-                    "use scalar": true,
-                    "scalar":
-                    {
-                        "region": 0.04,
-                        "range": 50
-                    }
-                },
-                "acc requirement":
-                {
-                    "use scalar": true,
-                    "scalar":
-                    {
-                        "region": 0,
-                        "range": 0.2
-                    }
-                }
-            }
-
-            
-        }
-    },
-    "menus":
-    {
-        "items": 0
-    },
-    "help":
-    {
-        "items": 0
+      }
     }
+  },
+  "scalars": {
+    "items": 1,
+    "0": "algorithms",
+
+    "algorithms": {
+      "items": 1,
+      "0": "tro",
+
+      "tro": {
+        "items": 6,
+        "0": "iterations",
+        "1": "candidates",
+        "2": "region",
+        "3": "candidate scalar",
+        "4": "acc check point",
+        "5": "acc requirement",
+
+        "iterations": {
+          "items": 2,
+          "0": "algorithm",
+          "1": "back propagation",
+
+          "algorithm": {
+            "use scalar": true,
+            "scalar": {
+              "region": 0.25,
+              "range": 35
+            }
+          },
+          "back propagation": {
+            "use scalar": true,
+            "scalar": {
+              "region": 0.05,
+              "range": 100
+            }
+          }
+        },
+        "candidates": {
+          "use scalar": true,
+          "scalar": {
+            "region": 0.35,
+            "range": 50
+          }
+        },
+        "region": {
+          "use scalar": true,
+          "scalar": {
+            "region": 0.15,
+            "range": 22
+          }
+        },
+        "candidate scalar": {
+          "use scalar": true,
+          "scalar": {
+            "region": 0.9,
+            "range": 1.0
+          }
+        },
+        "acc check point": {
+          "use scalar": true,
+          "scalar": {
+            "region": 0.04,
+            "range": 50
+          }
+        },
+        "acc requirement": {
+          "use scalar": true,
+          "scalar": {
+            "region": 0,
+            "range": 0.2
+          }
+        }
+      }
+    }
+  },
+  "menus": {
+    "items": 0
+  },
+  "help": {
+    "items": 0
+  }
 }

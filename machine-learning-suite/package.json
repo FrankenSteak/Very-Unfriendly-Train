@@ -1,0 +1,13 @@
+{
+  "name": "machine-learning-suite",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prettier": "prettier --write '**/*.json'"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "prettier": "^2.4.0"
+  }
+}

@@ -1,119 +1,107 @@
 {
-    "parameters":
-    {
-        "items":    6,
+  "parameters": {
+    "items": 6,
 
-        "0":        "show output",
-        "1":        "frequency",
-        "2":        "mesh",
-        "3":        "runt", 
-        "4":        "trust region",
-        "5":        "nelder mead",
+    "0": "show output",
+    "1": "frequency",
+    "2": "mesh",
+    "3": "runt",
+    "4": "trust region",
+    "5": "nelder mead",
 
-        "show output":      true, 
+    "show output": true,
 
-        "frequency":
-        {
-            "items": 4,
-            
-            "0": "lower frequency offset",
-            "1": "upper frequency offset",
-            "2": "samples",
-            "3": "accuracy check samples",
+    "frequency": {
+      "items": 4,
 
-            "lower frequency offset":   0.002e9,
-            "upper frequency offset":   0.002e9,
-            "samples":                  7,
-            "accuracy check samples":   7
-        },
-        "mesh":
-        {
-            "items":    2,
+      "0": "lower frequency offset",
+      "1": "upper frequency offset",
+      "2": "samples",
+      "3": "accuracy check samples",
 
-            "0":        "wire radius",
-            "1":        "size",
-
-            "wire radius":  0.001,
-            "size":         "Coarse"
-        },
-        "runt":
-        {
-            "items":    3,
-
-            "0":        "parallel",
-            "1":        "run",
-            "2":        "interactive",
-
-            "parallel":     true,
-            "run":          true,
-            "interactive":  false
-        },
-
-        "trust region":
-        {
-            "items":    10,
-
-            "0":        "primary iterations",
-            "1":        "secondary iterations",
-            "2":        "grace iterations",
-
-            "3":        "candidates",
-            "4":        "secondary candidates",
-            
-            "5":        "algorithm region",
-            "6":        "surrogate region",
-            
-            "7":        "primary region scalar",
-            "8":        "secondary region scalar",
-            "9":        "early exit conditions",
-
-            "primary iterations":       45,
-            "secondary iterations":     15,
-            "grace iterations":         3,
-
-            "candidates":               8,
-            "secondary candidates":     8,
-
-            "algorithm region":         5,
-            "surrogate region":         4,
-
-            "primary region scalar":    0.5,
-            "secondary region scalar":  0.01,
-
-            "early exit conditions":
-            {
-                "items":    2,
-
-                "0":        "area",
-                "1":        "frequency",
-                "2":        "fitness",
-
-                "area":         0.55,
-                "frequency":    0.15,
-                "fitness":      0.35
-            }
-            
-        },
-        "nelder mead":
-        {
-            "items":    0,
-
-            "0":"primary iterations",
-            "1":"secondary iterations",
-            "2":"time"
-
-        }
+      "lower frequency offset": 0.002e9,
+      "upper frequency offset": 0.002e9,
+      "samples": 7,
+      "accuracy check samples": 7
     },
-    "scalars":
-    {
-        "items": 0
+    "mesh": {
+      "items": 2,
+
+      "0": "wire radius",
+      "1": "size",
+
+      "wire radius": 0.001,
+      "size": "Coarse"
     },
-    "menus":
-    {
-        "items": 0
+    "runt": {
+      "items": 3,
+
+      "0": "parallel",
+      "1": "run",
+      "2": "interactive",
+
+      "parallel": true,
+      "run": true,
+      "interactive": false
     },
-    "help":
-    {
-        "items": 0
+
+    "trust region": {
+      "items": 10,
+
+      "0": "primary iterations",
+      "1": "secondary iterations",
+      "2": "grace iterations",
+
+      "3": "candidates",
+      "4": "secondary candidates",
+
+      "5": "algorithm region",
+      "6": "surrogate region",
+
+      "7": "primary region scalar",
+      "8": "secondary region scalar",
+      "9": "early exit conditions",
+
+      "primary iterations": 45,
+      "secondary iterations": 15,
+      "grace iterations": 3,
+
+      "candidates": 8,
+      "secondary candidates": 8,
+
+      "algorithm region": 5,
+      "surrogate region": 4,
+
+      "primary region scalar": 0.5,
+      "secondary region scalar": 0.01,
+
+      "early exit conditions": {
+        "items": 2,
+
+        "0": "area",
+        "1": "frequency",
+        "2": "fitness",
+
+        "area": 0.55,
+        "frequency": 0.15,
+        "fitness": 0.35
+      }
+    },
+    "nelder mead": {
+      "items": 0,
+
+      "0": "primary iterations",
+      "1": "secondary iterations",
+      "2": "time"
     }
+  },
+  "scalars": {
+    "items": 0
+  },
+  "menus": {
+    "items": 0
+  },
+  "help": {
+    "items": 0
+  }
 }
