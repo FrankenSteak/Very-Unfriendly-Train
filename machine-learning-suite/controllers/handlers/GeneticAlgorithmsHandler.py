@@ -10,6 +10,7 @@ from config.Config import Conny
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as ga
 from controllers.optimizers.GeneticAlgorithm import Garry
 from helpers.ApplicationHelper import ApplicationHelper
+from helpers.ArrayHelper import ArrayHelper
 #endregion
 
 class SpongeBob:
@@ -225,7 +226,7 @@ class SpongeBob:
             #   STEP 11: Iterate through the required number of candidates
             for _ in range(0, kwargs["params"]["candidates"]):
                 #   STEP 12: Get temporary candidate
-                lTmp = ApplicationHelper.getShape(kwargs["initial"])
+                lTmp = ArrayHelper.getShape(kwargs["initial"])
 
                 #   STEP 13: Iterate through candidate
                 for i in range(0, len(lTmp)):

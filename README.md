@@ -21,12 +21,13 @@
       - /controllers/handlers/OptimizationHandler.py
       - /controllers/optimizers/Swarms.py
       - /controllers/optimizers/GeneticAlgorithms.py
-      - /helpers/ActivationFunctions.py
-         - Ensure math functions work as expected
-      - /helpers/GeneralHelpers.py
-         - Renamed to `ApplicationHelper.py`
 
 # Documentation
    - /config/Config.py
    - /static/Enums.py
       - Been removed so that files` code is more centralized to those files
+   - /helpers/ActivationFunctions.py
+      - Ensure math functions work as expected
+   - /helpers/GeneralHelpers.py
+      - Renamed to `ApplicationHelper.py`
+      - Expaned to `ApplicationHelper.py`,  `ArrayHelper.py`,  and `MathHelper.py`

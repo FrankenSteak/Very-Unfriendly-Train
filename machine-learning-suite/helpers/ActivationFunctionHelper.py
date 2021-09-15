@@ -19,521 +19,165 @@ class ActivationFunctionHelper:
 
     def __init__(self):
         #   --- Setup ---
-        self.__cf = Conny()
-        self.__cf.load("ActivationFunctions.json")
+        self._config = Conny()
+        self._config.load("ActivationFunctions.json")
         #   --- Linear ---
-        self.__fC_linear            = self.__cf.data["parameters"]["linear"]["c"]["default"]
+        self.linear_c = self._config.data["linear"]["c"]["default"]
+        self.linear_m = self._config.data["linear"]["m"]["default"]
         #   --- Logistic ---
-        self.__fC_logisitic         = self.__cf.data["parameters"]["logistic"]["c"]["default"]
-        #   --- tanH ---
-        self.__fC_tanh              = self.__cf.data["parameters"]["tanh"]["c"]["default"]
-        self.__fM_tanh              = self.__cf.data["parameters"]["tanh"]["magnitude"]["default"]
+        self.logistic_c = self._config.data["logistic"]["c"]["default"]
+        self.logistic_k = self._config.data["logistic"]["k"]["default"]
+        self.logistic_max = self._config.data["logistic"]["max"]["default"]
+        #   --- tanh ---
+        self.tanh_c = self._config.data["tanh"]["c"]["default"]
+        self.tanh_k = self._config.data["tanh"]["k"]["default"]
+        self.tanh_m = self._config.data["tanh"]["m"]["default"]
         #   --- relU ---
-        self.__fC_relu              = self.__cf.data["parameters"]["relu"]["c"]["default"]
-        #   --- Leaky-relU ---
-        self.__fC_lRelu_Pos         = self.__cf.data["parameters"]["leaky relu"]["c"]["positive"]["default"]
-        self.__fC_lRelu_Neg         = self.__cf.data["parameters"]["leaky relu"]["c"]["negative"]["default"]
+        self.relu_boundary = self._config.data["relu"]["boundary"]["default"]
+        self.relu_lower_c = self._config.data["relu"]["lower_c"]["default"]
+        self.relu_lower_m = self._config.data["relu"]["lower_m"]["default"]
+        self.relu_upper_c = self._config.data["relu"]["upper_c"]["default"]
+        self.relu_upper_m = self._config.data["relu"]["upper_m"]["default"]
         #   --- elU ---
-        self.__fC_elu_lin           = self.__cf.data["parameters"]["elu"]["c"]["linear"]["default"]
-        self.__fC_elu_exp           = self.__cf.data["parameters"]["elu"]["c"]["exponential"]["default"]
+        self.elu_boundary = self._config.data["elu"]["boundary"]["default"]
+        self.elu_linear_c = self._config.data["elu"]["linear_c"]["default"]
+        self.elu_linear_m = self._config.data["elu"]["linear_m"]["default"]
+        self.elu_exponential_c = self._config.data["elu"]["exponential_c"]["default"]
+        self.elu_exponential_k = self._config.data["elu"]["exponential_k"]["default"]
+        self.elu_exponential_m = self._config.data["elu"]["exponential_m"]["default"]
         #   --- srelU ---
-        self.__fC_srelu_lower       = self.__cf.data["parameters"]["srelu"]["c"]["lower"]["default"]
-        self.__fC_srelu_center      = self.__cf.data["parameters"]["srelu"]["c"]["center"]["default"]
-        self.__fC_srelu_upper       = self.__cf.data["parameters"]["srelu"]["c"]["upper"]["default"]
-        self.__fBoundary_srelu_lower    = self.__cf.data["parameters"]["srelu"]["boundary"]["lower"]["default"]
-        self.__fBoundary_srelu_upper    = self.__cf.data["parameters"]["srelu"]["boundary"]["upper"]["default"]
-        #   --- Gaussian ---
-        self.__fC_gaussian          = self.__cf.data["parameters"]["gaussian"]["c"]["default"]
+        self.srelu_lower_boundary = self._config.data["srelu"]["lower_boundary"]["default"]
+        self.srelu_upper_boundary = self._config.data["srelu"]["upper_boundary"]["default"]
+        self.srelu_lower_c = self._config.data["srelu"]["lower_c"]["default"]
+        self.srelu_lower_m = self._config.data["srelu"]["lower_m"]["default"]
+        self.srelu_central_c = self._config.data["srelu"]["central_c"]["default"]
+        self.srelu_central_m = self._config.data["srelu"]["central_m"]["default"]
+        self.srelu_upper_c = self._config.data["srelu"]["upper_c"]["default"]
+        self.srelu_upper_m = self._config.data["srelu"]["upper_m"]["default"]
         #   --- Response ---
         return
 
     #
     #endregion
 
-    #region Front-End
-
-    #   region Front-End: Gets
-
-    def getActivation(self, _iIn: int, _fIn: float) -> float:
+    #region --- FE: Activation Functions ---
+    def activation_function(self, activation_function: int, x: float) -> float:
         """
+            ToDo
         """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check activation functions - Essentially a switch case
-        if (_iIn == 0):
-            return self.linear(_fIn)
-        elif (_iIn == 1):
-            return self.logistic(_fIn)
-        elif (_iIn == 2):
-            return self.tanH(_fIn)
-        elif (_iIn == 3):
-            return self.relu(_fIn)
-        elif (_iIn == 4):
-            return self.leakyRelu(_fIn)
-        elif (_iIn == 5):
-            return self.elu(_fIn)
-        elif (_iIn == 6):
-            return self.srelu(_fIn)
-        else:
-            #   STEP 3: Error handling
-            raise Exception("An error occured in ActivationFunctionHelper.getActivation() - > Step 2: Invalid activation function passed")
-
-    def getActivationD(self, _iIn: int, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check activation functions
-        if (_iIn == 0):
-            return self.linearD()
-        elif (_iIn == 1):
-            return self.logisticD(_fIn)
-        elif (_iIn == 2):
-            return self.tanHD(_fIn)
-        elif (_iIn == 3):
-            return self.reluD(_fIn)
-        elif (_iIn == 4):
-            return self.leakyReluD(_fIn)
-        elif (_iIn == 5):
-            return self.eluD(_fIn)
-        elif (_iIn == 6):
-            return self.sreluD(_fIn)
-        else:
-            #   STEP 3: Error handling
-            raise Exception("An error occured in ActivationFunctionHelper.getActivationD() -> Step 2: Invalid activation function passed")
-    
-    #
-    #   endregion
-    
-    #   region Front-End: Sets
-
-    def setFunction(self, **kwargs) -> None:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Be safe
-        try:
-            #   STEP 3: Check if function = linear
-            if (kwargs["function"] == 0):
-                #   STEP 4: Outsource
-                self.__setLinear(kwargs)
-
-            #   STEP 5: Check if function = logistic
-            elif (kwargs["function"] == 1):
-                #   STEP 6: Outsource
-                self.__setLogistic(kwargs)
-
-            #   STEP 7: Check if function = tanh
-            elif (kwargs["function"] == 2):
-                #   STEP 8: Outsource
-                self.__setTanh(kwargs)
-
-            #   STEP 9: Check if srelu
-            elif (kwargs["function"] == 6):
-                #   STEP 10: Outsource
-                self.__setSrelu__(kwargs)
-
-            #   STEP 11: Function not implemented
-            else:
-                #   STEP 12: Error handling
-                raise Exception("An error occured in ActivationFunctionHelper.setFunction() -> Step 9: That activation function isn't fully implemented yet")
-
-        except Exception as ex:
-            #   STEP 13: Error handling
-            print("Initial Error: ", ex)
-            raise Exception("An error occured in ActivationFunctionHelper.setFunction()")
-            
-        #   STEP 14: Return
-        return
-    
-    #
-    #   endregion
-
-    #   region Front-End: Linear
-
-    def linear(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Return
-        return _fIn * self.__fC_linear
-
-    def linearD(self) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Return
-        return self.__fC_linear
-
-    #
-    #   endregion
-
-    #   region Front-End: Logistic
-
-    def logistic(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-        fOut = 1.0 / (1.0 + mt.exp(-1.0 * self.__fC_logisitic * _fIn))
         
-        #   STEP 2: Return
-        return fOut
+        if (activation_function == 0):
+            return self.linear(x)
+        elif (activation_function == 1):
+            return self.logistic(x)
+        elif (activation_function == 2):
+            return self.tanh(x)
+        elif (activation_function == 3):
+            return self.relu(x)
+        elif (activation_function == 5):
+            return self.elu(x)
+        elif (activation_function == 6):
+            return self.srelu(x)
+        else:
+            raise Exception("An error occured in ActivationFunctionHelper.activation_function(): Invalid activation function passed")
 
-    def logisticD(self, _fIn: float) -> float:
+    def activation_function_derivative(self, activation_function: int, x: float) -> float:
         """
+            ToDo
         """
-
-        #   STEP 0: Local variables
-        fOut = 0.0
-
-        #   STEP 1: Setup - Local variables
-        fOut = self.logistic(_fIn)
-
-        #   STEP 2: Compute derivative
-        fOut = fOut * (1.0 - fOut)
-        fOut = self.__fC_logisitic * fOut
-
-        #   STEP 3: Return
-        return fOut
-
-    #
-    #   endregion
-
-    #   region Front-End: TanH
-
-    def tanH(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Return
-        return (self.__fM_tanh * np.tanh(self.__fC_tanh * _fIn))
-
-    def tanHD(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        fOut = 0.0
-
-        #   STEP 1: Setup - Local variables
-        fOut = self.tanH(_fIn)
         
-        #   STEP 2: Compute derivative
-        fOut = self.__fM_tanh * self.__fC_tanh * (1.0 - fOut * fOut)
-        
-        #   STEP 3: Return
-        return fOut
+        if (activation_function == 0):
+            return self.linear_derivative()
+        elif (activation_function == 1):
+            return self.logistic_derivative(x)
+        elif (activation_function == 2):
+            return self.tanh_derivative(x)
+        elif (activation_function == 3):
+            return self.relu_derivative(x)
+        elif (activation_function == 5):
+            return self.elu_derivative(x)
+        elif (activation_function == 6):
+            return self.srelu_derivative(x)
+        else:
+            raise Exception("An error occured in ActivationFunctionHelper.activation_function_derivative(): Invalid activation function passed")
     
     #
-    #   endregion
+    #endregion
 
-    #   region Front-End: Relu
+    #region --- FE: Linear ---
+    def linear(self, x: float) -> float:
+        return self.linear_m * x + self.linear_c
 
-    def relu(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check relu condition
-        if (_fIn > 0):
-            #   STEP 3: Return
-            return (self.__fC_relu * _fIn)
-        
-        else:
-            #   STEP 4: Return of the Return
-            return 0.0
-
-    def reluD(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check relu condition
-        if (_fIn > 0):
-            #   STEP 3: Return
-            return self.__fC_relu
-
-        else:
-            #   STEP 4: Return of the Return
-            return 0.0
-    
-    #
-    #   endregion
-    
-    #   region Front-End: Leaky-Relu
-    
-    def leakyRelu(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check Leaky Relu condition
-        if (_fIn > 0):
-            #   STEP 3: Return
-            return self.__fC_lRelu_Pos * _fIn
-        
-        else:
-            #   STEP 4: Return of the Return
-            return self.__fC_lRelu_Neg * _fIn
-
-    def leakyReluD(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check Leaky Relu condition
-        if (_fIn > 0):
-            #   STEP 3: Return
-            return self.__fC_lRelu_Pos
-
-        else:
-            #   STEP 4: Return of the Return
-            return self.__fC_lRelu_Neg
-
-    #
-    #   endregion
-
-    #   region Front-End: Elu
-
-    def elu(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check elu condition
-        if (_fIn > 0):
-            #   STEP 3: Return
-            return self.__fC_elu_lin * _fIn
-
-        else:
-            #   STEP 4: Return of the Return
-            return (self.__fC_elu_exp * (mt.exp(_fIn) - 1))
-
-    def eluD(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check elu condition
-        if (_fIn > 0):
-            #   STEP 3: Return
-            return self.__fC_elu_lin
-
-        else:
-            #   STEP 4: Return of the Return
-            return (self.elu(_fIn) - self.__fC_elu_exp)
-    
-    #
-    #   endregion
-
-    #   region Front-End: Srelu
-
-    def srelu(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        fOut = 0.0
-
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check srelu condition
-        if (_fIn <= self.__fBoundary_srelu_lower):
-            #   STEP 3: If under lower boundary
-            fOut = self.__fBoundary_srelu_lower
-            fOut = fOut + self.__fC_srelu_lower * (_fIn - fOut)
-
-        elif (_fIn >= self.__fBoundary_srelu_upper):
-            #   STEP 4: If above upper boundary
-            fOut = self.__fBoundary_srelu_upper
-            fOut = fOut + self.__fC_srelu_upper * (_fIn - fOut)
-
-        else:
-            #   STEP 5: If center
-            fOut = self.__fC_srelu_center * _fIn
-
-        #   STEP 6: Return
-        return fOut
-
-    def sreluD(self, _fIn: float) -> float:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check srelu condition
-        if (_fIn <= self.__fBoundary_srelu_lower):
-            #   STEP 3: If under lower boundary
-            return self.__fC_srelu_lower
-
-        elif (_fIn >= self.__fBoundary_srelu_upper):
-            #   STEP 4: If above upper boundary
-            return self.__fC_srelu_upper
-
-        else:
-            #   STEP 5: If center
-            return self.__fC_srelu_center
-
-    # 
-    #   endregion
+    def linear_derivative(self) -> float:
+        return self.linear_m
 
     #
     #endregion
 
-    #region Back-End
+    #region --- FE: Logistic ---
+    def logistic(self, x: float) -> float:
+        return 1.0 / (1.0 + mt.exp(-1.0 * self.logistic_c * x))
 
-    def __setLinear(self, _dData: dict) -> None:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check if c is specified
-        if ("c" in _dData):
-            #   STEP 3: Set c
-            self.__fC_linear = _dData["c"]
-
-        #   STEP 4: Return
-        return
-
-    def __setLogistic(self, _dData: dict) -> None:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: check if c is specified
-        if ("c" in _dData):
-            #   STEP 3: Set c
-            self.__fC_logisitic = _dData["c"]
-
-        #   STEP 4: Return
-        return
-
-    def __setTanh(self, _dData: dict) -> None:
-        """
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-
-        #   STEP 2: Check if c is specified
-        if ("c" in _dData):
-            #   STEP 3: Set c
-            self.__fC_tanh = _dData["c"]
-
-        #   STEP 4: Check if m is specified
-        if ("m" in _dData):
-            #   STEP 5: Set m
-            self.__fM_tanh = _dData["m"]
-
-        #   STEP 6: Return
-        return
-
-    def __setSrelu__(self, kwargs: dict) -> None:
-        """
-            Description:
-
-                Sets the variables for the srelu activation function.
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Arguments:
-
-                + c = ( dict ) A dictionary containing the gradient functions
-                    for the lower, center, and upper regions of the srelu
-                    activation function
-                    ~ Required
-
-                    ~ "lower":  ( float )
-                    ~ "center": ( float )
-                    ~ "upper":  ( float )
-
-                + boundary  = ( dict ) A dictionary containing the boundaries
-                    for the srelu activation function
-                    ~ Required
-
-                    ~ "lower":  ( float )
-                    ~ "upper":  ( float )
-
-
-        """
-
-        #   STEP 0: Local variables
-        #   STEP 1: Setup - Local variables
-        
-        #   region STEP 2->??: Error checking
-
-        #   STEP 2: CHeck if c arg passed
-        if ("c" not in kwargs):
-            #   STEP 3: Error handling
-            raise Exception("An error occured in ActivationFunctionHelper.__setSrelu__() -> Step 2: No c arg passed")
-
-        #   STEP 4: Check if boundary arg passed
-        if ("boundary" not in kwargs):
-            #   STEP 5: Error handling
-            raise Exception("An error occured in ActivationFunctionHelper.__setSrelu__() -> Step 4: No boundary arg passed")
-
-        #
-        #   endregion
-
-        #   STEP 6: Update - Class variables
-        self.__fC_srelu_lower           = kwargs["c"]["lower"]
-        self.__fC_srelu_center          = kwargs["c"]["center"]
-        self.__fC_srelu_upper           = kwargs["c"]["upper"]
-
-        self.__fBoundary_srelu_lower    = kwargs["boundary"]["lower"]
-        self.__fBoundary_srelu_upper    = kwargs["boundary"]["upper"]
-
-        #   STEP 7: Return
-        return
+    def logistic_derivative(self, x: float) -> float:
+        fOut = self.logistic(x)
+        return fOut * (1.0 - fOut)
 
     #
-    #   endregion
+    #endregion
 
+    #region --- FE: tanh ---
+    def tanh(self, x: float) -> float:
+        return self.tanh_k * np.tanh(self.tanh_m * x + self.tanh_c)
 
-#region --- Testing ---
-if (__name__ == "__main__"):
-    av = ActivationFunctionHelper()
+    def tanh_derivative(self, x: float) -> float:
+        fOut = self.tanh(x)
+        return self.tanh_m * self.tanh_k * (1.0 - fOut * fOut)
+    
+    #
+    #endregion
 
-    print(av.tanH(0.0))
-    print(av.tanHD(0.0))
-#
-#   endregion
+    #region --- FE: relu ---
+    def relu(self, x: float) -> float:
+        if (x > self.relu_boundary): return (self.relu_upper_m * x + self.relu_upper_c)
+        return (self.relu_lower_m * x + self.relu_lower_c)
+
+    def relu_derivative(self, x: float) -> float:
+        if (x > self.relu_boundary): return self.relu_upper_m
+        return self.relu_lower_m
+    
+    #
+    #endregion
+
+    #region --- FE: elu ---
+    def elu(self, x: float) -> float:
+        if (x > self.elu_boundary): return (self.elu_linear_m * x + self.elu_linear_c)
+        return (self.elu_exponential_k * (mt.exp(self.elu_exponential_m * x + self.elu_exponential_c) - 1))
+
+    def elu_derivative(self, x: float) -> float:
+        if (x > self.elu_boundary): return self.elu_linear_c
+        return (self.elu_exponential_m * self.elu(x))
+    
+    #
+    #endregion
+
+    #region --- FE: srelu ---
+    def srelu(self, x: float) -> float:
+        if (x <= self.srelu_lower_boundary): return (self.srelu_lower_m * x + self.srelu_lower_c)
+        elif (x >= self.srelu_upper_boundary): return (self.srelu_upper_m * x + self.srelu_upper_c)
+        return (self.srelu_center_c * x)
+
+    def srelu_derivative(self, x: float) -> float:
+        if (x <= self.srelu_lower_boundary):
+            #   STEP 3: If under lower boundary
+            return self.srelu_lower_c
+
+        elif (x >= self.srelu_upper_boundary):
+            #   STEP 4: If above upper boundary
+            return self.srelu_upper_c
+
+        else:
+            #   STEP 5: If center
+            return self.srelu_center_c
+
+    # 
+    #endregion

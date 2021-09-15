@@ -11,6 +11,7 @@ from controllers.optimizers.Swarms import Swarms as sw
 from controllers.optimizers.Swarm import SwarmChan
 from config.Config import Conny
 from helpers.ApplicationHelper import ApplicationHelper
+from helpers.ArrayHelper import ArrayHelper
 #endregion
 
 #region Class - Sarah
@@ -243,7 +244,7 @@ class Sarah:
         lShape                  = None
 
         #   STEP 1: Setup - Local variables
-        lShape                  = ApplicationHelper.getShape(kwargs["initial"])
+        lShape                  = ArrayHelper.getShape(kwargs["initial"])
 
         #   region STEP 2->??: PSO Candidate generation
 

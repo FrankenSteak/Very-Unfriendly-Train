@@ -15,6 +15,8 @@ from controllers.optimizers.Swarms import Swarms as swarms
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as genetic_algorithm
 from helpers.ActivationFunctionHelper import ActivationFunctionHelper
 from helpers.ApplicationHelper import ApplicationHelper
+from helpers.ArrayHelper import ArrayHelper
+from helpers.MathHelper import MathHelper
 from models.DataContainer import Data
 #endregion
 
@@ -332,11 +334,11 @@ class Annie:
 				"is child":				self.bIsChild,
 
 				#	STEP 5: Layoutvariables
-				"weights":				ApplicationHelper.getList(self.__lWeights),
-				"momentum weights":		ApplicationHelper.getList(self.__lWeights_Momentum),
-				"nodes":				ApplicationHelper.getList(self.__lNodes),
-				"pre activation nodes":	ApplicationHelper.getList(self.__lNodes_PreActivation),
-				"average nodes":		ApplicationHelper.getList(self.__lNodes_Averages),
+				"weights":				ArrayHelper.getList(self.__lWeights),
+				"momentum weights":		ArrayHelper.getList(self.__lWeights_Momentum),
+				"nodes":				ArrayHelper.getList(self.__lNodes),
+				"pre activation nodes":	ArrayHelper.getList(self.__lNodes_PreActivation),
+				"average nodes":		ArrayHelper.getList(self.__lNodes_Averages),
 
 				"input width":			self.__iInputWidth,
 				"output width":			self.__iOutputWidth,
@@ -1391,7 +1393,7 @@ class Annie:
 		self.__dHiddenDetails		= _dParams["hidden details"]
 		self.__iAcFunction_Output	= _dParams["output details"]["default"]
 
-		self.__acFunctions.setFunction(function=self.__iAcFunction_Output, c=_dParams["output details"]["c"], boundary=_dParams["output details"]["boundary"])
+		# self.__acFunctions.setFunction(function=self.__iAcFunction_Output, c=_dParams["output details"]["c"], boundary=_dParams["output details"]["boundary"])
 		
 		self.__fMomentum			= _dParams["momentum"]["momentum scalar"]
 		self.__bMomentumActive		= _dParams["momentum"]["is active"]
@@ -2083,7 +2085,7 @@ class Annie:
 			raise Exception("An error occured in Annie.__propagateForward() -> Step 2: Data input width mismatch")		
 
 		#	STEP 5: Update - Drop out list
-		self.__lDropOut	= ApplicationHelper.getShape(self.__lNodes)
+		self.__lDropOut	= ArrayHelper.getShape(self.__lNodes)
 			
 		#	STEP 6: Iterate through inputs
 		for i in range(0, len(_dataPoint)):
@@ -2116,7 +2118,7 @@ class Annie:
 				self.__lNodes_PreActivation[i][iTmp - 1] 	= self.__lBias[i]
 
 				#	STEP 17: Set bias node
-				self.__lNodes[i][iTmp - 1] 					= self.__acFunctions.getActivation(self.__iAcFunction, self.__lBias[i])
+				self.__lNodes[i][iTmp - 1] 					= self.__acFunctions.activation_function(self.__iAcFunction, self.__lBias[i])
 
 				#	STEP 18: Adjust layer length
 				iTmp_Iterations 							-= 1
@@ -2148,7 +2150,7 @@ class Annie:
 					self.__lNodes_PreActivation[i][j]	= fTmp
 
 					#	STEP 28: Update node values
-					self.__lNodes[i][j] 				= self.__acFunctions.getActivation(self.__iAcFunction, fTmp)
+					self.__lNodes[i][j] 				= self.__acFunctions.activation_function(self.__iAcFunction, fTmp)
 			
 		#	STEP 29: Return
 		return
@@ -2226,7 +2228,7 @@ class Annie:
 					fTmp_preActivation	= self.__lNodes_PreActivation[i][j]
 
                     #	STEP 13: Get normal activation function
-					_lNodeSig[i][j]	= self.__acFunctions.getActivationD(self.__iAcFunction, fTmp_preActivation)
+					_lNodeSig[i][j]	= self.__acFunctions.activation_function_derivative(self.__iAcFunction, fTmp_preActivation)
 
 		#	STEP 14: Return
 		return _lNodeSig
@@ -2819,7 +2821,7 @@ class Annie:
 			dDNR = _dData.getRandDNR()
 
 			self.__propagateForward__(dDNR["in"])
-			print( ApplicationHelper.round( dDNR["out"], 1) , ApplicationHelper.round( self.getOutput(), 1), sep="\t")
+			print( MathHelper.round( dDNR["out"], 1) , MathHelper.round( self.getOutput(), 1), sep="\t")
 
 		print("\n-----------------------------", "\tClassification\t\t", "-----------------------------\n")
 		
