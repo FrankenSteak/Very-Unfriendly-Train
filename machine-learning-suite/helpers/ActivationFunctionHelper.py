@@ -1,4 +1,4 @@
-#region Imports
+#region --- Imports ---
 import  math                        as mt
 import  numpy                       as np
 import  os
@@ -9,87 +9,42 @@ sys.path.append(os.path.abspath("."))
 from config.Config import Conny
 #endregion
 
-#region Class - Antonio
-
-class Antonio:
-    
-    #region Init
-
+class ActivationFunctionHelper:    
+    #region --- Init ---
     """
-        Description:
+        - Description::
 
             Contains various activation functions along witht their derivatives.
     """
 
     def __init__(self):
-
-        #region STEP 0: Local variables
+        #   --- Setup ---
         self.__cf = Conny()
         self.__cf.load("ActivationFunctions.json")
-
-        #endregion
-
-        #region STEP 1: Private variables
-
-        #   region Linear
-        
+        #   --- Linear ---
         self.__fC_linear            = self.__cf.data["parameters"]["linear"]["c"]["default"]
-
-        #   endregion
-
-        #   region Logistic
-        
+        #   --- Logistic ---
         self.__fC_logisitic         = self.__cf.data["parameters"]["logistic"]["c"]["default"]
-
-        #   endregion
-
-        #   region TanH
-
+        #   --- tanH ---
         self.__fC_tanh              = self.__cf.data["parameters"]["tanh"]["c"]["default"]
         self.__fM_tanh              = self.__cf.data["parameters"]["tanh"]["magnitude"]["default"]
-
-        #   endregion
-
-        #   region Relu
-        
+        #   --- relU ---
         self.__fC_relu              = self.__cf.data["parameters"]["relu"]["c"]["default"]
-
-        #   endregion
-
-        #   region Leaky-Relu
-        
+        #   --- Leaky-relU ---
         self.__fC_lRelu_Pos         = self.__cf.data["parameters"]["leaky relu"]["c"]["positive"]["default"]
         self.__fC_lRelu_Neg         = self.__cf.data["parameters"]["leaky relu"]["c"]["negative"]["default"]
-
-        #   endregion
-
-        #   region Elu
-        
+        #   --- elU ---
         self.__fC_elu_lin           = self.__cf.data["parameters"]["elu"]["c"]["linear"]["default"]
         self.__fC_elu_exp           = self.__cf.data["parameters"]["elu"]["c"]["exponential"]["default"]
-
-        #   endregion
-
-        #   region Srelu
-        
+        #   --- srelU ---
         self.__fC_srelu_lower       = self.__cf.data["parameters"]["srelu"]["c"]["lower"]["default"]
         self.__fC_srelu_center      = self.__cf.data["parameters"]["srelu"]["c"]["center"]["default"]
         self.__fC_srelu_upper       = self.__cf.data["parameters"]["srelu"]["c"]["upper"]["default"]
-
         self.__fBoundary_srelu_lower    = self.__cf.data["parameters"]["srelu"]["boundary"]["lower"]["default"]
         self.__fBoundary_srelu_upper    = self.__cf.data["parameters"]["srelu"]["boundary"]["upper"]["default"]
-
-        #   endregion
-
-        #   region Gaussian
-        
+        #   --- Gaussian ---
         self.__fC_gaussian          = self.__cf.data["parameters"]["gaussian"]["c"]["default"]
-
-        #   endregion
-
-        #endregion
-
-        #   STEP 2: Return
+        #   --- Response ---
         return
 
     #
@@ -123,7 +78,7 @@ class Antonio:
             return self.srelu(_fIn)
         else:
             #   STEP 3: Error handling
-            raise Exception("An error occured in Antonio.getActivation() - > Step 2: Invalid activation function passed")
+            raise Exception("An error occured in ActivationFunctionHelper.getActivation() - > Step 2: Invalid activation function passed")
 
     def getActivationD(self, _iIn: int, _fIn: float) -> float:
         """
@@ -149,7 +104,7 @@ class Antonio:
             return self.sreluD(_fIn)
         else:
             #   STEP 3: Error handling
-            raise Exception("An error occured in Antonio.getActivationD() -> Step 2: Invalid activation function passed")
+            raise Exception("An error occured in ActivationFunctionHelper.getActivationD() -> Step 2: Invalid activation function passed")
     
     #
     #   endregion
@@ -188,12 +143,12 @@ class Antonio:
             #   STEP 11: Function not implemented
             else:
                 #   STEP 12: Error handling
-                raise Exception("An error occured in Antonio.setFunction() -> Step 9: That activation function isn't fully implemented yet")
+                raise Exception("An error occured in ActivationFunctionHelper.setFunction() -> Step 9: That activation function isn't fully implemented yet")
 
         except Exception as ex:
             #   STEP 13: Error handling
             print("Initial Error: ", ex)
-            raise Exception("An error occured in Antonio.setFunction()")
+            raise Exception("An error occured in ActivationFunctionHelper.setFunction()")
             
         #   STEP 14: Return
         return
@@ -549,12 +504,12 @@ class Antonio:
         #   STEP 2: CHeck if c arg passed
         if ("c" not in kwargs):
             #   STEP 3: Error handling
-            raise Exception("An error occured in Antonio.__setSrelu__() -> Step 2: No c arg passed")
+            raise Exception("An error occured in ActivationFunctionHelper.__setSrelu__() -> Step 2: No c arg passed")
 
         #   STEP 4: Check if boundary arg passed
         if ("boundary" not in kwargs):
             #   STEP 5: Error handling
-            raise Exception("An error occured in Antonio.__setSrelu__() -> Step 4: No boundary arg passed")
+            raise Exception("An error occured in ActivationFunctionHelper.__setSrelu__() -> Step 4: No boundary arg passed")
 
         #
         #   endregion
@@ -573,13 +528,10 @@ class Antonio:
     #
     #   endregion
 
-#
-#endregion
 
-#region Testing
-
+#region --- Testing ---
 if (__name__ == "__main__"):
-    av = Antonio()
+    av = ActivationFunctionHelper()
 
     print(av.tanH(0.0))
     print(av.tanHD(0.0))

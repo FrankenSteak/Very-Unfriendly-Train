@@ -22,7 +22,7 @@ class Garry:
 
         #region STEP 0: Local variables
         self.__cf = Conny()
-        self.__cf.load("Garry.json")
+        self.__cf.load("GeneticAlgorithms.json")
 
         #endregion
 

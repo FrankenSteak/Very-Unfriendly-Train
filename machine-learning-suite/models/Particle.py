@@ -1,4 +1,4 @@
-#region Imports
+#region --- Imports ---
 import 	numpy as np
 import 	os
 import 	sys
@@ -13,15 +13,9 @@ class UwU:
 	#region Init
 
     """
-        - **Description**::
+        - Description::
 
-        EEEEK! Oni-Swarm don't touch me there!
-        
-        |\n
-        |\n
-        |\n
-        |\n
-        |\n
+            "EEEEK! Oni-Swarm don't touch me there!"
     """
 
     def __init__(self):

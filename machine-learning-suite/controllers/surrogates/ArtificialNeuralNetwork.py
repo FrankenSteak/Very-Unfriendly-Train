@@ -13,7 +13,7 @@ from config.Config import Conny
 from controllers.handlers.OptimizationHandler import Hermione
 from controllers.optimizers.Swarms import Swarms as swarms
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as genetic_algorithm
-from helpers.ActivationFunctionHelper import Antonio
+from helpers.ActivationFunctionHelper import ActivationFunctionHelper
 from helpers.ApplicationHelper import ApplicationHelper
 from models.DataContainer import Data
 #endregion
@@ -61,7 +61,7 @@ class Annie:
 		self.__fWeightRange			= None
 		
 		#	STEP 1.3: Activation functions
-		self.__acFunctions			= Antonio()
+		self.__acFunctions			= ActivationFunctionHelper()
 		self.__iAcFunction			= None
 		
 		#	STEP 1.4: Learning Rate
@@ -949,11 +949,6 @@ class Annie:
 			#	STEP 7: Update - Local variable
 			bOptimization = kwargs["advanced_training"]
 
-			#	STEP 8: Random 10% to not use advanced training
-			if ((bOptimization) and (rn.uniform(0.0, 1.0) < 0.1)):
-				#	STEP 9: Update - Local variable
-				bOptimization = False
-
 		#	STEP 10: Check if advanced algorithm passed
 		if ("advanced_algorithm" in kwargs):
 			#	STEP 11: Update - Local variable
@@ -978,11 +973,11 @@ class Annie:
 		#	region STEP 15->17: Default training
 
 		#	STEP 5: Check if DEF training
-		bOptimization = False
 		if (bOptimization == False):
 			#	STEP 6: User Output
 			if (self.bShowOutput):
 				print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Default Training")
+				input("\n> Start:")
 
 			#	STEP 7: Outsource default training
 			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
@@ -997,6 +992,7 @@ class Annie:
 			#	STEP 19: User Output
 			if (self.bShowOutput):
 				print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Trust-Region Optimization assisted Default training")
+				input("\n> Start:")
 
 			#	STEP 20: Outsource tro training
 			self.__trainTro__(_dData)
@@ -1014,6 +1010,7 @@ class Annie:
 			#	STEP 23: User Output
 			if (self.bShowOutput):
 				print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Particle-Swarm Optimization assisted Default training")
+				input("\n> Start:")
 
 			#	STEP 24: Outsource pso training
 			self.__trainPso__(_dData)
@@ -2857,7 +2854,7 @@ if (__name__ == "__main__"):
 		if (x == "exit" or x == "N" or x == "n"):
 			break
 
-		os.system("cls")
+		os.system("clear")
 
 		fire = Annie()
 		
