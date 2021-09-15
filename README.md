@@ -22,7 +22,7 @@
       - /controllers/optimizers/Swarms.py
       - /controllers/optimizers/GeneticAlgorithms.py
 
-# Documentation
+# Refactoring Completed
    - /config/Config.py
    - /static/Enums.py
       - Been removed so that files` code is more centralized to those files
@@ -31,3 +31,6 @@
    - /helpers/GeneralHelpers.py
       - Renamed to `ApplicationHelper.py`
       - Expaned to `ApplicationHelper.py`,  `ArrayHelper.py`,  and `MathHelper.py`
+
+# Optimizers
+   - https://en.wikipedia.org/wiki/List_of_metaphor-based_metaheuristics
