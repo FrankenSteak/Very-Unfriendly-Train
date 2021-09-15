@@ -1,25 +1,17 @@
 #region Imports
-
-from    enum                            import Enum
-
 import  copy                            as cp
 import  numpy                           as np
 import  os
 import  random                          as rn
 import  sys
-import  time                            as tm
 
 sys.path.append(os.path.abspath("."))
 
-from    Enums                import Enums            as en
-from    Swarms               import Swarms           as sw
-
-from    Particle        import UwU
-from    Swarm           import SwarmChan
-
-from    Config                  import Conny
-from    GeneralHelpers          import Helga
-
+from static.Enums import Enums as en
+from controllers.optimizers.Swarms import Swarms as sw
+from controllers.optimizers.Swarm import SwarmChan
+from config.Config import Conny
+from helpers.GeneralHelpers import Helga
 #endregion
 
 #region Class - Sarah

@@ -1,66 +1,44 @@
-#region Imports
-
-import  json                            as js
-import  os
-import  shutil                          as sh
-import  sys
+#region --- Imports ---
+import json as js
+import os
+import shutil as sh
+import sys
 
 sys.path.append(os.path.abspath("."))
 
-from    GeneralHelpers                  import Helga
-
+from helpers.GeneralHelpers import Helga
 #endregion
 
-#region Class - Conny
-
 class Conny:
-
-    #region Init
-
-    """
-        - **Description**::
-
-        This class serves as the base configuration file for all other classes
-
-        |\n
-        |\n
-        |\n
-        |\n
-        |\n
-    """
-
+    #region --- Init ---
     def __init__(self):
-
-        self.data   = None
+        self.data = None
 
         return
 
     #
     #endregion
 
-    #region Front-End
-
-    #   region Front-End: Init
-
+    #region --- Setup ---
     def load(self, _sFileName: str, **kwargs) -> None:
         """
-            - **Description**::
+            - Description::
 
-            Imports the data form the provided .json file
+                Imports the data form the provided .json file
 
             |\n
             |\n
             |\n
             |\n
             |\n
-            - **Parameters**::
+            - Parameters::
 
                 :param _sFileName: >> (str) The .json file to import
+                :param full_path: >> (bool) Whether or not the path provided is the full file path
 
-            - **Return**::
+            - Return::
 
                 :returns: (None)
-
         """
 
         #   STEP 0: Local variables
@@ -68,13 +46,14 @@ class Conny:
         sFilePath   = ""
 
         #   STEP 1: Get full file path
-        if ((_sFileName.find("/") > 0) or (_sFileName.find("\\") > 0)):
-            #   STEP 1.1: Set File Path
-            sFilePath = _sFileName
-
-        else:
-            #   STEP 1.2: Get full path and append filename
-            sFilePath = os.path.abspath(".") + "\\Code\\ConfigFiles\\" + _sFileName
+        try:
+            if (kwargs["full_path"]):
+                sFilePath = _sFileName
+        except:
+            Helga.nop()
+            
+        if (sFilePath == ""):
+            sFilePath = os.path.abspath(".") + "/config/" + _sFileName
             
         #   STEP 2: Try-catch
         try:
@@ -94,12 +73,11 @@ class Conny:
                 jsFile = None
 
         return
-
+    
     #
-    #   endregion
+    #endregion
 
-    #   region Front-End: Is-type-statements
-
+    #region  --- FE: Is-type Statements ---
     def hasMenu(self) -> bool:
         """
         """
@@ -115,12 +93,11 @@ class Conny:
             return True
 
         return False
-
+    
     #
-    #   endregion
+    #endregion
 
-    #   region Front-End: Gets
-
+    #region  --- FE: Gets ---
     def getMenu(self, kwargs: dict) -> list:
         """
         """
@@ -176,38 +153,11 @@ class Conny:
 
         #   STEP 9: Return
         return lOut
-
-    def getDirectory(self) -> str:
-        """
-        """
-
-        #   STEP 0: Local variables
-        sLocal                  = ""
-        sDir                    = ""
-        sSetup                  = os.path.abspath(".") + "\\Code\\Templates\\Unfriendly Train"
-
-        #   STEP 1: Setup - Local variables
-        sLocal = os.getenv('APPDATA')
-        sLocal = sLocal[:len(sDir) -7] + "Local\\"
-        
-        sDir    = sLocal + "Unfriendly Train\\Setup\\Directories.json"
-
-        #   STEP 2: Check if the directory doesn't exist
-        if (os.path.exists(sDir) == False):
-            #   STEP 3: Copy setup files
-            sh.copytree(sSetup, sLocal + "\\Unfriendly Train")
-
-        #   STEP 4: Load directories into self
-        self.load(sDir)
-
-        #   STPE 5: Return
-        return sDir
-
+    
     #
-    #   endregion
+    #endregion
 
-    #   region Front-End: Other
-
+    #region  --- FE: Other ---
     def update(self, **kwargs) -> None:
         """
             Description:
@@ -276,28 +226,11 @@ class Conny:
         return
 
     #
-    #   endregion
-
-    #
     #endregion
 
-    #region Back-End
-
-    #
-    #endregion
-
-#
-#endregion
-
-#region Testing
-
-#"""
+#region --- Testing ---
 
 a = Conny()
-a.getDirectory()
 Helga.nop()
 
-#"""
-
-#
 #endregion

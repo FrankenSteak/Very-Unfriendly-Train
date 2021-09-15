@@ -1,7 +1,4 @@
 #region Imports
-
-from    enum                        import Enum
-
 import  math                        as mt
 import  numpy                       as np
 import  os
@@ -9,10 +6,8 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from    Enums                       import Enums            as en
-
-from    Config                      import Conny
-
+from static.Enums import Enums as en
+from config.Config import Conny
 #endregion
 
 #region Class - Antonio

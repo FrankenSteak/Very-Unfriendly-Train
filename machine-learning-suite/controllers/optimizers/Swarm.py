@@ -1,7 +1,4 @@
 #region Imports
-
-from    enum                            import Enum
-
 import  numpy                           as np
 import  os
 import  random                          as rn
@@ -9,14 +6,11 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from    Enums                import Enums                as en
-from    Swarms               import Swarms               as sw
-
-from    Particle        import UwU
-
-from    Config                  import Conny
-from    GeneralHelpers          import Helga
-
+from static.Enums import Enums as en
+from controllers.optimizers.Swarms import Swarms as sw
+from models.Particle import UwU
+from config.Config import Conny
+from helpers.GeneralHelpers import Helga
 #endregion
 
 #region Class - Swarm

@@ -1,7 +1,4 @@
-#region Imports
-
-from    enum                                import Enum
-
+#region --- Imports ---
 import  copy                                as cp
 import  numpy                               as np
 import  os
@@ -11,15 +8,11 @@ import  time                                as tm
 
 sys.path.append(os.path.abspath("."))
 
-from    Enums                    import Enums                as en
-from    GeneticAlgorithms        import GeneticAlgorithms    as ga
-
-from    Particle            import UwU
-from    GeneticAlgorithm    import Garry
-
-from    Config                      import Conny
-from    GeneralHelpers              import Helga
-
+from config.Config import Conny
+from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as ga
+from controllers.optimizers.GeneticAlgorithm import Garry
+from helpers.GeneralHelpers import Helga
+from static.Enums import Enums as en
 #endregion
 
 #region Class - SpongeBob

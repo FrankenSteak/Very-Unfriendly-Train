@@ -7,8 +7,6 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from    Config                          import Conny
-
 #endregion
 
 #region Class - Swarms (Enum)

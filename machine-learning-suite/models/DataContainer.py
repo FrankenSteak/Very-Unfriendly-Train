@@ -1,9 +1,7 @@
 #region Imports
-
-from    enum                            import Enum
-
 import  copy                            as cp
 import  json                            as js
+from typing import List
 import  numpy                           as np
 import  os
 import  random                          as rn
@@ -11,11 +9,8 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from    Enums                   import Enums        as en
-
-from    Config                  import Conny
-from    GeneralHelpers          import Helga
-
+from config.Config import Conny
+from helpers.GeneralHelpers import Helga
 #endregion
 
 #region Class - Data Container
@@ -34,10 +29,8 @@ class Data:
     def __init__(self):
 
         #region STEP 0: Local variables
-
-        self.__enum             = en.Data
-        self.__cf               = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("Data.json")
 
         #endregion
 
@@ -152,7 +145,7 @@ class Data:
             #   STEP 8: Check if file not set
             if (sFilePath == None):
                 #   STEP 9: Get full path
-                sFilePath = os.path.abspath(".") + "\\Code\\DataSets\\" + kwargs["file"]
+                sFilePath = os.path.abspath(".") + "/static/datasets/" + kwargs["file"]
                 print("sFilePath = " + str(sFilePath))
 
                 #   STEP 10: Check if extension in kwargs
@@ -163,7 +156,7 @@ class Data:
                         sFilePath = sFilePath + ".json"
 
             #   STEP 13: Import config file
-            cfTmp.load(sFilePath)
+            cfTmp.load(sFilePath, full_path=True)
 
             #   STEP 14: Populate data
             self.__fLower           = cfTmp.data["data"]["lower"]
@@ -2960,7 +2953,7 @@ class Data:
         #   STEP 3: Return
         return lOut
 
-    def __txtToFloat__(self, _lData: list, **kwargs) -> []:
+    def __txtToFloat__(self, _lData: list, **kwargs) -> List:
         """
         """
 
@@ -3094,7 +3087,7 @@ class Data:
         #   STEP ??: Return
         return lOut
 
-    def __stripData__(self, _lData: list, **kwargs) -> []:
+    def __stripData__(self, _lData: list, **kwargs) -> List:
         """
         """
 

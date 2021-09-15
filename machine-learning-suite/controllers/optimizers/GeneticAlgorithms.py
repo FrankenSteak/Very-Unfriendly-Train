@@ -7,7 +7,7 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from    Config                  import Conny
+from config.Config import Conny
 
 #endregion
 

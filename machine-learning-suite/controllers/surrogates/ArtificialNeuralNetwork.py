@@ -1,30 +1,22 @@
-#region Imports
-
-from	enum							import Enum
-
-import 	copy 							as cp
-import 	datetime 						as dt
-import	json							as js
-import 	numpy 							as np
-import 	os
-import 	random 							as rn
-import 	sys
+#region	--- Imports ---
+import copy as cp
+import datetime as dt
+import json as js
+import numpy as np
+import os
+import random as rn
+import sys
 
 sys.path.append(os.path.abspath("."))
 
-from	Enums							import Enums				as en
-from	Swarms							import Swarms				as sw
-from	GeneticAlgorithms				import GeneticAlgorithms 	as ga
-
-from 	Swarm 							import SwarmChan
-
-from	OptimizationHandler				import Hermione
-
-from 	ActivationFunctions 			import Antonio
-from	Config							import Conny
-from 	DataContainer 					import Data
-from 	GeneralHelpers 					import Helga
-
+from config.Config import Conny
+from controllers.handlers.OptimizationHandler import Hermione
+from controllers.optimizers.Swarms import Swarms as swarms
+from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as genetic_algorithm
+from helpers.ActivationFunctions import Antonio
+from helpers.GeneralHelpers import Helga
+from models.DataContainer import Data
+from static.Enums import Enums as enums
 #endregion
 
 #region Class - Annie
@@ -32,36 +24,11 @@ from 	GeneralHelpers 					import Helga
 class Annie:
 
 	#region Init
-
-	"""
-        Description:
-
-        	This class contains the optimization and functionality for the
-			Anritifical Neural Network.
-        
-        |\n
-        |\n
-        |\n
-        |\n
-        |\n
-
-        Arguments:
-
-			+ geometry	= ( dict ) Dictionary containing the variables to be
-				used when setting up the geometry of Annie
-				~ in width	= ( int ) The input data width
-				~ out width = ( int ) The output data width
-				~ hidden width	= ( int ) The hidden layer width
-				~ hidden legnth = ( int ) The number of hidden layers
-
-			+ params	= ( dict ) 
-	"""
-
 	def __init__(self, **kwargs) -> None:
 		
 		#	region STEP 0: Local variables
 
-		self.__enum					= en.Annie
+		self.__enum					= enums.Annie
 		self.__config				= Conny()
 		self.__config.load(self.__enum.value)
 
@@ -2766,7 +2733,7 @@ class Annie:
 			print("\t- Outsourcing Trust-Region Optimization training to Hermione\n")
 
 		#	STEP 3: Perform training
-		dResults = vOptimzier.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimizer=ga.TRO, threading=True)
+		dResults = vOptimzier.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimizer=genetic_algorithm.TRO, threading=True)
 		
 		#	STEP 4: Set new weights
 		self.__setWeights(dResults["surrogate"].getWeights(password=self.__iPassword))
@@ -2825,7 +2792,7 @@ class Annie:
 			print("\t- Outsourcing Particle-Swarm Optimization training to Hermione\n")
 
 		#	STEP 3: Perform training
-		dResults = vOptimizer.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimzier=sw.PSO, threading=True)
+		dResults = vOptimizer.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimzier=swarms.PSO, threading=True)
 
 		#	STEP 4: Set new weights
 		self.__setWeights(dResults["surrogate"].getWeights(password=self.__iPassword))
@@ -2889,7 +2856,7 @@ class Annie:
 
 if (__name__ == "__main__"):
 	dat = Data()
-	dat.importData(file="4x - Banknote\\banknote_0.json")
+	dat.importData(file="4x - Banknote/banknote_0.json")
 
 	x = ""
 

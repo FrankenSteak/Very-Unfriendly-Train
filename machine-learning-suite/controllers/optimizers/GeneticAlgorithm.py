@@ -1,20 +1,14 @@
 #region Imports
-
-from    enum                            import Enum
-
 import  numpy                           as np
 import  os
 import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from    Enums                import Enums                as en
-from    GeneticAlgorithms    import GeneticAlgorithms    as GA
-
-from    Particle        import UwU
-
-from    Config                  import Conny
-
+from config.Config import Conny
+from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as GA
+from models.Particle import UwU
+from static.Enums import Enums as en
 #endregion
 
 #region Class - Garry
