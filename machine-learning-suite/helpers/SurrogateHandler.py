@@ -76,10 +76,8 @@ class Golem:
     def __init__(self, **kwargs) -> None:
         
         #   region STEP 0: Local Variables
-
-        self.__enum                     = en.Golem
-        self.__cf                       = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("Golem.json")
         
         #
         #   endregion

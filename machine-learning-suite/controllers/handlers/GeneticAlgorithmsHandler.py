@@ -1,10 +1,8 @@
 #region --- Imports ---
-import  copy                                as cp
 import  numpy                               as np
 import  os
 import  random                              as rn
 import  sys
-import  time                                as tm
 
 sys.path.append(os.path.abspath("."))
 
@@ -12,60 +10,28 @@ from config.Config import Conny
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as ga
 from controllers.optimizers.GeneticAlgorithm import Garry
 from helpers.GeneralHelpers import Helga
-from static.Enums import Enums as en
 #endregion
 
-#region Class - SpongeBob
-
 class SpongeBob:
-
-    #region Init
-
-    """
-    """
-
+    #region --- Private ---
     def __init__(self):
-
-        #region STEP 0: Local variables
-
-        self.__enum                 = en.SpongeBob
-        self.__config               = Conny()
-        self.__config.load(self.__enum.value)
-        
-        #endregion
-
-        #region STEP 1: Private variables
-
-        self.__bAllowTesting        = self.__config.data["parameters"]["allow testing"]["default"]
-
-        #endregion
-
-        #region STEP 2: Public variables
-
-        self.bShowOutput            = self.__config.data["parameters"]["show output"]["default"]
-
-        #endregion
-
-        #region STEP 3: Setup - Private variables
-
-        #endregion
-
-        #region STEP 4: Setup - Public variables
-
-        #endregion
-
+        #   --- Setup ---
+        self.__config = Conny()
+        self.__config.load("SpongeBob.json")
+        #   --- Private ---
+        self.__bAllowTesting = self.__config.data["parameters"]["allow testing"]["default"]
+        #   --- Public ---
+        self.bShowOutput = self.__config.data["parameters"]["show output"]["default"]
+        #   --- Response ---
         return
 
     #
     #endregion
 
-    #region Front-End
-
-    #   region Front-End: Mapping
-
-    def mapSurrogate(self, **kwargs) -> dict:
+    #region --- Public: FE ---
+    def map_surrogate(self, **kwargs) -> dict:
         """
-            Description:
+            - Description::
 
                 Maps the passed surrogate using the specified optimizer.
 
@@ -74,10 +40,9 @@ class SpongeBob:
             |\n
             |\n
             |\n
-            
-            Arguments:
+            - Parameters::
 
-                + surrogate = ( vars ) The surrogate that requires mapping
+                :param surrogate: >> ( vars ) The surrogate that requires mapping
                     ~ Required
 
                 + data  = ( vars ) A Data container that contains the data
@@ -89,26 +54,20 @@ class SpongeBob:
                     ~ Required
         """
 
-        #   STEP 0: Local variables
-
-        #   STEP 1: Setup - Local variables
-        
-        #   region STEP 2->7: Error checking
-
         #   STEP 2: Check if surrogate arg passed
         if ("surrogate" not in kwargs):
             #   STEP 3: Error handling
-            raise Exception("An error occured in SpongeBob.mapSurrogate() -> Step 2: No surrogate arg passed")
+            raise Exception("An error occured in SpongeBob.map_surrogate() -> Step 2: No surrogate arg passed")
 
         #   STEP 4: Check if data arg passed
         if ("data" not in kwargs):
             #   STEP 5: Error handling
-            raise Exception("An error occured in SpongeBob.mapSurrogate() -> Step 4: No data arg passed")
+            raise Exception("An error occured in SpongeBob.map_surrogate() -> Step 4: No data arg passed")
 
         #   STEP 6: Check if optimizer arg passed
         if ("optimizer" not in kwargs):
             #   STEP 7: Error handling
-            raise Exception("An error occured in SpongeBob.mapSurrogate() -> Step 6: No optimizer arg passed")
+            raise Exception("An error occured in SpongeBob.map_surrogate() -> Step 6: No optimizer arg passed")
         
         #
         #   endregion
@@ -123,12 +82,7 @@ class SpongeBob:
             return self.__troMapping__(surrogate=kwargs["surrogate"], data=kwargs["data"])
 
         #   STEP 12: Unrecognized optimizer - Error handling
-        raise Exception("An error occured in SpongeBob.mapSurrogate() -> Step 12: Unrecognized optimizer")
-        
-    #
-    #   endregion
-
-    #   region Front-End: Training
+        raise Exception("An error occured in SpongeBob.map_surrogate() -> Step 12: Unrecognized optimizer")
 
     def trainSurrogate(self, **kwargs) -> dict:
         """
@@ -207,14 +161,8 @@ class SpongeBob:
 
     #
     #   endregion
-    
-    #
-    #endregion
 
-    #region Back-End
-
-    #   region Back-End: Gets
-
+    #region --- Private: BE ---
     def __getCandidates__(self, **kwargs) -> list:
         """
             Description:
@@ -462,11 +410,6 @@ class SpongeBob:
         #   STEP ??: Error handling
         raise Exception("An error occured in SpongeBob.__getParams__(): Unimplemented optimizer passed")
 
-    #
-    #   endregion
-
-    #   region Back-End: Training
-
     def __troTraining__(self, **kwargs) -> dict:
         """
             Description:
@@ -669,11 +612,6 @@ class SpongeBob:
         #   STEP 30: Return
         return dOut
 
-    #
-    #   endregion
-
-    #   region Back-End: Mapping
-
     def __troMapping__(self, **kwargs) -> dict:
         """
             Description:
@@ -797,11 +735,6 @@ class SpongeBob:
         #   STEP ??: Return
         return dOut
 
-    #
-    #   endregion
-
-    #   region Back-end: Other
-
     def __limit_candidate_to_trust_region__(self, **kwargs) -> list:
         """
             Description:
@@ -874,18 +807,3 @@ class SpongeBob:
 
     #
     #   endregion
-
-    #
-    #endregion
-    
-#
-#endregion
-
-#region Testing
-
-
-if (__name__ == "__main__"):
-    Helga.nop()
-
-#
-#   endregion

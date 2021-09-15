@@ -7,7 +7,6 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from static.Enums import Enums as en
 from controllers.optimizers.Swarms import Swarms as sw
 from controllers.optimizers.Swarm import SwarmChan
 from config.Config import Conny
@@ -26,10 +25,8 @@ class Sarah:
     def __init__(self):
 
         #region STEP 0: Local variables
-
-        self.__enum                 = en.Sarah
-        self.__config               = Conny()
-        self.__config.load(self.__enum.value)
+        self.__config = Conny()
+        self.__config.load("Sarah.json")
         
         #endregion
 

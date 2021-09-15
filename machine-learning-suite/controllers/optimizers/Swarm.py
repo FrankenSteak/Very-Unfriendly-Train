@@ -6,7 +6,6 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from static.Enums import Enums as en
 from controllers.optimizers.Swarms import Swarms as sw
 from models.Particle import UwU
 from config.Config import Conny
@@ -42,10 +41,8 @@ class SwarmChan:
     def __init__(self, _iParticles: int) -> None:
 
         #region STEP 0: Local variables
-
-        self.__enum                 = en.SwarmChan
-        self.__cf                   = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("SwarmChan.json")
 
         #endregion
 

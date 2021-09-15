@@ -1,18 +1,10 @@
 #region Imports
-
-from    enum                            import Enum
-
-import  datetime                         as dt
 import  os
 import  sys
 import  threading                        as thread
 import  time                             as t
 
 sys.path.append(os.path.abspath("."))
-
-from    Enums                import Enums                as en
-
-from    ArtificialNeuralNetwork                     import Annie
 
 from    Config                  import Conny
 from    DataContainer           import Data
@@ -43,10 +35,8 @@ class DAVID:
     def __init__(self) -> None:
         
         #region STEP 0: Local variables
-
-        self.__enum                 = en.David
-        self.__cf                   = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("David.json")
 
         #endregion
 

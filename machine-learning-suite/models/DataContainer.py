@@ -146,7 +146,6 @@ class Data:
             if (sFilePath == None):
                 #   STEP 9: Get full path
                 sFilePath = os.path.abspath(".") + "/static/datasets/" + kwargs["file"]
-                print("sFilePath = " + str(sFilePath))
 
                 #   STEP 10: Check if extension in kwargs
                 if ("extension" in kwargs):

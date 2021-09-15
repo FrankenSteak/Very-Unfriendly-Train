@@ -6,7 +6,6 @@ import  sys
 
 sys.path.append(os.path.abspath("."))
 
-from static.Enums import Enums as en
 from config.Config import Conny
 #endregion
 
@@ -25,10 +24,8 @@ class Antonio:
     def __init__(self):
 
         #region STEP 0: Local variables
-
-        self.__enum                 = en.Antonio
-        self.__cf                   = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("ActivationFunctions.json")
 
         #endregion
 

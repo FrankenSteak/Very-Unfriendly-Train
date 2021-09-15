@@ -16,7 +16,6 @@ from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as geneti
 from helpers.ActivationFunctions import Antonio
 from helpers.GeneralHelpers import Helga
 from models.DataContainer import Data
-from static.Enums import Enums as enums
 #endregion
 
 #region Class - Annie
@@ -27,10 +26,8 @@ class Annie:
 	def __init__(self, **kwargs) -> None:
 		
 		#	region STEP 0: Local variables
-
-		self.__enum					= enums.Annie
-		self.__config				= Conny()
-		self.__config.load(self.__enum.value)
+		self.__config = Conny()
+		self.__config.load("ArtificialNeuralNetwork.json")
 
 		self.__iPassword			= rn.random() * 111754552.83191288 			# ( ( pi ^ pi ) ^ pi ) * ( 10 * pi )
 
@@ -882,7 +879,7 @@ class Annie:
 
 	def trainSet(self, _dData: Data, **kwargs) -> dict:
 		"""
-			Description:
+			- Description::
 
 				Trains this instance of Annie using the data set provided as
 				well as the parameters in kwargs.
@@ -892,26 +889,21 @@ class Annie:
 			|\n
 			|\n
 			|\n
+			- Parameters::
 
-			Parameters:
-
-				:param _dData: = ( vars ) -- The data container containing the
+				:param _dData: >> ( vars ) -- The data container containing the
 					data set to train with
 
-			|\n
-
-			Argumtents:
-
-				+ acc	= ( bool ) Check accuracy flag for default training
+				:arg acc: >> ( bool ) Check accuracy flag for default training
 					~ default	= True
 
-				+ compare	= ( bool ) Show comparison flag
+				:arg compare: >> ( bool ) Show comparison flag
 					~ default 	= False
 
-				+ advanced_training	= ( bool ) Flag for the use of optimizers during training
+				:arg advanced_training: >> ( bool ) Flag for the use of optimizers during training
 					~ default	= False
 
-				+ advanced_algorithm	= ( int ) The optimizer to user for training if advanced_training = true
+				:arg advanced_algorithm: >> ( int ) The optimizer to user for training if advanced_training = true
 					~ default 	= randint(0, 3)
 
 			|\n

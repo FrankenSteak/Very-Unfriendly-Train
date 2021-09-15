@@ -1,13 +1,8 @@
 #region Imports
-
-from    enum                            import Enum
-
 import  os
 import  sys
 
 sys.path.append(os.path.abspath("."))
-
-from    Enums                import Enums            as en
 
 from    Config                  import Conny
 
@@ -25,10 +20,8 @@ class Viktor:
     def __init__(self):
 
         #region STEP 0: Local variables
-
-        self.__enum                 = en.Viktor
-        self.__cf                   = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("Viktor.json")
 
         #endregion
 

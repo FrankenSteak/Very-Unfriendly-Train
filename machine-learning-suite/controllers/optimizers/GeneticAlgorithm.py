@@ -6,9 +6,7 @@ import  sys
 sys.path.append(os.path.abspath("."))
 
 from config.Config import Conny
-from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as GA
 from models.Particle import UwU
-from static.Enums import Enums as en
 #endregion
 
 #region Class - Garry
@@ -23,10 +21,8 @@ class Garry:
     def __init__(self, _iPopSize: int) -> None:
 
         #region STEP 0: Local variables
-
-        self.__enum                 = en.Garry
-        self.__cf                   = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("Garry.json")
 
         #endregion
 

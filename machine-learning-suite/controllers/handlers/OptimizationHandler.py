@@ -16,7 +16,6 @@ from controllers.handlers.SwarmHandler import Sarah
 from helpers.GeneralHelpers import Helga
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as ga
 from controllers.optimizers.Swarms import Swarms as sw
-from static.Enums import Enums as en
 #endregion
 
 #region Class - Hermione
@@ -32,9 +31,8 @@ class Hermione:
 
         #region STEP 0: Local variables
 
-        self.__enum             = en.Hermione
-        self.__cf               = Conny()
-        self.__cf.load(self.__enum.value)
+        self.__cf = Conny()
+        self.__cf.load("Hermione.json")
 
         #endregion
 

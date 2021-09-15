@@ -4,8 +4,6 @@ import 	os
 import 	sys
 
 sys.path.append(os.path.abspath("."))
-
-from static.Enums import Enums as en
 #endregion
 
 #region Class - UwU
@@ -27,12 +25,6 @@ class UwU:
     """
 
     def __init__(self):
-
-        #region STEP 0: Local variables
-
-        self.__enum                 = en.UwU
-
-        #endregion
 
         #region STEP 1: Private variables
 
