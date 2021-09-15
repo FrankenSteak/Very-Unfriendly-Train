@@ -76,7 +76,7 @@ class Enums(Enum):
 
     #       region Enums-(Classes): Surrogates
 
-    Annie   = "Annie.json"
+    Annie   = "ArtificialNeuralNetwork.json"
     Viktor  = "Viktor.json"
     King    = "King.json"
     
@@ -85,7 +85,7 @@ class Enums(Enum):
 
     #       region Enums-(Classes): Helpers
 
-    Antonio = "Antonio.json"
+    Antonio = "ActivationFunctions.json"
     Data    = "Data.json"
     David   = "David.json"
     

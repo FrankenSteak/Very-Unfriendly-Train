@@ -46,13 +46,9 @@ class Conny:
         sFilePath   = ""
 
         #   STEP 1: Get full file path
-        try:
-            if (kwargs["full_path"]):
-                sFilePath = _sFileName
-        except:
-            Helga.nop()
-            
-        if (sFilePath == ""):
+        if (("full_path" in kwargs) and (kwargs["full_path"])):
+            sFilePath = _sFileName
+        else:
             sFilePath = os.path.abspath(".") + "/config/" + _sFileName
             
         #   STEP 2: Try-catch

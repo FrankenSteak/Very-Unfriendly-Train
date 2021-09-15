@@ -6,3 +6,4 @@
 *ignore.zip
 *.pyc
 .vscode/
+__pycache__/
