@@ -24,6 +24,7 @@
       - /helpers/ActivationFunctions.py
          - Ensure math functions work as expected
       - /helpers/GeneralHelpers.py
+         - Renamed to `ApplicationHelper.py`
 
 # Documentation
    - /config/Config.py

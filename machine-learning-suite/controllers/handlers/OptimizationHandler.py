@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath("."))
 from config.Config import Conny
 from controllers.handlers.GeneticAlgorithmsHandler import SpongeBob
 from controllers.handlers.SwarmHandler import Sarah
-from helpers.GeneralHelpers import Helga
+from helpers.ApplicationHelper import ApplicationHelper
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as ga
 from controllers.optimizers.Swarms import Swarms as sw
 #endregion
@@ -139,7 +139,7 @@ class Hermione:
             if (bThreading):
                 #   STEP 14: User output
                 if (self.bShowOutput):
-                    print("Hermione (map-srg) {" + Helga.time() + "} - Starting threaded surrogate mapping")
+                    print("Hermione (map-srg) {" + ApplicationHelper.time() + "} - Starting threaded surrogate mapping")
 
                 #   STEP 15: Outsource and return
                 return self.__mapSurrogate__(surrogate=kwargs["surrogate"], data=kwargs["data"], optimizer=eOptimizer)
@@ -148,7 +148,7 @@ class Hermione:
             else:
                 #   STEP 17: User output
                 if (self.bShowOutput):
-                    print("Hermione (map-srg) {" + Helga.time() + "} - Starting surrogate mapping")
+                    print("Hermione (map-srg) {" + ApplicationHelper.time() + "} - Starting surrogate mapping")
 
                 #   STEP 18: Create new mapper
                 spongebob   = SpongeBob()
@@ -162,7 +162,7 @@ class Hermione:
             if (bThreading):
                 #   STEP 22: User output
                 if (self.bShowOutput):
-                    print("Hermione (map-srg) {" + Helga.time() + "} - Starting threaded surrogate mapping")
+                    print("Hermione (map-srg) {" + ApplicationHelper.time() + "} - Starting threaded surrogate mapping")
                 
                 #   STEP 23: Outsource and return
                 return self.__mapSurrogate__(surrogate=kwargs["surrogate"], data=kwargs["data"], optimizer=eOptimizer)
@@ -171,7 +171,7 @@ class Hermione:
             else:
                 #   STEP 25: User output
                 if (self.bShowOutput):
-                    print("Hermione (map-srg) {" + Helga.time() + "} - Starting surrogate mapping")
+                    print("Hermione (map-srg) {" + ApplicationHelper.time() + "} - Starting surrogate mapping")
 
                 #   STEP 26: Create new swarm handler
                 sarah = Sarah()
@@ -276,7 +276,7 @@ class Hermione:
             if (bThreading):
                 #   STEP 15: User output
                 if (self.bShowOutput):
-                    print("Hermione (train-srg) {" + Helga.time() + "} - Starting threaded surrogate training")
+                    print("Hermione (train-srg) {" + ApplicationHelper.time() + "} - Starting threaded surrogate training")
 
                 #   STEP 16: Outsource and return
                 return self.__trainSurrogate__(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["password"], optimizer=eOptimizer)
@@ -285,7 +285,7 @@ class Hermione:
             else:
                 #   STEP 18: User output
                 if (self.bShowOutput):
-                    print("Hermione (train-srg) {" + Helga.time() + "} - Starting surrogate training")
+                    print("Hermione (train-srg) {" + ApplicationHelper.time() + "} - Starting surrogate training")
 
                 #   STEP 19: Create new optimizer
                 sb      = SpongeBob()
@@ -299,7 +299,7 @@ class Hermione:
             if (bThreading):
                 #   STEP 23: User output
                 if (self.bShowOutput):
-                    print("Hermione (train-srg) {" + Helga.time() + "} - Starting threaded surrogate training")
+                    print("Hermione (train-srg) {" + ApplicationHelper.time() + "} - Starting threaded surrogate training")
 
                 #   STEP 24: Outsouce and return
                 return self.__trainSurrogate__(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["password"], optimizer=eOptimizer)
@@ -308,7 +308,7 @@ class Hermione:
             else:
                 #   STEP 26: User output
                 if (self.bShowOutput):
-                    print("Hermione (train-srg) {" + Helga.time() + "} - Starting surrogate training")
+                    print("Hermione (train-srg) {" + ApplicationHelper.time() + "} - Starting surrogate training")
 
                 #   STEP 27: Create new optimizer
                 sarah       = Sarah()
@@ -731,7 +731,7 @@ class Hermione:
         dArgs                   = _qTr.get()[0]
         dResults                = None
 
-        iThread_ID              = Helga.ticks()
+        iThread_ID              = ApplicationHelper.ticks()
         iThread_AppID           = dArgs["thread"]
 
         iSwarms_Active          = 0
@@ -755,7 +755,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 6: Release lock
                     _lUO.release()
@@ -778,7 +778,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 13: Release lock
                     _lUO.release()
@@ -820,7 +820,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(eTmp_Optimizer))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 24: Release lock
                     _lUO.release()
@@ -846,7 +846,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(eTmp_Optimizer))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 32: Release lock
                     _lUO.release()
@@ -998,7 +998,7 @@ class Hermione:
             lUO_Lock.acquire()
 
             #   STEP 15: print
-            print("Hermione (train-thread) {" + Helga.time() + "} - Starting threaded surrogate training.\n")
+            print("Hermione (train-thread) {" + ApplicationHelper.time() + "} - Starting threaded surrogate training.\n")
 
             #   STEP 16: Release
             lUO_Lock.release()
@@ -1173,7 +1173,7 @@ class Hermione:
         dArgs                   = _qTr.get()[0]
         dResults                = None
 
-        iThread_ID              = Helga.ticks()
+        iThread_ID              = ApplicationHelper.ticks()
         iThread_AppID           = dArgs["thread"]
 
         iSwarms_Active          = 0
@@ -1197,7 +1197,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 6: Release lock
                     _lUO.release()
@@ -1220,7 +1220,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(dArgs["optimizer"]))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 13: Release lock
                     _lUO.release()
@@ -1262,7 +1262,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(eTmp_Optimzier))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 24: Release lock
                     _lUO.release()
@@ -1288,7 +1288,7 @@ class Hermione:
                     print("\t- Optimizer: " + str(eTmp_Optimizer))
                     print("\t- Thread ID: " + str(iThread_ID))
                     print("\t- Application Thread ID: " + str(iThread_AppID))
-                    print("\t- Time: " + Helga.time() + "\n")
+                    print("\t- Time: " + ApplicationHelper.time() + "\n")
 
                     #   STEP 32: Release lock
                     _lUO.release()
@@ -1313,7 +1313,7 @@ class Hermione:
 
             #   STEP 38: Print output
             print("\t\t\t\t\t- Thread: " + str(iThread_AppID) +  " - <" + str(dResults["accuracy"]) + "  :  " + str(round(fTmpFitness, 2)) + ">")
-            print("\t\t\t\t\t- Time: " + Helga.time() + "\n")
+            print("\t\t\t\t\t- Time: " + ApplicationHelper.time() + "\n")
 
             #   STEP 39: release lock
             _lUO.release()

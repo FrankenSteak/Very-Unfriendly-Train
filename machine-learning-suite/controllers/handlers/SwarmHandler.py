@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath("."))
 from controllers.optimizers.Swarms import Swarms as sw
 from controllers.optimizers.Swarm import SwarmChan
 from config.Config import Conny
-from helpers.GeneralHelpers import Helga
+from helpers.ApplicationHelper import ApplicationHelper
 #endregion
 
 #region Class - Sarah
@@ -113,7 +113,7 @@ class Sarah:
         if (kwargs["optimizer"] == sw.PSO):
             #   STEP 9: User output
             if (self.bShowOutput):
-                print("Sarah (map-srg) -> (map-srg-PSO) {" + Helga.time() + "}")
+                print("Sarah (map-srg) -> (map-srg-PSO) {" + ApplicationHelper.time() + "}")
 
             #   STEP 10: Outsource to pso and return
             return self.__psoMapping__(surrogate=kwargs["surrogate"], data=kwargs["data"])
@@ -187,7 +187,7 @@ class Sarah:
         if (kwargs["optimizer"] == sw.PSO):
             #   STEP 11: User Output
             if (self.bShowOutput):
-                print("Sarah (train-srg) -> (train-srg-pso) {" + Helga.time() + "}")
+                print("Sarah (train-srg) -> (train-srg-pso) {" + ApplicationHelper.time() + "}")
 
             #   STEP 12: Outsource pso optimization and return
             return self.__psoTraining__(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["password"])
@@ -243,7 +243,7 @@ class Sarah:
         lShape                  = None
 
         #   STEP 1: Setup - Local variables
-        lShape                  = Helga.getShape(kwargs["initial"])
+        lShape                  = ApplicationHelper.getShape(kwargs["initial"])
 
         #   region STEP 2->??: PSO Candidate generation
 
@@ -547,7 +547,7 @@ class Sarah:
 
         #   STEP 18: User Output
         if (self.bShowOutput):
-            print("Sarah (train-srg-pso) {" + Helga.time() + "} - Starting Particle-Swarm Optimization\n")
+            print("Sarah (train-srg-pso) {" + ApplicationHelper.time() + "} - Starting Particle-Swarm Optimization\n")
 
         #   STEP 19: Perform number of iterations
         for i in range(0, dPsoParams["iterations"] + 1):
@@ -598,7 +598,7 @@ class Sarah:
         #   STEP 23: User Output
         if (self.bShowOutput):
             #   STEP 25: Print output
-            print("\tSarah (train-srg-pso) {" + Helga.time() + "} - Particle-Swarm Optimization Unsuccessful")
+            print("\tSarah (train-srg-pso) {" + ApplicationHelper.time() + "} - Particle-Swarm Optimization Unsuccessful")
             print("\t\tTotal iterations: " + str(i))
             print("\t\tAccurate Samples: " + str(iAcc))
             print("\t\tPercent Accuracy: " + str(round(fAcc * 100.0, 2)) + "%\n")
@@ -729,7 +729,7 @@ class Sarah:
         
         #   STEP 12: User output
         if (self.bShowOutput):
-            print("Sarah (map-srg-pso) {" + Helga.time() + "} - Starting Particle-Swarm Optimization mapping")
+            print("Sarah (map-srg-pso) {" + ApplicationHelper.time() + "} - Starting Particle-Swarm Optimization mapping")
 
         #   STEP 13: Iterate
         for i in range(0, dPSO_Params["iterations"] + 1):
@@ -751,7 +751,7 @@ class Sarah:
 
         #   STEP 19: User output
         if (self.bShowOutput):
-            print("Sarah (map-srg-PSO) {" + Helga.time() + "} - Particle-Swarm Optimzation mapping completed")
+            print("Sarah (map-srg-PSO) {" + ApplicationHelper.time() + "} - Particle-Swarm Optimzation mapping completed")
             print("\tTotal Iterations: " + str(i))
 
         #   STEP 18: Populate output dictionary

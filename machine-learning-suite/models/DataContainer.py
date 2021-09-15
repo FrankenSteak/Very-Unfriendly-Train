@@ -10,7 +10,7 @@ import  sys
 sys.path.append(os.path.abspath("."))
 
 from config.Config import Conny
-from helpers.GeneralHelpers import Helga
+from helpers.ApplicationHelper import ApplicationHelper
 #endregion
 
 #region Class - Data Container
@@ -484,8 +484,8 @@ class Data:
             #   STEP 11: Check if tranpose
             if (kwargs["transpose"]):
                 #   STEP 12: Transpose data
-                self.__lInput   = Helga.transpose(self.__lInput)
-                self.__lOutput  = Helga.transpose(self.__lOutput)
+                self.__lInput   = ApplicationHelper.transpose(self.__lInput)
+                self.__lOutput  = ApplicationHelper.transpose(self.__lOutput)
         
         #   STEP 7: Check if automap argument passed
         if ("automap" in kwargs):

@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath("."))
 
 from    Config                  import Conny
 from    DataContainer           import Data
-from    GeneralHelpers          import Helga
+from    GeneralHelpers          import ApplicationHelper
 
 #endregion
 
@@ -75,7 +75,7 @@ class DAVID:
         global tTest
 
         #   STEP 0: Local variables
-        sFileName   = Helga.ticks()
+        sFileName   = ApplicationHelper.ticks()
         lData       = []
         iCount      = 0
 
@@ -205,7 +205,7 @@ class DAVID:
 
                         except Exception as ex:
                             #   STEP 2.7: bombed out
-                            print("\tDAVID (The THING) {" + Helga().time() + "} - Bombed out:")
+                            print("\tDAVID (The THING) {" + ApplicationHelper().time() + "} - Bombed out:")
                             print("\t\tSwarm Size: " + str(a))
                             print("\t\tSwarm Iterations: " + str(b))
                             print("\t\tDef Iterations: " + str(c))

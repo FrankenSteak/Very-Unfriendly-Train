@@ -13,8 +13,8 @@ from config.Config import Conny
 from controllers.handlers.OptimizationHandler import Hermione
 from controllers.optimizers.Swarms import Swarms as swarms
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as genetic_algorithm
-from helpers.ActivationFunctions import Antonio
-from helpers.GeneralHelpers import Helga
+from helpers.ActivationFunctionHelper import Antonio
+from helpers.ApplicationHelper import ApplicationHelper
 from models.DataContainer import Data
 #endregion
 
@@ -332,11 +332,11 @@ class Annie:
 				"is child":				self.bIsChild,
 
 				#	STEP 5: Layoutvariables
-				"weights":				Helga.getList(self.__lWeights),
-				"momentum weights":		Helga.getList(self.__lWeights_Momentum),
-				"nodes":				Helga.getList(self.__lNodes),
-				"pre activation nodes":	Helga.getList(self.__lNodes_PreActivation),
-				"average nodes":		Helga.getList(self.__lNodes_Averages),
+				"weights":				ApplicationHelper.getList(self.__lWeights),
+				"momentum weights":		ApplicationHelper.getList(self.__lWeights_Momentum),
+				"nodes":				ApplicationHelper.getList(self.__lNodes),
+				"pre activation nodes":	ApplicationHelper.getList(self.__lNodes_PreActivation),
+				"average nodes":		ApplicationHelper.getList(self.__lNodes_Averages),
 
 				"input width":			self.__iInputWidth,
 				"output width":			self.__iOutputWidth,
@@ -629,7 +629,7 @@ class Annie:
 
 		except:
 			#	STEP 13: Do nothing
-			Helga.nop()
+			ApplicationHelper.nop()
 
 		#	STEP 14: Shortcut
 		try:
@@ -644,7 +644,7 @@ class Annie:
 
 		except:
 			#	STEP 18: YEET
-			Helga.nop()
+			ApplicationHelper.nop()
 
 		#
 		#	endregion
@@ -982,7 +982,7 @@ class Annie:
 		if (bOptimization == False):
 			#	STEP 6: User Output
 			if (self.bShowOutput):
-				print("Annie (train-set) {" + Helga.time() + "} - Training via Default Training")
+				print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Default Training")
 
 			#	STEP 7: Outsource default training
 			dTmp_Out	= self.__trainDef__(_dData, bCheckAcc)
@@ -996,7 +996,7 @@ class Annie:
 		elif ((bOptimization == True) and (iAlgorithm == 0)):
 			#	STEP 19: User Output
 			if (self.bShowOutput):
-				print("Annie (train-set) {" + Helga.time() + "} - Training via Trust-Region Optimization assisted Default training")
+				print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Trust-Region Optimization assisted Default training")
 
 			#	STEP 20: Outsource tro training
 			self.__trainTro__(_dData)
@@ -1013,7 +1013,7 @@ class Annie:
 		elif ((bOptimization == True) and (iAlgorithm == 1)):
 			#	STEP 23: User Output
 			if (self.bShowOutput):
-				print("Annie (train-set) {" + Helga.time() + "} - Training via Particle-Swarm Optimization assisted Default training")
+				print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Particle-Swarm Optimization assisted Default training")
 
 			#	STEP 24: Outsource pso training
 			self.__trainPso__(_dData)
@@ -1766,7 +1766,7 @@ class Annie:
 
 			#	STEP 10: User output
 			if (self.bShowOutput):
-				print("Annie (get-geo) {" + Helga.time() + "} - Initializing deep net")
+				print("Annie (get-geo) {" + ApplicationHelper.time() + "} - Initializing deep net")
 				print("\t~ Depth: " + str(iLength_Hidden), end="\n\n")
 
 		#	STEP 2: Populate output dictionary
@@ -1964,7 +1964,7 @@ class Annie:
 
 		#	STEP 7: User Output
 		if (self.bShowOutput):
-			print("Annie (def-training) {" + Helga.time() + "} - Starting default training")
+			print("Annie (def-training) {" + ApplicationHelper.time() + "} - Starting default training")
 			print("\t~ Epochs:\t\t"				+ str(iEpochs))
 			print("\t~ Batches per Epoch:\t"	+ str(iBatch_Iterations))
 			print("\t~ Batch size:\t\t"			+ str(iBatch_Size))
@@ -2021,13 +2021,13 @@ class Annie:
 
 					#	STEP 21: User output
 					if (self.bShowOutput):
-						print("\t{" + Helga.time() + "} -", "Fitness: " + str( round( fBest_Fitness, 2 ) ) + "\t", "Test: " + str( round( dTmp_AccTest["percent accuracy"], 2) ), "Train: " + str( round( dTmp_AccTrain["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
+						print("\t{" + ApplicationHelper.time() + "} -", "Fitness: " + str( round( fBest_Fitness, 2 ) ) + "\t", "Test: " + str( round( dTmp_AccTest["percent accuracy"], 2) ), "Train: " + str( round( dTmp_AccTrain["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
 
 				#	STEP 22: If temp fitness not converging
 				elif ( fTmp_Fitness > 5.0 * fBest_Fitness ):
 					#	STEP 23: User output
 					if (self.bShowOutput):
-						print("\t{" + Helga.time() + "} - \tEnding epoch " + str(i) + " early by " + str( iBatch_Iterations - j ) + " batch iterations")
+						print("\t{" + ApplicationHelper.time() + "} - \tEnding epoch " + str(i) + " early by " + str( iBatch_Iterations - j ) + " batch iterations")
 					
 					#	STEP 24: End epoch
 					break
@@ -2086,7 +2086,7 @@ class Annie:
 			raise Exception("An error occured in Annie.__propagateForward() -> Step 2: Data input width mismatch")		
 
 		#	STEP 5: Update - Drop out list
-		self.__lDropOut	= Helga.getShape(self.__lNodes)
+		self.__lDropOut	= ApplicationHelper.getShape(self.__lNodes)
 			
 		#	STEP 6: Iterate through inputs
 		for i in range(0, len(_dataPoint)):
@@ -2462,7 +2462,7 @@ class Annie:
 
 		#	STEP 9: User Output
 		if (self.bShowOutput):
-			print("Annie (child-train) {" + Helga.time() + "} - Training child network to meet 100 percent accuracy requirement")
+			print("Annie (child-train) {" + ApplicationHelper.time() + "} - Training child network to meet 100 percent accuracy requirement")
 
 		#	STEP 10: Get outputs for both datasets
 		dNew	= kwargs["data"]
@@ -2479,7 +2479,7 @@ class Annie:
 		if (iRequired > 0):
 			#	STEP 12: User Output
 			if (self.bShowOutput):
-				print("Annie (child-train) {" + Helga.time() + "} - Expanding dataset to avoid single class dataset")
+				print("Annie (child-train) {" + ApplicationHelper.time() + "} - Expanding dataset to avoid single class dataset")
 
 			#	STEP 13: Get the output\s that isn't in the new dataset
 			lOutputs = []
@@ -2518,7 +2518,7 @@ class Annie:
 
 		#	STEP 24: User Output
 		if (self.bShowOutput):
-			print("Annie (child-train) {" + Helga.time() + "} - Starting training process")
+			print("Annie (child-train) {" + ApplicationHelper.time() + "} - Starting training process")
 
 		if (bChildOutput):
 			print("")
@@ -2554,7 +2554,7 @@ class Annie:
 
 					#	STEP 33: User output
 					if (self.bShowOutput):
-						print("Annie (child-train) {" + Helga.time() + "} - Child net successfully trained")
+						print("Annie (child-train) {" + ApplicationHelper.time() + "} - Child net successfully trained")
 
 					if (bShowComparison):
 						print("\n***\n")
@@ -2576,7 +2576,7 @@ class Annie:
 
 		#	STEP 37: User output
 		if (self.bShowOutput):
-			print("Annie (child-train) {" + Helga.time() + "} - Child net successfully trained")
+			print("Annie (child-train) {" + ApplicationHelper.time() + "} - Child net successfully trained")
 			print("\t> Required accuracy not achieved")
 
 		if (bShowComparison):
@@ -2659,7 +2659,7 @@ class Annie:
 		if ((self.bIsFertile == True) and (self.bIsChild == False) and (self.bIsClassifier == False)):
 			#	STEP 10: User output
 			if (self.bShowOutput):
-				print("\nAnnie (train-classifier) {" + Helga.time() + "} - Creating classifier")
+				print("\nAnnie (train-classifier) {" + ApplicationHelper.time() + "} - Creating classifier")
 			
 			#	STEP 11: Create classifier
 			self.__annClassifier = Annie()
@@ -2670,7 +2670,7 @@ class Annie:
 
 			#	STEP 13: User output
 			if (self.bShowOutput):
-				print("Annie (train-classifier) {" + Helga.time() + "} - Training classifier\n")
+				print("Annie (train-classifier) {" + ApplicationHelper.time() + "} - Training classifier\n")
 
 			#	STEP 14: Train classifier
 			self.__annClassifier.trainSet(dData, compare=bShowComparison)
@@ -2822,7 +2822,7 @@ class Annie:
 			dDNR = _dData.getRandDNR()
 
 			self.__propagateForward__(dDNR["in"])
-			print( Helga.round( dDNR["out"], 1) , Helga.round( self.getOutput(), 1), sep="\t")
+			print( ApplicationHelper.round( dDNR["out"], 1) , ApplicationHelper.round( self.getOutput(), 1), sep="\t")
 
 		print("\n-----------------------------", "\tClassification\t\t", "-----------------------------\n")
 		

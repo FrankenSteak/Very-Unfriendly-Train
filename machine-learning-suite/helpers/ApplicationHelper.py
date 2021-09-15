@@ -6,9 +6,9 @@ import  numpy           as np
 
 #endregion
 
-#region Class - Helga
+#region Class - ApplicationHelper
 
-class Helga:
+class ApplicationHelper:
 
     #region Init
 
@@ -94,10 +94,10 @@ class Helga:
         #   STEP 2: Check that candidates is a list
         if (type(_lCandidates) != list):
             #   STEP 3: Error handling
-            raise Exception("An error occured in Helga.getCentroid() -> Step 2: Passed parameter must be a list")
+            raise Exception("An error occured in ApplicationHelper.getCentroid() -> Step 2: Passed parameter must be a list")
 
         #   STEP 4: Setup - Local variables
-        lOut    = Helga.getShape(_lCandidates[0])
+        lOut    = ApplicationHelper.getShape(_lCandidates[0])
 
         #   STEP 5: Loop through candidates
         for i in range(0, len( _lCandidates )):
@@ -241,7 +241,7 @@ class Helga:
         #   STEP 2: Check that input is str
         if (type(_sData) != str):
             #   STEP 3: Error handling
-            raise Exception("An error occured in Helga.getValue() -> Step 3: Invalid input")
+            raise Exception("An error occured in ApplicationHelper.getValue() -> Step 3: Invalid input")
 
         #   STEP 4: Loop through input
         for i in range(0, len(_sData)):
@@ -343,6 +343,6 @@ class Helga:
 
 if (__name__ == "__main__"):
 
-    Helga.nop()
+    ApplicationHelper.nop()
 
 #endregion

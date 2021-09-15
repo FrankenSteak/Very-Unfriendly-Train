@@ -2,7 +2,7 @@
 import json
 import os
 
-from helpers.GeneralHelpers import Helga
+from helpers.ApplicationHelper import ApplicationHelper
 #endregion
 
 class Conny:

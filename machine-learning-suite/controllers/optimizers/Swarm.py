@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath("."))
 from controllers.optimizers.Swarms import Swarms as sw
 from models.Particle import UwU
 from config.Config import Conny
-from helpers.GeneralHelpers import Helga
+from helpers.ApplicationHelper import ApplicationHelper
 #endregion
 
 #region Class - Swarm
@@ -1540,7 +1540,7 @@ class SwarmChan:
 #   region Testing
 
 if (__name__ == "__main__"):
-    Helga.nop()
+    ApplicationHelper.nop()
 
 #
 #   endregion

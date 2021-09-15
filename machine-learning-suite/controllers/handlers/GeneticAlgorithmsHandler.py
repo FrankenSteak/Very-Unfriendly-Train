@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath("."))
 from config.Config import Conny
 from controllers.optimizers.GeneticAlgorithms import GeneticAlgorithms as ga
 from controllers.optimizers.GeneticAlgorithm import Garry
-from helpers.GeneralHelpers import Helga
+from helpers.ApplicationHelper import ApplicationHelper
 #endregion
 
 class SpongeBob:
@@ -76,7 +76,7 @@ class SpongeBob:
         if (kwargs["optimizer"] == ga.TRO):
             #   STEP 10: User output
             if (self.bShowOutput):
-                print("SpongeBob (map-srg) -> (map-srg-TRO) {" + Helga.time() + "}")
+                print("SpongeBob (map-srg) -> (map-srg-TRO) {" + ApplicationHelper.time() + "}")
 
             #   STEP 11: Outsource to tro and return
             return self.__troMapping__(surrogate=kwargs["surrogate"], data=kwargs["data"])
@@ -147,7 +147,7 @@ class SpongeBob:
         if (kwargs["optimizer"] == ga.TRO):
             #   STEP 11: User Output
             if (self.bShowOutput):
-                print("SpongeBob (train-srg) -> (train-srg-tro) {" + Helga.time() + "}")
+                print("SpongeBob (train-srg) -> (train-srg-tro) {" + ApplicationHelper.time() + "}")
 
             #   STEP 12: Outsource tro optimization and return
             return self.__troTraining__(surrogate=kwargs["surrogate"], data=kwargs["data"], password=kwargs["password"])
@@ -225,7 +225,7 @@ class SpongeBob:
             #   STEP 11: Iterate through the required number of candidates
             for _ in range(0, kwargs["params"]["candidates"]):
                 #   STEP 12: Get temporary candidate
-                lTmp = Helga.getShape(kwargs["initial"])
+                lTmp = ApplicationHelper.getShape(kwargs["initial"])
 
                 #   STEP 13: Iterate through candidate
                 for i in range(0, len(lTmp)):
@@ -525,7 +525,7 @@ class SpongeBob:
 
         #   STEP 14: User Output
         if (self.bShowOutput):
-            print("SpongeBob (train-srg-tro) {" + Helga.time() + "} - Starting Trust-Region Optimization\n")
+            print("SpongeBob (train-srg-tro) {" + ApplicationHelper.time() + "} - Starting Trust-Region Optimization\n")
 
         #   STEP 15: Perform specified number of iterations
         for i in range(0, dTroParams["iterations"] + 1):
@@ -581,13 +581,13 @@ class SpongeBob:
         if (self.bShowOutput):
             #   STEP 28: Print output
             if (fAcc >= dTroParams["requirement"]):
-                print("SpongeBob (train-srg-tro) {" + Helga.time() + "} - Trust-Region Optimization successful")
+                print("SpongeBob (train-srg-tro) {" + ApplicationHelper.time() + "} - Trust-Region Optimization successful")
                 print("\tTotal Iterations: " + str(i))
                 print("\tAccurate Samples: " + str(iAcc))
                 print("\tPercent Accuracy: " + str(round(fAcc * 100.0, 2)) + "%\n")
 
             else:
-                print("\tSpongeBob (train-srg-tro) {" + Helga.time() + "} - Trust-Region Optimization Unsuccessful")
+                print("\tSpongeBob (train-srg-tro) {" + ApplicationHelper.time() + "} - Trust-Region Optimization Unsuccessful")
                 print("\t\tTotal iterations: " + str(i))
                 print("\t\tAccurate Samples: " + str(iAcc))
                 print("\t\tPercent Accuracy: " + str(round(fAcc * 100.0, 2)) + "%\n")
@@ -693,7 +693,7 @@ class SpongeBob:
         
         #   STEP 11: User output
         if (self.bShowOutput):
-            print("SpongeBob (map-srg-TRO) {" + Helga.time() +"} - Starting Trust-Region Optimization mapping")
+            print("SpongeBob (map-srg-TRO) {" + ApplicationHelper.time() +"} - Starting Trust-Region Optimization mapping")
 
         #   STEP 12: Loop for max iterations
         for i in range(0, dTRO_Params["iterations"] + 1):
@@ -722,7 +722,7 @@ class SpongeBob:
 
         #   STEP 27: User output
         if (self.bShowOutput):
-            print("SpongeBob (map-srg-TRO) {" + Helga.time() + "} - Trust-Region Optimizaion mapping completed")
+            print("SpongeBob (map-srg-TRO) {" + ApplicationHelper.time() + "} - Trust-Region Optimizaion mapping completed")
             print("\tTotal Iterations: " + str(i))
 
         #   STEP 28: Populate output dictionary
