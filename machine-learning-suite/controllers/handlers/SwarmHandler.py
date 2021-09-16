@@ -367,10 +367,10 @@ class Sarah:
             #   STEP 14: Iterate through candidates
             for i in range(0, len(candidates)):
                 #   STEP 15: Set the surrogate weights
-                surrogate.setWeights(weights=candidates[i], password=password)
+                surrogate.set_weights(weights=candidates[i], password=password)
                 
                 #   STEP 16: Append fitness to output list
-                lOut.append(surrogate.getAFitness(data=data))
+                lOut.append(surrogate.get_fitness_of_array(data=data))
 
             #   STEP 17: Return
             return lOut
@@ -518,7 +518,7 @@ class Sarah:
         password        = kwargs["password"]
 
         #   STEP 10: Init candidate list
-        lCandidates     = self.__getCandidates__(optimizer=sw.PSO, params=dPsoParams, initial=surrogate.getWeights(password=password))
+        lCandidates     = self.__getCandidates__(optimizer=sw.PSO, params=dPsoParams, initial=surrogate.get_weights(password=password))
 
         #   STEP 11: Init fitness list
         lFitness        = self.__getFitness__(type="surrogate", candidates=lCandidates, surrogate=surrogate, data=dTestingData, password=password) 
@@ -536,12 +536,12 @@ class Sarah:
         #   STEP 14: Check if L1
         if (fTmp < 0.65):
             #   STEP 15: Set - L1
-            surrogate.bUse_L1  = True
+            surrogate.use_l1  = True
 
         #   STEP 16: Check if L2
         elif  (fTmp < 0.85):
             #   STPE 17: Set - L2
-            surrogate.bUse_L2   = True
+            surrogate.use_l2   = True
 
         #
         #   endregion
@@ -574,7 +574,7 @@ class Sarah:
             swarm.setParticleFitness(lFitness)
 
             #   STEP 10: Set surrogate weights to best candidate
-            surrogate.setWeights(weights=swarm.lBestSolution, password=password)
+            surrogate.set_weights(weights=swarm.lBestSolution, password=password)
 
             #   STEP 11: Perform default training
             for j in range(0, dPsoParams["iterations-def"]):
@@ -582,17 +582,17 @@ class Sarah:
                 dDNR = dTrainingData.getRandDNR(noise=True)
 
                 #   STEP 13: Perform propagation
-                surrogate.propagateForward(data=dDNR["in"], password=password)
-                surrogate.propagateBackward(data=dDNR["out"], password=password)
+                surrogate.propagate_forward(data=dDNR["in"], password=password)
+                surrogate.propagate_backward(data=dDNR["out"], password=password)
 
             #   STEP 14: Update best candidate
-            swarm.lBestSolution = surrogate.getWeights(password=password)
+            swarm.lBestSolution = surrogate.get_weights(password=password)
 
             #
             #   endregion
 
         #   STEP 24: Get accuracy as percentage
-        dHold   = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen(), full_set=True)
+        dHold   = surrogate.get_accuracy(data=kwargs["data"], size=kwargs["data"].getLen(), full_set=True)
         iAcc    = dHold["accurate samples"]
         fAcc    = dHold["percent accuracy"]
 

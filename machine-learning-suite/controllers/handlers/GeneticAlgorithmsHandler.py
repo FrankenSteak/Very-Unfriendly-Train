@@ -339,10 +339,10 @@ class SpongeBob:
             #   STEP 14: Iterate through candidates
             for i in range(0, len(candidates)):
                 #   STEP 15: Set the surrogate weights
-                surrogate.setWeights(weights=candidates[i], password=password)
+                surrogate.set_weights(weights=candidates[i], password=password)
 
                 #   STEP 16: Append fitness to output list
-                lOut.append(surrogate.getAFitness(data=data))
+                lOut.append(surrogate.get_fitness_of_array(data=data))
 
             #   STEP 17: Return
             return lOut
@@ -496,7 +496,7 @@ class SpongeBob:
         #   STEP 10: Init surrogate activation funcitons
         
         #   STEP 11: Init candidate list
-        lCandidates.append(surrogate.getWeights(password=password))
+        lCandidates.append(surrogate.get_weights(password=password))
 
         #   STEP 12: Init fitness list
         lFitness        = self.__getFitness__(type="surrogate", candidates=lCandidates, surrogate=surrogate, data=dData_Test, password=password)
@@ -514,12 +514,12 @@ class SpongeBob:
         #   STEP 15: Check if L1
         if (fTmp < 0.65):
             #   STEP 16: Set - L1
-            surrogate.bUse_L1   = True
+            surrogate.use_l1 = True
 
         #   STEP 17: Check if L2
         elif (fTmp < 0.85):
             #   STEP 18: Set - L2
-            surrogate.bUse_L2   = True
+            surrogate.use_l2   = True
 
         #
         #   endregion
@@ -540,17 +540,17 @@ class SpongeBob:
             #   STEP 6: Get candidate list fitness
             for j in range(0, len(lCandidates)):
                 #   STEP 7: Set surrogate weights
-                surrogate.setWeights(weights=lCandidates[j], password=password)
+                surrogate.set_weights(weights=lCandidates[j], password=password)
 
                 #   STEP 8: Append candidate fitness
-                lFitness.append(surrogate.getAFitness(data=dData_Test))
+                lFitness.append(surrogate.get_fitness_of_array(data=dData_Test))
 
             #   STEP 9: Update garry
             garry.setPopulation(candidates=lCandidates)
             garry.setFitness(fitness=lFitness)
 
             #   STEP 10: Set surrogate weight to best candidate
-            surrogate.setWeights(weights=garry.vBestSolution.lCurrPosition, password=password)
+            surrogate.set_weights(weights=garry.vBestSolution.lCurrPosition, password=password)
 
             #   STEP 11: Perform default training
             for j in range(0, dTroParams["iterations-def"]):
@@ -558,12 +558,12 @@ class SpongeBob:
                 dDNR = dData_Train.getRandDNR(noise=True)
 
                 #   STEP 13: Perform propagation
-                surrogate.propagateForward( data=dDNR["in"], password=password)
-                surrogate.propagateBackward( data=dDNR["out"], password=password)
+                surrogate.propagate_forward( data=dDNR["in"], password=password)
+                surrogate.propagate_backward( data=dDNR["out"], password=password)
 
             #   STEP 14: Update garry
-            garry.vBestSolution.lCurrPosition   = surrogate.getWeights(password=password)
-            garry.fBestSolution                 = surrogate.getAFitness(data=dData_Test)
+            garry.vBestSolution.lCurrPosition   = surrogate.get_weights(password=password)
+            garry.fBestSolution                 = surrogate.get_fitness_of_array(data=dData_Test)
 
             #   STEP 15: Perform trust-region optimization
             garry.tro()
@@ -574,7 +574,7 @@ class SpongeBob:
                 break
 
         #   STEP 26: Get accuracy as percentage
-        dHold = surrogate.getAccuracy(data=kwargs["data"], size=kwargs["data"].getLen(), full_set=True)
+        dHold = surrogate.get_accuracy(data=kwargs["data"], size=kwargs["data"].getLen(), full_set=True)
         iAcc = dHold["accurate samples"]
         fAcc = dHold["percent accuracy"]
 

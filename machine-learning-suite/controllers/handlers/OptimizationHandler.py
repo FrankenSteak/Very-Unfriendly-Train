@@ -1303,7 +1303,7 @@ class Hermione:
         #   endregion
 
         #   STEP 35: Get surrogate fitness
-        fTmpFitness = dResults["surrogate"].getAFitness(data=dArgs["data"])
+        fTmpFitness = dResults["surrogate"].get_fitness_of_array(data=dArgs["data"])
         fTmpFitness = fTmpFitness * dResults["inverse accuracy"]
         
         #   STEP 36: User Output

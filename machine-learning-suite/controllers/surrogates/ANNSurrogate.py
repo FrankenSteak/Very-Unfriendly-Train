@@ -21,99 +21,265 @@ from models.DataContainer import Data
 #endregion
 
 class Annie:
-    #region	--- Init ---
+    #region	--- init ---
     def __init__(self, **kwargs) -> None:
-        #   --- Setup ---
+        #   --- General ---
         self.__config = Conny()
         self.__config.load("ArtificialNeuralNetwork.json")
-        self.__password			= rn.random() * 111754552.83191288 			#  ToDo change to uuid
+        self.__password = rn.random() * 111754552.83191288  #  ToDo change to uuid
 
         rn.seed(dt.datetime.now())
-        #
+        #   --- Application ---
+        self.show_output = None
+        self.__bAllowTesting = None
+        self.__dHiddenDetails = None
+        #   --- Secondary Neural Nets ---
+        self.secondary_neural_net_iterations = None
         self.secondary_neural_nets = None
-        self.__iIterationsChildGen = None
-        self.classifier_neural_net = None        
-        #	STEP 1.1: Layout
+        self.classifier_neural_net = None
+        self.is_primary = None
+        self.is_classifier = None
+        self.is_secondary = None
+        #   --- Weights ---
         self.weights = None
+        self.weight_range = None
         self.weights_momentum = None
-        #
-        self.nodes = None
-        self.pre_activation_nodes = None
-        self.node_averages = None
-        #
+        #   --- Nodes ---
         self.input_width = None
         self.output_width = None
         self.hidden_layers_width = None
         self.number_of_hidden_layers = None
-        #
-        self.__dHiddenDetails = None
-        #
-        self.weight_range = None
-        #	STEP 1.3: Activation functions
+        self.bias_array = None
+        self.nodes = None
+        self.pre_activation_nodes = None
+        self.node_averages = None
+        #   --- Activation Functions ---
         self.activation_functions = ActivationFunctionHelper()
         self.current_activation_function = None
-        #	STEP 1.4: Learning Rate
+        #   --- Training Variables ---
         self.learning_rate = None
-        #	STEP 1.5: Momentum
         self.use_momentum = None
-        #
-        self.momentum = None		
-        #	STEP 1.6: Default training variables
-        self.accuracy_requirement = None
-        #
+        self.momentum = None
         self.number_of_epochs = None
         self.batch_size = None
-        #	STEP 1.7: Other
+        self.use_bias = None
+        self.bias = None
+        #   --- Fitness Function ---
+        self.accuracy_requirement = None
         self.accuracy_test_sample_size = None
         self.fitness_test_sample_size = None
-        #	STEP 1.9: Bools
-        self.__bAllowTesting		= None
-        #	STEP 1.10: Bias
-        self.bias_array				= None
-        #
-        self.bias				= None       
-        #	STEP 1.11: Dropout
-        self.drop_out_array				= None
-        self.input_nodes_drop_out_percent		= None
-        self.hidden_nodes_drop_out_percent		= None        
-        #	STEP 1.12: Regularizations
-        self.weight_decay			= None
-        self.l1_regularization			= None
-        self.l2_regularization			= None
-        #	STEP 2.1: Chlidren
-        self.is_primary				= None
-        self.is_classifier			= None
-        self.is_secondary				= None        
-        #	STEP 2.2: Other
-        self.show_output			= None
-        #	STEP 2.3: Drop out
-        self.use_drop_out			= False
-        #	STEP 2.4: Regularization
-        self.use_noise_injection	= True
-        self.use_weight_decay		= False
-        self.use_l1_regularization				= False
-        self.use_l2_regularization				= False
-        #	STEP 3.1: Check if parameters in kwargs
+        #   --- Regularization---
+        self.use_drop_out = False
+        self.drop_out_array = None
+        self.input_nodes_drop_out_rate = None
+        self.hidden_nodes_drop_out_rate = None
+        self.use_weight_decay = False
+        self.weight_decay = None
+        self.use_l1_regularization = False
+        self.l1_regularization = None
+        self.use_l2_regularization = False
+        self.l2_regularization = None
+        self.use_noise_injection = True
+        
+        #   --- Setup ---
         if ("params" in kwargs):
-            #	STEP 3.2: Init params using passed params
-            self.__initParams__(kwargs["params"])
+            self.__setup_params__(kwargs["params"])
         else:
-            #	STEP 3.3: Init params using default params
-            self.__initParams__(self.__config.data["parameters"])
+            self.__setup_params__(self.__config.data["parameters"])
 
-        #	STEP 3.4: Check if geometry is in kwargs
         if ("geometry" in kwargs):
-            #	STEP 3.5: Init geometry using passed geometry
-            self.__initGeometry__(kwargs["geometry"])
+            self.__setup_geometry__(kwargs["geometry"])
+
+        #   --- Response ---
+        return
+
+    def __setup_geometry__(self, _dGeometry: dict) -> None:
+        """
+            Description:
+
+                Initializes this instance's gemoetry variables; weights and
+                nodes are then initialized.
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + in width	= ( int ) The input data width
+                    ~ Required
+
+                + out width = ( int ) The output data width
+                    ~ Required
+
+                + hidden width	= ( int ) The hidden layer width
+                    ~ Required
+
+                + hidden legnth = ( int ) The number of hidden layers
+                    ~ Required
+        """
+
+        #	STEP 0: Local variables
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Initialize lists
+        self.input_width 		= _dGeometry["in width"]
+        self.output_width		= _dGeometry["out width"]
+        self.hidden_layers_width		= _dGeometry["hidden width"]
+        self.number_of_hidden_layers	= _dGeometry["hidden length"]
+
+        #	STEP 3: Initialize weights and momentumWeights
+        self.__setup_nodes__()
+        self.__setup_weights__()
 
         #	STEP 4: Return
+        return
+
+    def __setup_params__(self, _dParams: dict) -> None:
+        """
+        """
+
+        #	STEP 0: Local variables
+
+        #	STEP 1: Setup - Local variables
+        self.__bAllowTesting		= _dParams["allow testing"]
+        self.show_output			= _dParams["show output"]
+        self.current_activation_function			= _dParams["activation function"]
+        self.weight_range			= _dParams["weight range"]
+        self.learning_rate		= _dParams["learning"]
+        self.accuracy_test_sample_size		= _dParams["accuracy sample size"]
+        self.fitness_test_sample_size		= _dParams["fitness sample size"]
+        
+
+        self.__dHiddenDetails		= _dParams["hidden details"]
+        self.current_activation_function_Output	= _dParams["output details"]["default"]
+
+        # self.activation_functions.setFunction(function=self.current_activation_function_Output, c=_dParams["output details"]["c"], boundary=_dParams["output details"]["boundary"])
+        
+        self.momentum			= _dParams["momentum"]["momentum scalar"]
+        self.use_momentum		= _dParams["momentum"]["is active"]
+
+        self.bias				= _dParams["bias"]["bias value"]
+
+        self.use_bias				= _dParams["bias"]["use bias"]
+        self.number_of_epochs				= _dParams["training methods"]["def"]["epochs"]
+        self.batch_size			= _dParams["training methods"]["def"]["batch size"]
+        self.accuracy_requirement		= _dParams["training methods"]["def"]["acc requirement"]
+
+        self.hidden_nodes_drop_out_rate		= _dParams["training methods"]["def"]["drop out"]["hidden drop out"]
+        self.input_nodes_drop_out_rate		= _dParams["training methods"]["def"]["drop out"]["input drop out"]
+
+        self.weight_decay			= _dParams["training methods"]["def"]["weight decay"]
+        self.l1_regularization			= _dParams["training methods"]["def"]["lambda1"]
+        self.l2_regularization			= _dParams["training methods"]["def"]["lambda2"]
+
+        self.is_primary				= _dParams["children"]["is fertile"]
+        self.is_classifier			= _dParams["children"]["is classifier"]
+
+        self.is_secondary				= _dParams["children"]["is child"]
+        self.secondary_neural_net_iterations	= _dParams["children"]["generation iterations"]
+
+        #	STEP 2: Return
+        return
+
+    def __setup_weights__(self) -> None:
+        """
+        """
+
+        #	STEP 0: Local variables
+        self.weights 		= []
+        self.weights_momentum 	= []
+
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Iterate through nodes
+        for i in range(0, len(self.nodes) - 1):
+            #	STEP 3: Append weight list
+            self.weights.append(np.zeros( len(self.nodes[i]) * len(self.nodes[i + 1]) ))
+
+        #	STEP 4: Create momentum weights
+        self.weights_momentum = cp.deepcopy(self.weights)
+
+        #	STEP 5: Iterate through weights
+        for i in range(0, len(self.weights)):
+            for j in range(0, len(self.weights[i])):
+                #	STEP 6: Get random value for weight
+                self.weights[i][j] = rn.gauss(0.0, self.weight_range)
+
+        #	STEP 7: Return
+        return
+
+    def __setup_nodes__(self) -> None:
+        """
+        """
+
+        #	STEP 0: Local variables
+        dWidth						= self.__dHiddenDetails["width"]
+
+        self.nodes 				= []
+        self.pre_activation_nodes	= []
+        self.node_averages		= []
+
+        iInWidth					= self.input_width
+        iOutWidth					= self.output_width
+        iHiddenWidth				= self.hidden_layers_width
+        iHiddenLength				= self.number_of_hidden_layers
+
+        #	STEP 1: Setup - local variables
+        
+        #region STEP 1.1: Bias nodes - check if using bias
+
+        if (self.use_bias):
+            #	STEP 1.2: Adjust hidden width
+            iHiddenWidth 	+= 1
+            iInWidth		+= 1
+            
+        #
+        #endregion
+
+        #	STEP 2: Init first row of nodes
+        self.nodes.append(np.zeros(iInWidth))
+
+        #	STEP 3: Iterate through hidden nodes
+        for _ in range(0, iHiddenLength):
+            #	STEP 4: Get random number
+            rand = rn.random()
+
+            #	STEP 5: Check if no width change
+            if ((rand <= dWidth["decrease"]) and (iHiddenWidth > self.output_width) and (iHiddenWidth > self.input_width)):
+                #	STEP 6: Check if decrease
+                iHiddenWidth -= 1
+
+            #	STEP 7: Check if increase
+            elif (rand <= dWidth["decrease"] + dWidth["increase"]):
+                iHiddenWidth += 1
+
+            #	STEP 4: Append hidden layer nodes
+            self.nodes.append(np.zeros(iHiddenWidth))
+
+        #	STEP 5: Append output layer nodes
+        self.nodes.append(np.zeros(iOutWidth))
+
+        #	STEP 6: Copy zeroes to pre activation list
+        self.pre_activation_nodes = cp.deepcopy(self.nodes)
+        self.node_averages		= cp.deepcopy(self.nodes)
+
+        #	STEP 7: Init bias matrix
+        self.bias_array				= np.zeros(iHiddenLength + 1)
+
+        #	STEP 8: Set bias values
+        self.__set_bias_values__()
+
+        #	STEP 9: Return
         return
 
     #
     #endregion
 
-    #region --- FE: imports/exports ---
-    def importAnnie(self, **kwargs) -> None:
+    #region --- imports/exports ---
+    def import_ann(self, **kwargs) -> None:
         """
             - Description::
 
@@ -124,12 +290,11 @@ class Annie:
             |\n
             |\n
             |\n
-
             - Arguments::
 
                 :arg file: >> [required][str] The file path from which the Annie instance
                     should be imported
-
+                    
                 :arg is_full_path: >> [bool] Specifies if the full path was provided
                     in the <file> argument
 
@@ -156,11 +321,11 @@ class Annie:
                         file_path = file_path + ".json"
 
             #   --- Open json
-            with open(file_path, "r+") as jsFile:
-                json_data = js.load(jsFile)
+            with open(file_path, "r+") as json_file:
+                json_data = js.load(json_file)
 
             #	STEP 12: Child variables
-            self.__iIterationsChildGen	= json_data["child iterations"]
+            self.secondary_neural_net_iterations	= json_data["child iterations"]
 
             self.is_primary				= json_data["is fertile"]
             self.is_classifier			= json_data["is classifier"]
@@ -170,66 +335,44 @@ class Annie:
             if (json_data["child"] != None):
                 #	STEP 14: Init child net
                 self.secondary_neural_nets = Annie()
-                self.secondary_neural_nets.importAnnie(file=json_data["child"])
+                self.secondary_neural_nets.import_ann(file=json_data["child"])
 
             #	STEP 15: Layout variables
-            self.weights 			= json_data["weights"]
-            self.weights_momentum	= json_data["momentum weights"]
-
-            self.nodes				= json_data["nodes"]
-            self.pre_activation_nodes	= json_data["pre activation nodes"]
-            self.node_averages		= json_data["average nodes"]
-
-            self.input_width			= json_data["input width"]
-            self.output_width			= json_data["output width"]
-            self.hidden_layers_width			= json_data["hidden width"]
-            self.number_of_hidden_layers		= json_data["hidden length"]
-
-            self.__dHiddenDetails		= json_data["hidden layer details"]
-
-            self.weight_range			= json_data["weight range"]
-
-            #	STEP 16: Activation Function variables
-            self.current_activation_function			= json_data["activation function"]
-
-            #	STEP 17: Learning Rate variables
-            self.learning_rate		= json_data["learning rate"]
-            
-            #	STEP 18: Momentum variables
-            self.use_momentum		= json_data["momentum active"]
-
-            self.momentum			= json_data["momentum"]			
-
-            #	STEP 19: Training variables
-            self.accuracy_requirement		= json_data["accuracy requirement"]
-
-            self.number_of_epochs				= json_data["epochs"]
-            self.batch_size			= json_data["batch size"]
-
-            #	STEP 20: Accuracy Test sample size
-            self.accuracy_test_sample_size		= json_data["accuracy sample size"]
-            self.fitness_test_sample_size		= json_data["fitness sample size"]
-
-            #	STEP 21: Other
-            self.__bAllowTesting		= json_data["allow testing"]
-            self.show_output			= json_data["show output"]
-
-            #	STEP 22: Bias variables
-            self.__bUseBias				= json_data["use bias"]
-            self.__bClearBias			= json_data["clear bias"]
-            self.bias				= json_data["bias value"]
+            self.weights = json_data["weights"]
+            self.weights_momentum = json_data["momentum weights"]
+            self.nodes = json_data["nodes"]
+            self.pre_activation_nodes = json_data["pre activation nodes"]
+            self.node_averages = json_data["average nodes"]
+            self.input_width = json_data["input width"]
+            self.output_width = json_data["output width"]
+            self.hidden_layers_width = json_data["hidden width"]
+            self.number_of_hidden_layers = json_data["hidden length"]
+            self.__dHiddenDetails = json_data["hidden layer details"]
+            self.weight_range = json_data["weight range"]
+            self.current_activation_function = json_data["activation function"]
+            self.learning_rate = json_data["learning rate"]
+            self.use_momentum = json_data["momentum active"]
+            self.momentum = json_data["momentum"]
+            self.accuracy_requirement = json_data["accuracy requirement"]
+            self.number_of_epochs = json_data["epochs"]
+            self.batch_size = json_data["batch size"]
+            self.accuracy_test_sample_size = json_data["accuracy sample size"]
+            self.fitness_test_sample_size = json_data["fitness sample size"]
+            self.__bAllowTesting = json_data["allow testing"]
+            self.show_output = json_data["show output"]
+            self.use_bias = json_data["use bias"]
+            self.bias = json_data["bias value"]
 
         except Exception as ex:
-            #	STEP 22: Error handling
             print("Initial error: ", ex)
-            raise Exception("An error occured in Annie.importAnnie()")
+            raise Exception("An error occured in Annie.import_ann()")
 
-        #	STEP 23: Return
+        #   --- Response ---
         return
 
-    def exportAnnie(self, **kwargs) -> None:
+    def export_ann(self, **kwargs) -> None:
         """
-            Description:
+            - Description::
 
                 Exports this instance of Annie to the specified file location.
 
@@ -238,145 +381,92 @@ class Annie:
             |\n
             |\n
             |\n
+            - Arguments::
 
-            Arguments:
-
-                + file	= ( str ) The file path this instance should be
+                :arg file: >> [required][str] The file path this instance should be
                     exported
                     ~ Required
 
-                + full_path	= ( bool ) Specifies if the full path was provided
+                :arg full_path: >> [bool] Specifies if the full path was provided
                     in the <file> argument
 
-                + extension	= ( bool ) Specifies if the file extension has been
+                :arg extension: >> [bool] Specifies if the file extension has been
                     appended to the <file> argument
                     ~ False = appends .json to the end of the path
         """
 
-        #	STEP 0: Local variables
-        json_data					= None
+        json_data = None
+        file_path = None
+        json_file = None
 
-        file_path				= None
-
-        jsFile					= None
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Be safe
         try:
-            #	STEP 3: Populate dictionary
             json_data = {
-                #	STEP 4: Child variables
-                "child iterations":		self.__iIterationsChildGen,
-
-                "is fertile":			self.is_primary,
-                "is classifier":		self.is_classifier,
-                "is child":				self.is_secondary,
-
-                #	STEP 5: Layoutvariables
-                "weights":				ArrayHelper.getList(self.weights),
-                "momentum weights":		ArrayHelper.getList(self.weights_momentum),
-                "nodes":				ArrayHelper.getList(self.nodes),
-                "pre activation nodes":	ArrayHelper.getList(self.pre_activation_nodes),
-                "average nodes":		ArrayHelper.getList(self.node_averages),
-
-                "input width":			self.input_width,
-                "output width":			self.output_width,
-                "hidden width":			self.hidden_layers_width,
-                "hidden length":		self.number_of_hidden_layers,
-
-                "hidden layer details":	self.__dHiddenDetails,
-
-                "weight range":			self.weight_range,
-
-                #	STEP 6: Activation Function variables
-                "activation function":	self.current_activation_function,
-
-                #	STEP 7: Learning Rate variables
-                "learning rate":		self.learning_rate,
-
-                #	STEP 8: Momentum variables
-                "momentum active":		self.use_momentum,
-
-                "momentum":				self.momentum,
-
-                #	STEP 9: Training variables
-                "accuracy requirement":	self.accuracy_requirement,
-
-                "epochs":				self.number_of_epochs,
-                "batch size":			self.batch_size,
-
-                #	STEP 10: Acc Test sample size
-                "accuracy sample size":	self.accuracy_test_sample_size,
-                "fitness sample size":	self.fitness_test_sample_size,
-
-                #	STEP 11: Other variables
-                "allow testing":		self.__bAllowTesting,
-                "show output":			self.show_output,
-
-                #	STEP 12: Bias variables
-                "use bias":				self.__bUseBias,
-                "clear bias":			self.__bClearBias,
-                "bias value":			self.bias
+                "child iterations": self.secondary_neural_net_iterations,
+                "is fertile": self.is_primary,
+                "is classifier": self.is_classifier,
+                "is child": self.is_secondary,
+                "weights": ArrayHelper.getList(self.weights),
+                "momentum weights": ArrayHelper.getList(self.weights_momentum),
+                "nodes": ArrayHelper.getList(self.nodes),
+                "pre activation nodes": ArrayHelper.getList(self.pre_activation_nodes),
+                "average nodes": ArrayHelper.getList(self.node_averages),
+                "input width": self.input_width,
+                "output width": self.output_width,
+                "hidden width": self.hidden_layers_width,
+                "hidden length": self.number_of_hidden_layers,
+                "hidden layer details": self.__dHiddenDetails,
+                "weight range": self.weight_range,
+                "activation function": self.current_activation_function,
+                "learning rate": self.learning_rate,
+                "momentum active": self.use_momentum,
+                "momentum": self.momentum,
+                "accuracy requirement": self.accuracy_requirement,
+                "epochs": self.number_of_epochs,
+                "batch size": self.batch_size,
+                "accuracy sample size": self.accuracy_test_sample_size,
+                "fitness sample size": self.fitness_test_sample_size,
+                "allow testing": self.__bAllowTesting,
+                "show output": self.show_output,
+                "use bias": self.use_bias,
+                "bias value": self.bias,
+                "child": ""
             }
 
-            #	STEP 12: Check if this instance has a child net
-            if (self.secondary_neural_nets == None):
-                #	STEP 13: No set child var = None
-                json_data["child"] = None
-
-            else:
-                #	STEP 14: Yes, create child net export name
+            #   --- Export Secondary ANN ---
+            if (self.secondary_neural_nets != None):
                 json_data["child"] = kwargs["file"] + "_child"
+                self.secondary_neural_nets.export_ann(file=json_data["child"], extension=False)
 
-                #	STEP 15: Export child net
-                self.secondary_neural_nets.exportAnnie(file=json_data["child"], extension=False)
-
-            #	STEP 16: Check if full path in kwargs
+            #   --- Check if full file path ---
             if ("full_path" in kwargs):
-                #	STEP 17: If specified file is full path
                 if (kwargs["full_path"] == True):
-                    #	STEP 18: Set file path
                     file_path = kwargs["file"]
 
-            #	STEP 19: If file path not set
+            #   --- Check if not full file path ---
             if (file_path == None):
-                #	STEP 20: Get full path
                 file_path = os.path.abspath(".") + "\\Data\\Exports\\Surrogates\\" + kwargs["file"]
-
-                #	STEP 21: Check if file extension specified
                 if ("extension" in kwargs):
-                    #	STEP 22: If file extension not added
                     if (kwargs["extension"] == False):
-                        #	STEP 23: If file exntension not added
                         file_path = file_path + ".json"
 
-            #	STEP 24: Create the file
-            jsFile = open(file_path, "a")
-
-            #	STEP 25: Close file
-            jsFile.close()
-            jsFile = None
-
-            #	STEP 26: Open file
-            with open(file_path, "r+") as jsFile:
-                #	STEP 27: Dump json data to file
-                js.dump(json_data, jsFile, indent=4, separators=(", ", " : "))
+            #   --- Export file ---
+            json_file = open(file_path, "a")
+            json_file.close()
+            with open(file_path, "r+") as json_file:
+                js.dump(json_data, json_file, indent=4, separators=(", ", " : "))
 
         except Exception as ex:
-            #	STEP 28: Error handling
             print("Initial error: ", ex)
-            raise Exception("An error occured in Annie.exportAnnie()")
+            raise Exception("An error occured in Annie.export_ann()")
 
-        #	STEP 29: Return
+        #   --- Response ---
         return
 
     #
     #endregion
 
-    #region Front-End: Is-type-statements
-
-    def isAccurate(self, _lfExpectedOutput: list, **kwargs) -> bool:
+    #region --- is-type statements ---
+    def is_accurate(self, expected_output_values: list, **kwargs) -> bool:
         """
             Description:
 
@@ -398,7 +488,7 @@ class Annie:
         """
 
         #	STEP 0: Local variables
-        lOutputs				= self.getOutput()
+        lOutputs				= self.get_ann_output()
 
         bRMSD					= False
 
@@ -419,7 +509,7 @@ class Annie:
             #	STEP 5: Loop through outputs
             for i in range(0, len( lOutputs ) ):
                 #	STEP 6: Get difference between output and actual
-                fTmp_Error = lOutputs[i] - _lfExpectedOutput[i]
+                fTmp_Error = lOutputs[i] - expected_output_values[i]
 
                 #	STEP 7: If within margin
                 if ((fTmp_Error <= fTmp_Margin) and (fTmp_Error >= -1.0 * fTmp_Margin)):
@@ -447,7 +537,7 @@ class Annie:
             #	STEP 14: Loop through outputs
             for i in range(0, len( lOutputs ) ):
                 #	STEP 15: Get MSE
-                fTmp_MSE	= np.power( _lfExpectedOutput[i] - lOutputs[i], 2)
+                fTmp_MSE	= np.power( expected_output_values[i] - lOutputs[i], 2)
 
                 #	STEP 16: Add MSE to sum
                 fTmp_Sum	+= fTmp_MSE
@@ -475,9 +565,8 @@ class Annie:
     #
     #endregion
 
-    #region Front-End: Gets
-
-    def getAccuracy(self, **kwargs) -> dict:
+    #region --- gets ---
+    def get_accuracy(self, **kwargs) -> dict:
         """
             Description:
 
@@ -541,7 +630,7 @@ class Annie:
         #	STEP 2: Check if data passed
         if ("data" not in kwargs):
             #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.getAccuracy() -> Step 2: No data argument passed")
+            raise Exception("An error occured in Annie.get_accuracy() -> Step 2: No data argument passed")
 
         else:
             #	STEP 4: Set data var
@@ -602,10 +691,10 @@ class Annie:
             dDNR = dData.getRandDNR()
 
             #	STEP 21: Propagate forward
-            self.__propagateForward__(dDNR["in"])
+            self.__propagate_forward__(dDNR["in"])
 
             #	STEP 22: Get accuracy
-            if (self.isAccurate(dDNR["out"], RMSD=True)):
+            if (self.is_accurate(dDNR["out"], RMSD=True)):
                 iAccurate += 1
 
             else:
@@ -630,7 +719,7 @@ class Annie:
         #	STEP 26: Return
         return dOut
 
-    def getAFitness(self, **kwargs) -> float:
+    def get_fitness_of_array(self, **kwargs) -> float:
         """
             Description:
 
@@ -665,7 +754,7 @@ class Annie:
         #	STEP 2: Check if data passed
         if ("data" not in kwargs):
             #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.getAFitness() -> Step 2: No data argument passed")
+            raise Exception("An error occured in Annie.get_fitness_of_array() -> Step 2: No data argument passed")
 
         else:
             #	STEP 4: Set local variable
@@ -701,10 +790,10 @@ class Annie:
             dDNR = dData.getRandDNR()
 
             #	STEP 14: Propagate forward
-            self.__propagateForward__(dDNR["in"])
+            self.__propagate_forward__(dDNR["in"])
 
             #	STEP 15: Sum fitness
-            fOut += self.getFitness(dDNR["out"])
+            fOut += self.get_ann_fitness(dDNR["out"])
 
         #
         #endregion
@@ -712,7 +801,7 @@ class Annie:
         #	STEP 16: Return
         return fOut
 
-    def getError(self, _lfExpectedOutput: list) -> list:
+    def get_ann_error(self, expected_output_values: list) -> list:
         """
         """
         
@@ -721,17 +810,17 @@ class Annie:
         lTmp					= None
 
         #	STEP 1: Setup - Local variables
-        lTmp					= self.getOutput()
+        lTmp					= self.get_ann_output()
 
         #	STEP 2: Iterate through outputs
-        for i in range(0, len(_lfExpectedOutput)):
+        for i in range(0, len(expected_output_values)):
             #	STEP 3: Append E = expected - actual
-            lOut.append(_lfExpectedOutput[i] - lTmp[i])
+            lOut.append(expected_output_values[i] - lTmp[i])
 
         #	STEP 4: Return
         return lOut
 
-    def getFitness(self, _lfExpectedOutput: list) -> float:
+    def get_ann_fitness(self, expected_output_values: list) -> float:
         """
         """
 
@@ -740,7 +829,7 @@ class Annie:
         lTmp				= None
 
         #	STEP 1: Setup - Local variables
-        lTmp 				= self.getError(_lfExpectedOutput)
+        lTmp 				= self.get_ann_error(expected_output_values)
 
         #	STEP 2: Get the fitness of the sample
         for i in range(0, len(lTmp)):
@@ -749,7 +838,7 @@ class Annie:
         #	STEP 3: Return
         return fOut
 
-    def getOutput(self, **kwargs) -> list:
+    def get_ann_output(self, **kwargs) -> list:
         """
             Description:
 
@@ -788,7 +877,7 @@ class Annie:
         #	STEP 6: Return
         return lOut
 
-    def getPointOutput(self, _lData: list) -> vars:
+    def get_ann_output_and_reset(self, _lData: list) -> vars:
         """
         """
         
@@ -798,10 +887,10 @@ class Annie:
         #	STEP 1: Setup - Local variables
 
         #	STEP 2: Propagate forward
-        self.__propagateForward__(_lData)
+        self.__propagate_forward__(_lData)
 
         #	STEP 3: Get the output to return
-        lOut = np.ndarray.tolist(cp.deepcopy(self.getOutput()))
+        lOut = np.ndarray.tolist(cp.deepcopy(self.get_ann_output()))
 
         #	STEP 4: Reset the network
         self.__resetNodes__()
@@ -814,11 +903,422 @@ class Annie:
         #	STEP 7: Return normally
         return lOut
 
+    def get_weights(self, **kwargs) -> list:
+        """
+            Description:
+
+                Returns this class isntance's weight list if the provided password
+                matches this instance's password.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Args:
+
+                + password		= ( int/float ) This class' password
+                    ~ Required
+
+            |\n
+
+            Returns:
+
+                + list			= ( list )
+                    ~ A deep copy of this class' weights
+        """
+
+        #	STEP 0: Local variables
+        #	STEP 1: Setup - local variables
+
+        #	STEP 2: Check if password provided
+        if ("password" not in kwargs):
+            #	STEP 3: Error handling
+            raise Exception("An error occured in Annie.get_weights() -> Step 2: No password provided")
+
+        #	STEP 4: Check if password matches class password
+        if (kwargs["password"] != self.__password):
+            #	STEP 5: Error handling
+            raise Exception("An error occured in Annie.get_weights() -> Step 4: The provided password doesn't match this class' password")
+
+        #	STEP 6: Return
+        return cp.deepcopy(self.weights)
+
+    def __getClassificationDataset__(self, **kwargs) -> dict:
+        """
+            Description:
+
+                Creates a new dataset using the provided dataset. The new
+                dataset groups the data that is correctly classified by this
+                parent instance and the data that is incorrectly classified
+                into unique classes:
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Arguments:
+
+                + data	= ( vars ) The dataset to adjust
+                    ~ Required
+        """
+
+        #	STEP 0: Local variables
+        dNewData				= None
+        dOldData				= None
+
+        dOut					= {}
+
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Check if data arg passed
+        if ("data" not in kwargs):
+            #	STEP 3: Error handling
+            raise Exception("An error occured in Annie.__getClassificationDataset__() -> Step 2: No data argument passed")
+
+        else:
+            #	STEP 4: Set local variable
+            dOldData = kwargs["data"]
+            dOldData.reset()
+
+        #	STEP 5: Create new dataset
+        dNewData = Data()
+
+        #	STEP 6: Iterate through old dataset
+        for _ in range(0, dOldData.getLen()):
+            #	STEP 7: Get random data sample
+            dDNR = dOldData.getRandDNR()
+
+            #	STEP 8: Propagate forward
+            self.__propagate_forward__(dDNR["in"])
+
+            #	STEP 9: Check if accurate
+            if (self.is_accurate(dDNR["out"], RMSD=True)):
+                #	STEP 10: Create temp dictionary
+                json_data = {
+                    "in": dDNR["in"],
+                    "out": [1.0, -1.0]
+                }
+
+                #	STEP 11: Insert into new dataset
+                dNewData.insert(data=json_data)
+
+            else:
+                #	STEP 12: Create temp dictionary
+                json_data = {
+                    "in": dDNR["in"],
+                    "out": [-1.0, 1.0]
+                }
+
+                #	STEP 13: Insert into new dataset
+                dNewData.insert(data=json_data)
+
+        #	STEP 14: Populate output dictionary
+        dOut = {
+            "new set": dNewData
+        }
+
+        #	STEP 15: Return
+        return dOut
+
+    def __get_geometry__(self, _dData: Data) -> dict:
+        """
+        """
+
+        #	STEP 0: Local variables
+        dOut					= None
+
+        iWidth_Input			= None
+        iWidth_Output			= None
+        iWidth_Hidden			= None
+        iLength_Hidden			= None
+
+        #	STEP 1: Setup - Local variables
+        iWidth_Input	= _dData.getInputWidth()
+        iWidth_Output	= _dData.getOutputWidth()
+
+        iWidth_Hidden 	= iWidth_Input + int(rn.random() * iWidth_Input)
+
+        #	STEP 2: Check if geometry is shallow
+        if (( self.__dHiddenDetails["is shallow"] ) and ( rn.uniform(0.0, 1.0) < 0.95 ) and ( self.use_drop_out == False ) ):
+            #	STEP 3: Get length probabilities
+            dProbabilities	= self.__dHiddenDetails["probabilities"] 
+
+            #	STEP 4: Get random number
+            fTmp = rn.uniform(0.0, 1.0)
+
+            #	STEP 5: Check if 2 length
+            if (fTmp < dProbabilities["2"]):
+                iLength_Hidden = 2
+
+            #	STEP 6: Check if 3 lenght
+            elif (fTmp < dProbabilities["2"] + dProbabilities["3"]):
+                iLength_Hidden = 3
+
+            #	STEP 7: Then must be 1 length
+            else:
+                iLength_Hidden = 1
+
+        #	STEP 8: Not shallow
+        else:
+            #	STEP 9
+            iTmp_Len1	= iWidth_Input + int(rn.random() * iWidth_Input)
+            iTmp_Len2	= rn.randint(4, 7)
+
+            iLength_Hidden	= min(iTmp_Len1, iTmp_Len2)
+
+            #	STEP 10: User output
+            if (self.show_output):
+                print("Annie (get-geo) {" + ApplicationHelper.time() + "} - Initializing deep net")
+                print("\t~ Depth: " + str(iLength_Hidden), end="\n\n")
+
+        #	STEP 2: Populate output dictionary
+        dOut = {
+            "in width": 		iWidth_Input,
+            "out width": 		iWidth_Output,
+            "hidden width":		iWidth_Hidden,
+            "hidden length":	iLength_Hidden
+        }
+
+        #	STEP 3: Return
+        return dOut
+
+    def __get_wheights_shape__(self) -> list:
+        """
+        """
+
+        #	STEP 0: Local variables
+        lOut = []
+
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Iterate thrgouh weight layers
+        for i in range(0, len(self.weights)):
+            #	STEP 3: Append zeros for layer
+            lOut.append(np.zeros(len(self.weights[i])))
+        
+        #	STEP 4: Return
+        return lOut
+
+    def __get_nodes_shape__(self) -> list:
+        """
+        """
+
+        #	STEP 0: Local variables
+        lOut = []
+
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Iterate through node layers
+        for i in range(0, len(self.nodes)):
+            #	STEP 3: Append zeros for node layer
+            lOut.append(np.zeros(len(self.nodes[i])))
+        
+        #	STEP 6: Return
+        return lOut
+
     #
     #endregion
 
-    #region Front-End: Training
+    #region --- sets ---
+    def set_activation_function(self, **kwargs) -> None:
+        """
+            Description
 
+                Sets the activation function for the class to match the range
+                of weights that will be used and updates the learning rate
+                accordingly
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Args:
+
+                + password		= ( int/float ) This class' password
+                    ~ Required
+                + algorithm		= ( str ) Name of the algorithm being used
+                    ~ Required
+                + scalar		= ( float ) The scalar to use
+                    ~ Required
+
+        """
+
+        #	STEP 0: Local variables
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Check if password passed
+        if ("password" not in kwargs):
+            #	STEP 3: Error handling
+            raise Exception("An error occured in Annie.set_activation_function() -> Step 2: No password passed")
+
+        #	STEP 4: Check if password matches class password
+        if (kwargs["password"] != self.__password):
+            #	STEP 5: Error handling
+            raise Exception("An error occured in Annie.set_activation_function() -> Step 3: Passed password does not match this class' password")
+
+        #	STEP 5: Outsource
+        self.__set_activation_function__(algorithm=kwargs["algorithm"], scalar=kwargs["scalar"])
+
+        #	STEP 6: Return
+        return
+
+    def set_weights(self, **kwargs) -> None:
+        """
+            Description:
+
+                Sets this class' weights to be the provided weights.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Args:
+
+                + password		= ( int/float ) This class' password
+                    ~ Required
+                + weights 		= ( list ) The weights to update to
+                    ~ Required
+                    
+        """
+
+        #	STEP 0: Local variables
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Check if password passed
+        if ("password" not in kwargs):
+            #	STEP 3: Error handling
+            raise Exception("An error occured in Annie.set_weights() -> Step 2: No password provided")
+
+        #	STEP 4: Check if password matches class password
+        if (kwargs["password"] != self.__password):
+            #	STEP 5: Error handling
+            raise Exception("An error occured in Annie.set_weights() -> Step 4: The provided password doesn't match this class' password")
+
+        #	STEP 6: Check if new weights provided
+        if ("weights" not in kwargs):
+            #	STEP 7: Error handling
+            raise Exception("An error occured in Annie.set_weights() -> Step 6: No weights provided to update to")
+
+        #	STEP 8: Set the weights
+        self.weights = kwargs["weights"]
+
+        #	STEP 9: Return
+        return
+
+    def __set_activation_function__(self, **kwargs) -> None:
+        """
+            Description:
+
+                Sets the activation function for the class to match the range
+                of weights that will be used and updates the learning rate
+                accordingly
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Args:
+            
+                + algorithm		= ( str ) Name of the algorithm that's updating
+                    ~ Required
+                + scalar		= ( float ) The scalar to use
+                    ~ Required
+
+        """
+        
+        #	STEP 0: Local variables
+        fTmp					= 0.0
+
+        #	STEP 1: Setup - Local variables
+        
+        #	STEP 2: Be safe
+        try:
+            #	STEP 3: Check if algorithm passed
+            if ("algorithm" not in kwargs):
+                #	STEP 4: Error handling
+                raise Exception("An error occured in Annie.__set_activation_function__() -> Step 3: No algorithm passed")
+
+            #	STEP 5: Check if scalar passed
+            if ("scalar" not in kwargs):
+                #	STEP 5: Error handling
+                raise Exception("An error occured in Annie.__set_activation_function__() -> Step 5: No scalar passed")
+
+            #	STEP 7: Check if normal propagation
+            if (kwargs["algorithm"] == "def"):
+                #	STEP 8: Return
+                return
+
+            #	STEP 9: Check if tro
+            if (kwargs["algorithm"] == "tro"):
+                #	STEP 10: Get scalar range
+                fTmp = float( 6.5 * kwargs["scalar"] )
+
+                #	STEP 11: update activation functions
+                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / fTmp ))
+
+                #	STEP 12: Update class learning rate
+                self.learning_rate = self.learning_rate * ( fTmp / 2.0 )
+
+                #	STEP 13: Return of the jedi
+                return
+
+            #	STEP 14: Check if pso
+            if (kwargs["algorithm"] == "pso"):
+                #	STEP 15: Get scalar range
+                fTmp = kwargs["scalar"]
+
+                #	STEP 16: Update activation function
+                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / fTmp ))
+
+                #	STEP 17: Update class learning rate
+                self.learning_rate = self.learning_rate * float ( fTmp / 2.5 )
+
+                #	STEP 18: Return of the jedi
+                return
+
+            #	STEP 19: Error handing
+            raise Exception("An error occured in Annie.__set_activation_function__() -> Step 19: Unimplemented algorithm passed")
+
+        except Exception as ex:
+            #	STEP ??: Error handling
+            print("Initial Error: ", ex)
+            raise Exception("An error occured in Annie.__set_activation_function__()")
+
+        #	STEP ??: Return
+        return
+
+    def __set_bias_values__(self) -> None:
+        """
+        """
+
+        #	STEP 0: Local variables
+
+        #	STEP 1: Setup - Local variables
+
+        #	STEP 2: Check if bias is being used
+        if (self.use_bias):
+            #	STEP 3: Iterate through bias list
+            for i in range(0, len(self.bias_array)):
+                #	STEP 4: Set bias node value
+                self.bias_array[i] = self.bias
+
+        #	STEP 5: Return
+        return
+
+    #
+    #endregion
+
+    #region --- training ---
     def trainSet(self, _dData: Data, **kwargs) -> dict:
         """
             - Description::
@@ -904,10 +1404,10 @@ class Annie:
         #	STEP 12: Check if weights initialized
         if (self.weights == None):
             #	STEP 13: Get geometry from data
-            dGeo = self.__getGeometry__(_dData)
+            dGeo = self.__get_geometry__(_dData)
 
             #	STEP 14: Init geometry
-            self.__initGeometry__(dGeo)
+            self.__setup_geometry__(dGeo)
 
         #
         #endregion
@@ -922,7 +1422,7 @@ class Annie:
                 input("\n> Start:")
 
             #	STEP 7: Outsource default training
-            json_data_Out	= self.__trainDef__(_dData, bCheckAcc)
+            json_data_Out	= self.__perform_default_training__(_dData, bCheckAcc)
 
         #
         #endregion
@@ -937,10 +1437,10 @@ class Annie:
                 input("\n> Start:")
 
             #	STEP 20: Outsource tro training
-            self.__trainTro__(_dData)
+            self.__perform_tro_training__(_dData)
 
             #	STEP 21: Outsoruce def training
-            json_data_Out	= self.__trainDef__(_dData, bCheckAcc)
+            json_data_Out	= self.__perform_default_training__(_dData, bCheckAcc)
 
         #
         #endregion
@@ -955,10 +1455,10 @@ class Annie:
                 input("\n> Start:")
 
             #	STEP 24: Outsource pso training
-            self.__trainPso__(_dData)
+            self.__preform_pso_training__(_dData)
 
             #	STEP 25: Outsource def training
-            json_data_Out 	= self.__trainDef__(_dData, bCheckAcc)
+            json_data_Out 	= self.__perform_default_training__(_dData, bCheckAcc)
 
         #
         #endregion
@@ -982,190 +1482,7 @@ class Annie:
         #	STEP 29: Return
         return dOut
 
-    #
-    #endregion
-
-    #region Front-End: Testing
-
-    def test(self, _dDict: dict) -> vars:
-        """
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - local variables
-
-        #	STEP 2: Check if testing allowed
-        if (self.__bAllowTesting):
-            print("YEET! This bitch empty!")
-
-        else:
-            raise Exception("An error occured in Annie.test() -> Step 2: Testing is not allowed in this class")
-
-        #	STEP ??: Return
-        return
-
-    #
-    #endregion
-
-    #region Mid-End: Gets
-
-    def getWeights(self, **kwargs) -> list:
-        """
-            Description:
-
-                Returns this class isntance's weight list if the provided password
-                matches this instance's password.
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Args:
-
-                + password		= ( int/float ) This class' password
-                    ~ Required
-
-            |\n
-
-            Returns:
-
-                + list			= ( list )
-                    ~ A deep copy of this class' weights
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - local variables
-
-        #	STEP 2: Check if password provided
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.getWeights() -> Step 2: No password provided")
-
-        #	STEP 4: Check if password matches class password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.getWeights() -> Step 4: The provided password doesn't match this class' password")
-
-        #	STEP 6: Return
-        return cp.deepcopy(self.weights)
-
-    #
-    #endregion
-
-    #region Mid-End: Sets
-
-    def setAcFunction(self, **kwargs) -> None:
-        """
-            Description
-
-                Sets the activation function for the class to match the range
-                of weights that will be used and updates the learning rate
-                accordingly
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Args:
-
-                + password		= ( int/float ) This class' password
-                    ~ Required
-                + algorithm		= ( str ) Name of the algorithm being used
-                    ~ Required
-                + scalar		= ( float ) The scalar to use
-                    ~ Required
-
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if password passed
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.setAcFunction() -> Step 2: No password passed")
-
-        #	STEP 4: Check if password matches class password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.setAcFunction() -> Step 3: Passed password does not match this class' password")
-
-        #	STEP 5: Outsource
-        self.__setAcFunction__(algorithm=kwargs["algorithm"], scalar=kwargs["scalar"])
-
-        #	STEP 6: Return
-        return
-
-    def setWeights(self, **kwargs) -> None:
-        """
-            Description:
-
-                Sets this class' weights to be the provided weights.
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Args:
-
-                + password		= ( int/float ) This class' password
-                    ~ Required
-                + weights 		= ( list ) The weights to update to
-                    ~ Required
-                    
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if password passed
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.SetWeights() -> Step 2: No password provided")
-
-        #	STEP 4: Check if password matches class password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.setWeights() -> Step 4: The provided password doesn't match this class' password")
-
-        #	STEP 6: Check if new weights provided
-        if ("weights" not in kwargs):
-            #	STEP 7: Error handling
-            raise Exception("An error occured in Annie.setWeights() -> Step 6: No weights provided to update to")
-
-        #	STEP 8: Set the weights
-        self.weights = kwargs["weights"]
-
-        #	STEP 9: Return
-        return
-
-    def setParameters(self, _dParams: dict) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if testing is allowed
-        if (self.__bAllowTesting):
-            #	STEP 3: Outsource
-            self.__initParams__(_dParams)
-
-        #	STEP 4: Return
-        return
-
-    #
-    #endregion
-
-    #region Mid-End: Propagation
-
-    def propagateForward(self, **kwargs) -> None:
+    def propagate_forward(self, **kwargs) -> None:
         """
             Description:
 
@@ -1192,25 +1509,25 @@ class Annie:
         #	STEP 2: check if password passed
         if ("password" not in kwargs):
             #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.propagateForward() -> Step 2: No password passed")
+            raise Exception("An error occured in Annie.propagate_forward() -> Step 2: No password passed")
 
         #	STEP 4: Check if password matches class' password
         if (kwargs["password"] != self.__password):
             #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.propagateForward() -> Step 4: Passed password does not match this class' password")
+            raise Exception("An error occured in Annie.propagate_forward() -> Step 4: Passed password does not match this class' password")
 
         #	STEP 6: Check if data passed
         if ("data" not in kwargs):
             #	STEP 7: Error handling
-            raise Exception("An error occured in Annie.propagateForward() -> Step 6: No data point passed")
+            raise Exception("An error occured in Annie.propagate_forward() -> Step 6: No data point passed")
 
         #	STEP 7: Outsource
-        self.__propagateForward__(kwargs["data"])
+        self.__propagate_forward__(kwargs["data"])
 
         #	STEP 8: Return
         return
 
-    def propagateBackward(self, **kwargs) -> None:
+    def propagate_backward(self, **kwargs) -> None:
         """
             Description
 
@@ -1237,589 +1554,25 @@ class Annie:
         #	STEP 2: check if password passed
         if ("password" not in kwargs):
             #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.propagateForward() -> Step 2: No password passed")
+            raise Exception("An error occured in Annie.propagate_forward() -> Step 2: No password passed")
 
         #	STEP 4: Check if password matches class' password
         if (kwargs["password"] != self.__password):
             #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.propagateForward() -> Step 4: Passed password does not match this class' password")
+            raise Exception("An error occured in Annie.propagate_forward() -> Step 4: Passed password does not match this class' password")
 
         #	STEP 6: Check if data passed
         if ("data" not in kwargs):
             #	STEP 7: Error handling
-            raise Exception("An error occured in Annie.propagateForward() -> Step 6: No data point passed")
+            raise Exception("An error occured in Annie.propagate_forward() -> Step 6: No data point passed")
 
         #	STEP 7: Outsource
-        self.__propagateBackward__(kwargs["data"])
+        self.__propagate_backward__(kwargs["data"])
 
         #	STEP 8: Return
         return
 
-    #
-    #endregion
-
-    #region Back-End: Init
-
-    def __initGeometry__(self, _dGeometry: dict) -> None:
-        """
-            Description:
-
-                Initializes this instance's gemoetry variables; weights and
-                nodes are then initialized.
-            
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Arguments:
-
-                + in width	= ( int ) The input data width
-                    ~ Required
-
-                + out width = ( int ) The output data width
-                    ~ Required
-
-                + hidden width	= ( int ) The hidden layer width
-                    ~ Required
-
-                + hidden legnth = ( int ) The number of hidden layers
-                    ~ Required
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Initialize lists
-        self.input_width 		= _dGeometry["in width"]
-        self.output_width		= _dGeometry["out width"]
-        self.hidden_layers_width		= _dGeometry["hidden width"]
-        self.number_of_hidden_layers	= _dGeometry["hidden length"]
-
-        #	STEP 3: Initialize weights and momentumWeights
-        self.__initNodes__()
-        self.__initWeights__()
-
-        #	STEP 4: Return
-        return
-
-    def __initParams__(self, _dParams: dict) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-
-        #	STEP 1: Setup - Local variables
-        self.__bAllowTesting		= _dParams["allow testing"]
-        self.show_output			= _dParams["show output"]
-        self.current_activation_function			= _dParams["activation function"]
-        self.weight_range			= _dParams["weight range"]
-        self.learning_rate		= _dParams["learning"]
-        self.accuracy_test_sample_size		= _dParams["accuracy sample size"]
-        self.fitness_test_sample_size		= _dParams["fitness sample size"]
-        
-
-        self.__dHiddenDetails		= _dParams["hidden details"]
-        self.current_activation_function_Output	= _dParams["output details"]["default"]
-
-        # self.activation_functions.setFunction(function=self.current_activation_function_Output, c=_dParams["output details"]["c"], boundary=_dParams["output details"]["boundary"])
-        
-        self.momentum			= _dParams["momentum"]["momentum scalar"]
-        self.use_momentum		= _dParams["momentum"]["is active"]
-
-        self.bias				= _dParams["bias"]["bias value"]
-
-        self.__bUseBias				= _dParams["bias"]["use bias"]
-        self.__bClearBias			= _dParams["bias"]["clear bias"]
-        self.number_of_epochs				= _dParams["training methods"]["def"]["epochs"]
-        self.batch_size			= _dParams["training methods"]["def"]["batch size"]
-        self.accuracy_requirement		= _dParams["training methods"]["def"]["acc requirement"]
-
-        self.hidden_nodes_drop_out_percent		= _dParams["training methods"]["def"]["drop out"]["hidden drop out"]
-        self.input_nodes_drop_out_percent		= _dParams["training methods"]["def"]["drop out"]["input drop out"]
-
-        self.weight_decay			= _dParams["training methods"]["def"]["weight decay"]
-        self.l1_regularization			= _dParams["training methods"]["def"]["lambda1"]
-        self.l2_regularization			= _dParams["training methods"]["def"]["lambda2"]
-
-        self.is_primary				= _dParams["children"]["is fertile"]
-        self.is_classifier			= _dParams["children"]["is classifier"]
-
-        self.is_secondary				= _dParams["children"]["is child"]
-        self.__iIterationsChildGen	= _dParams["children"]["generation iterations"]
-
-        #	STEP 2: Return
-        return
-
-    def __initWeights__(self) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-        self.weights 		= []
-        self.weights_momentum 	= []
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Iterate through nodes
-        for i in range(0, len(self.nodes) - 1):
-            #	STEP 3: Append weight list
-            self.weights.append(np.zeros( len(self.nodes[i]) * len(self.nodes[i + 1]) ))
-
-        #	STEP 4: Create momentum weights
-        self.weights_momentum = cp.deepcopy(self.weights)
-
-        #	STEP 5: Iterate through weights
-        for i in range(0, len(self.weights)):
-            for j in range(0, len(self.weights[i])):
-                #	STEP 6: Get random value for weight
-                self.weights[i][j] = rn.gauss(0.0, self.weight_range)
-
-        #	STEP 7: Return
-        return
-
-    def __initNodes__(self) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-        dWidth						= self.__dHiddenDetails["width"]
-
-        self.nodes 				= []
-        self.pre_activation_nodes	= []
-        self.node_averages		= []
-
-        iInWidth					= self.input_width
-        iOutWidth					= self.output_width
-        iHiddenWidth				= self.hidden_layers_width
-        iHiddenLength				= self.number_of_hidden_layers
-
-        #	STEP 1: Setup - local variables
-        
-        #region STEP 1.1: Bias nodes - check if using bias
-
-        if (self.__bUseBias):
-            #	STEP 1.2: Adjust hidden width
-            iHiddenWidth 	+= 1
-            iInWidth		+= 1
-            
-        #
-        #endregion
-
-        #	STEP 2: Init first row of nodes
-        self.nodes.append(np.zeros(iInWidth))
-
-        #	STEP 3: Iterate through hidden nodes
-        for _ in range(0, iHiddenLength):
-            #	STEP 4: Get random number
-            rand = rn.random()
-
-            #	STEP 5: Check if no width change
-            if ((rand <= dWidth["decrease"]) and (iHiddenWidth > self.output_width) and (iHiddenWidth > self.input_width)):
-                #	STEP 6: Check if decrease
-                iHiddenWidth -= 1
-
-            #	STEP 7: Check if increase
-            elif (rand <= dWidth["decrease"] + dWidth["increase"]):
-                iHiddenWidth += 1
-
-            #	STEP 4: Append hidden layer nodes
-            self.nodes.append(np.zeros(iHiddenWidth))
-
-        #	STEP 5: Append output layer nodes
-        self.nodes.append(np.zeros(iOutWidth))
-
-        #	STEP 6: Copy zeroes to pre activation list
-        self.pre_activation_nodes = cp.deepcopy(self.nodes)
-        self.node_averages		= cp.deepcopy(self.nodes)
-
-        #	STEP 7: Init bias matrix
-        self.bias_array				= np.zeros(iHiddenLength + 1)
-
-        #	STEP 8: Set bias values
-        self.__setBiasValues__()
-
-        #	STEP 9: Return
-        return
-
-    #
-    #endregion
-
-    #region Back-End: Sets
-
-    def __setAcFunction__(self, **kwargs) -> None:
-        """
-            Description:
-
-                Sets the activation function for the class to match the range
-                of weights that will be used and updates the learning rate
-                accordingly
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Args:
-            
-                + algorithm		= ( str ) Name of the algorithm that's updating
-                    ~ Required
-                + scalar		= ( float ) The scalar to use
-                    ~ Required
-
-        """
-        
-        #	STEP 0: Local variables
-        fTmp					= 0.0
-
-        #	STEP 1: Setup - Local variables
-        
-        #	STEP 2: Be safe
-        try:
-            #	STEP 3: Check if algorithm passed
-            if ("algorithm" not in kwargs):
-                #	STEP 4: Error handling
-                raise Exception("An error occured in Annie.__setAcFunction__() -> Step 3: No algorithm passed")
-
-            #	STEP 5: Check if scalar passed
-            if ("scalar" not in kwargs):
-                #	STEP 5: Error handling
-                raise Exception("An error occured in Annie.__setAcFunction__() -> Step 5: No scalar passed")
-
-            #	STEP 7: Check if normal propagation
-            if (kwargs["algorithm"] == "def"):
-                #	STEP 8: Return
-                return
-
-            #	STEP 9: Check if tro
-            if (kwargs["algorithm"] == "tro"):
-                #	STEP 10: Get scalar range
-                fTmp = float( 6.5 * kwargs["scalar"] )
-
-                #	STEP 11: update activation functions
-                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / fTmp ))
-
-                #	STEP 12: Update class learning rate
-                self.learning_rate = self.learning_rate * ( fTmp / 2.0 )
-
-                #	STEP 13: Return of the jedi
-                return
-
-            #	STEP 14: Check if pso
-            if (kwargs["algorithm"] == "pso"):
-                #	STEP 15: Get scalar range
-                fTmp = kwargs["scalar"]
-
-                #	STEP 16: Update activation function
-                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / fTmp ))
-
-                #	STEP 17: Update class learning rate
-                self.learning_rate = self.learning_rate * float ( fTmp / 2.5 )
-
-                #	STEP 18: Return of the jedi
-                return
-
-            #	STEP 19: Error handing
-            raise Exception("An error occured in Annie.__setAcFunction__() -> Step 19: Unimplemented algorithm passed")
-
-        except Exception as ex:
-            #	STEP ??: Error handling
-            print("Initial Error: ", ex)
-            raise Exception("An error occured in Annie.__setAcFunction__()")
-
-        #	STEP ??: Return
-        return
-
-    def __setBiasValues__(self) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if bias is being used
-        if (self.__bUseBias):
-            #	STEP 3: Iterate through bias list
-            for i in range(0, len(self.bias_array)):
-                #	STEP 4: Set bias node value
-                self.bias_array[i] = self.bias
-
-        #	STEP 5: Return
-        return
-        
-    def __setWeights(self, _lWeights: list) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - local variables
-
-        #	STEP 2: Set class weights
-        self.weights = _lWeights
-
-        #	STEP 3: Return
-        return
-
-    #
-    #endregion
-
-    #region Back-End: Gets
-
-    def __getClassificationDataset__(self, **kwargs) -> dict:
-        """
-            Description:
-
-                Creates a new dataset using the provided dataset. The new
-                dataset groups the data that is correctly classified by this
-                parent instance and the data that is incorrectly classified
-                into unique classes:
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Arguments:
-
-                + data	= ( vars ) The dataset to adjust
-                    ~ Required
-        """
-
-        #	STEP 0: Local variables
-        dNewData				= None
-        dOldData				= None
-
-        dOut					= {}
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if data arg passed
-        if ("data" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.__getClassificationDataset__() -> Step 2: No data argument passed")
-
-        else:
-            #	STEP 4: Set local variable
-            dOldData = kwargs["data"]
-            dOldData.reset()
-
-        #	STEP 5: Create new dataset
-        dNewData = Data()
-
-        #	STEP 6: Iterate through old dataset
-        for _ in range(0, dOldData.getLen()):
-            #	STEP 7: Get random data sample
-            dDNR = dOldData.getRandDNR()
-
-            #	STEP 8: Propagate forward
-            self.__propagateForward__(dDNR["in"])
-
-            #	STEP 9: Check if accurate
-            if (self.isAccurate(dDNR["out"], RMSD=True)):
-                #	STEP 10: Create temp dictionary
-                json_data = {
-                    "in": dDNR["in"],
-                    "out": [1.0, -1.0]
-                }
-
-                #	STEP 11: Insert into new dataset
-                dNewData.insert(data=json_data)
-
-            else:
-                #	STEP 12: Create temp dictionary
-                json_data = {
-                    "in": dDNR["in"],
-                    "out": [-1.0, 1.0]
-                }
-
-                #	STEP 13: Insert into new dataset
-                dNewData.insert(data=json_data)
-
-        #	STEP 14: Populate output dictionary
-        dOut = {
-            "new set": dNewData
-        }
-
-        #	STEP 15: Return
-        return dOut
-
-    def __getGeometry__(self, _dData: Data) -> dict:
-        """
-        """
-
-        #	STEP 0: Local variables
-        dOut					= None
-
-        iWidth_Input			= None
-        iWidth_Output			= None
-        iWidth_Hidden			= None
-        iLength_Hidden			= None
-
-        #	STEP 1: Setup - Local variables
-        iWidth_Input	= _dData.getInputWidth()
-        iWidth_Output	= _dData.getOutputWidth()
-
-        iWidth_Hidden 	= iWidth_Input + int(rn.random() * iWidth_Input)
-
-        #	STEP 2: Check if geometry is shallow
-        if (( self.__dHiddenDetails["is shallow"] ) and ( rn.uniform(0.0, 1.0) < 0.95 ) and ( self.use_drop_out == False ) ):
-            #	STEP 3: Get length probabilities
-            dProbabilities	= self.__dHiddenDetails["probabilities"] 
-
-            #	STEP 4: Get random number
-            fTmp = rn.uniform(0.0, 1.0)
-
-            #	STEP 5: Check if 2 length
-            if (fTmp < dProbabilities["2"]):
-                iLength_Hidden = 2
-
-            #	STEP 6: Check if 3 lenght
-            elif (fTmp < dProbabilities["2"] + dProbabilities["3"]):
-                iLength_Hidden = 3
-
-            #	STEP 7: Then must be 1 length
-            else:
-                iLength_Hidden = 1
-
-        #	STEP 8: Not shallow
-        else:
-            #	STEP 9
-            iTmp_Len1	= iWidth_Input + int(rn.random() * iWidth_Input)
-            iTmp_Len2	= rn.randint(4, 7)
-
-            iLength_Hidden	= min(iTmp_Len1, iTmp_Len2)
-
-            #	STEP 10: User output
-            if (self.show_output):
-                print("Annie (get-geo) {" + ApplicationHelper.time() + "} - Initializing deep net")
-                print("\t~ Depth: " + str(iLength_Hidden), end="\n\n")
-
-        #	STEP 2: Populate output dictionary
-        dOut = {
-            "in width": 		iWidth_Input,
-            "out width": 		iWidth_Output,
-            "hidden width":		iWidth_Hidden,
-            "hidden length":	iLength_Hidden
-        }
-
-        #	STEP 3: Return
-        return dOut
-
-    def __getShape_Weights(self) -> list:
-        """
-        """
-
-        #	STEP 0: Local variables
-        lOut = []
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Iterate thrgouh weight layers
-        for i in range(0, len(self.weights)):
-            #	STEP 3: Append zeros for layer
-            lOut.append(np.zeros(len(self.weights[i])))
-        
-        #	STEP 4: Return
-        return lOut
-
-    def __getShape_Nodes(self) -> list:
-        """
-        """
-
-        #	STEP 0: Local variables
-        lOut = []
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Iterate through node layers
-        for i in range(0, len(self.nodes)):
-            #	STEP 3: Append zeros for node layer
-            lOut.append(np.zeros(len(self.nodes[i])))
-        
-        #	STEP 6: Return
-        return lOut
-
-    #
-    #endregion
-
-    #region Back-End: Resets
-
-    def __resetAverages__(self) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Iterate through layers
-        for i in range(0, len(self.node_averages)):
-            #	STEP 3: Iterate through nodes in layer
-            for j in range(0, len(self.node_averages[i])):
-                #	STEP 4: Reset node
-                self.node_averages[i][j] = 0.0
-
-        #	STEP 5: Return
-        return
-
-    def __resetNodes__(self) -> None:
-        """
-        """
-        
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local vairalbes
-
-        #	STEP 2: Iterate through node layers
-        for i in range(0, len(self.nodes)):
-            #	STEP 3: Iterate through nodes in layer
-            for j in range(0, len(self.nodes[i])):
-                #	STEP 4: Reset ndoe
-                self.nodes[i][j] 				= 0.0
-                self.pre_activation_nodes[i][j] 	= 0.0
-
-        #	STEP 5: Return
-        return
-
-    def __resetPassword__(self) -> int:
-        """
-            Description:
-
-                Resets the password for this class
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Returns:
-
-                + int			= ( int )
-                    ~ The new password for this class
-
-        """
-
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Generate new password
-        self.__password = rn.random() * 111754552.83191288
-
-        #	STEP 3: Return
-        return self.__password
-
-    #
-    #endregion
-
-    #region Back-End: Training
-
-    #		region Back-End-(Training): Default
-
-    def __trainDef__(self, _dData: Data, _bCheckAcc: bool) -> int:
+    def __perform_default_training__(self, _dData: Data, _bCheckAcc: bool) -> int:
         """
             Description:
 
@@ -1859,7 +1612,7 @@ class Annie:
         dData_Testing		= None
         dData_Training		= None
 
-        lBest_Set			= self.getWeights(password=self.__password)
+        lBest_Set			= self.get_weights(password=self.__password)
         fBest_Fitness		= np.inf
 
         fScalar_Train		= 30.0
@@ -1920,15 +1673,15 @@ class Annie:
                     #	STEP 12: Check - Drop Out status
                     if (self.use_drop_out):
                         #	STEP 13: Set dropout flag
-                        self.__propagateForward__(dDNR["in"], training=True)
+                        self.__propagate_forward__(dDNR["in"], training=True)
 
                     #	STEP 14: No dropout
                     else:
                         #	STEP 15: Propagate forwared
-                        self.__propagateForward__(dDNR["in"])
+                        self.__propagate_forward__(dDNR["in"])
                     
                     #	STEP 16: Outsource - Back Prop
-                    self.__propagateBackward__(dDNR["out"])
+                    self.__propagate_backward__(dDNR["out"])
 
                 #
                 #endregion
@@ -1936,8 +1689,8 @@ class Annie:
                 #region STEP 17->24: Accuracy check point
 
                 #	STEP 17: Get accuracy
-                json_data_AccTest	= self.getAccuracy(data=dData_Testing, 	size=dData_Testing.getLen())
-                json_data_AccTrain	= self.getAccuracy(data=dData_Training, size=dData_Training.getLen())
+                json_data_AccTest	= self.get_accuracy(data=dData_Testing, 	size=dData_Testing.getLen())
+                json_data_AccTrain	= self.get_accuracy(data=dData_Training, size=dData_Training.getLen())
 
                 #	STEP 18: Get fitness
                 fTmp_Fitness	= 100.0 * ( 1.0 - json_data_AccTest["percent accuracy"] ) * ( 1.01 - json_data_AccTrain["percent accuracy"] ) + fScalar_Test * ( 1.0 - json_data_AccTest["percent accuracy"] ) + fScalar_Train * ( 1.01 - json_data_AccTrain["percent accuracy"] )
@@ -1945,7 +1698,7 @@ class Annie:
                 #	STEP 19: Check if best fitness
                 if (fTmp_Fitness < fBest_Fitness):
                     #	STEP 20: Update - Best
-                    lBest_Set		= self.getWeights(password=self.__password)
+                    lBest_Set		= self.get_weights(password=self.__password)
                     fBest_Fitness	= fTmp_Fitness
 
                     #	STEP 21: User output
@@ -1970,10 +1723,10 @@ class Annie:
         iTmp = self.number_of_epochs * (iBatch_Iterations * iBatch_Size)
 
         #	STEP 26: Update weights to fittest set
-        self.setWeights(password=self.__password, weights=lBest_Set)
+        self.set_weights(password=self.__password, weights=lBest_Set)
 
         #	STEP 27: Get dataset accuracy
-        json_data_AccTrain = self.getAccuracy(data=_dData, size=0, full_set=True)
+        json_data_AccTrain = self.get_accuracy(data=_dData, size=0, full_set=True)
 
         #	STEP 28: User output
         if (self.show_output):
@@ -2000,7 +1753,114 @@ class Annie:
         #	STEP 33: Return		
         return dOut
 
-    def __propagateForward__(self, _dataPoint: list, **kwargs) -> None:
+    def __perform_tro_training__(self, _dData: Data) -> int:
+        """
+            Description
+
+                Pergorms training of this class through Hermione
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Params:
+            
+                :param _dData:	= ( Data ) -- Data Container
+                    ~ Required
+
+            |\n
+
+            Returns:
+
+                + iterations	= ( int ) The number of iterations the training
+                    process took
+        """
+
+        #	STEP 0: Local variables
+        vOptimzier				= Hermione()
+
+        dResults				= None
+
+        iPassword				= None
+
+        #	STEP 1: Setup - Local variables
+        vOptimzier.show_output	= self.show_output
+
+        iPassword				= self.__resetPassword__()
+
+        #	STEP 2: User Output
+        if (self.show_output):
+            print("\t- Outsourcing Trust-Region Optimization training to Hermione\n")
+
+        #	STEP 3: Perform training
+        dResults = vOptimzier.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimizer=genetic_algorithm.TRO, threading=True)
+        
+        #	STEP 4: Set new weights
+        self.weights = dResults["surrogate"].get_weights(password=self.__password)
+
+        #	STEP 6: Update password
+        self.__resetPassword__()
+
+        #	STEP 7: Return
+        return dResults["iterations"]
+
+    def __preform_pso_training__(self, _dData: Data) -> int:
+        """
+            Description:
+
+                Performs training of this class through Hermione.
+
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+
+            Params:
+
+                :param _dData: 	= ( Data ) -- Data container
+                    ~ Required
+
+            |\n
+
+            Returns:
+            
+                + iterations	= ( int ) The number of iterations the training
+                    process took
+
+        """
+
+        #	STEP 0: Local variables
+        vOptimizer				= Hermione()
+
+        dResults				= None
+
+        iPassword				= None
+
+        #	STEP 1: Setup - Local variables
+        vOptimizer.show_output = self.show_output
+
+        iPassword				= self.__resetPassword__()
+
+        #	STEP 2: User Output
+        if (self.show_output):
+            print("\t- Outsourcing Particle-Swarm Optimization training to Hermione\n")
+
+        #	STEP 3: Perform training
+        dResults = vOptimizer.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimzier=swarms.PSO, threading=True)
+
+        #	STEP 4: Set new weights
+        self.weights = dResults["surrogate"].get_weights(password=self.__password)
+        
+        #	STEP 6: Update password
+        self.__resetPassword__()
+
+        #	STEP 7: Return
+        return dResults["iterations"]
+
+    def __propagate_forward__(self, _dataPoint: list, **kwargs) -> None:
         """
         """
 
@@ -2012,7 +1872,7 @@ class Annie:
         #	STEP 2: Check - Data width
         if (len(_dataPoint) != self.input_width):
             #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.__propagateForward() -> Step 2: Data input width mismatch")		
+            raise Exception("An error occured in Annie.__propagate_forward() -> Step 2: Data input width mismatch")		
 
         #	STEP 5: Update - Drop out list
         self.drop_out_array	= ArrayHelper.getShape(self.nodes)
@@ -2020,7 +1880,7 @@ class Annie:
         #	STEP 6: Iterate through inputs
         for i in range(0, len(_dataPoint)):
             #	STEP 7: Check if drop out
-            if ((self.use_drop_out) and (rn.uniform(0.0, 1.0) < self.input_nodes_drop_out_percent) and ("training" in kwargs)):
+            if ((self.use_drop_out) and (rn.uniform(0.0, 1.0) < self.input_nodes_drop_out_rate) and ("training" in kwargs)):
                 #	STEP 8: Set node as dropout
                 self.nodes[0][i]		= 0.0
                 self.drop_out_array[0][i]	= True
@@ -2032,7 +1892,7 @@ class Annie:
                 self.drop_out_array[0][i]	= False
 
         #	STEP 11: Check if using bias
-        if (self.__bUseBias):
+        if (self.use_bias):
             #	STEP 12: Update - Bias nodes
             self.nodes[0][len(self.nodes[0]) - 1] = self.bias_array[0]
         
@@ -2043,7 +1903,7 @@ class Annie:
             iTmp_Iterations	= iTmp
 
             #	STEP 15: Check if bias is being used and not output layer
-            if ((self.__bUseBias) and (i != len(self.nodes) - 1)):
+            if ((self.use_bias) and (i != len(self.nodes) - 1)):
                 #	STEP 16: Set pre activation bias node
                 self.pre_activation_nodes[i][iTmp - 1] 	= self.bias_array[i]
 
@@ -2056,7 +1916,7 @@ class Annie:
             #	STEP 19: Iterate through the nodes in the layer
             for j in range(0, iTmp_Iterations):
                 #	STEP 20: Check - Dropout status
-                if ((self.use_drop_out) and (rn.uniform(0.0, 1.0) < self.hidden_nodes_drop_out_percent) and (i != len(self.nodes) - 1) and ("training" in kwargs)):
+                if ((self.use_drop_out) and (rn.uniform(0.0, 1.0) < self.hidden_nodes_drop_out_rate) and (i != len(self.nodes) - 1) and ("training" in kwargs)):
                     #	STEP 21: Set node as dropout
                     self.nodes[i][j]					= 0.0
                     self.pre_activation_nodes[i][j]	= 0.0
@@ -2085,7 +1945,7 @@ class Annie:
         #	STEP 29: Return
         return
 
-    def __propagateBackward__(self, _lfExpectedOutput: list) -> None:
+    def __propagate_backward__(self, expected_output_values: list) -> None:
         """
         """
         
@@ -2097,30 +1957,28 @@ class Annie:
         lTmpError				= None
 
         #	STEP 1: Setup - Local variables
-        lNodeSig 	= self.__getShape_Nodes()
-        lNodeErr 	= self.__getShape_Nodes()
-        lWeightErr 	= self.__getShape_Weights()
+        lNodeSig 	= self.__get_nodes_shape__()
+        lNodeErr 	= self.__get_nodes_shape__()
+        lWeightErr 	= self.__get_wheights_shape__()
 
-        lTmpError	= self.getError(_lfExpectedOutput)
+        lTmpError	= self.get_ann_error(expected_output_values)
 
         #	STEP 2: Get sigmas for all node layers - iterate through layers
-        lNodeSig    = self.__pbSigma__(lNodeSig)
+        lNodeSig    = self.__get_ann_sigmas__(lNodeSig)
 
         #	STEP 3: Get node errors
-        lNodeErr    = self.__pbNodeError__(lTmpError, lNodeSig, lNodeErr)
+        lNodeErr    = self.__get_node_errors__(lTmpError, lNodeSig, lNodeErr)
 
         #	STEP 4: Get weight errors
-        lWeightErr  = self.__pbWeightError__(lNodeSig, lNodeErr, lWeightErr)
+        lWeightErr  = self.__get_weight_errors__(lNodeSig, lNodeErr, lWeightErr)
 
         #	STEP 5: Update weights
-        self.__pbUpdateWeights__(lWeightErr)
+        self.__update_weights__(lWeightErr)
 
         #	STEP 6: Return
         return
 
-    #		region Back-End-(Default): Back-Propagation
-
-    def __pbSigma__(self, _lNodeSig: list) -> list:
+    def __get_ann_sigmas__(self, _lNodeSig: list) -> list:
         """
             Description:
 
@@ -2163,7 +2021,7 @@ class Annie:
         #	STEP 14: Return
         return _lNodeSig
 
-    def __pbNodeError__(self, _lError: list, _lNodeSig: list, _lNodeErr: list) -> list:
+    def __get_node_errors__(self, _lError: list, _lNodeSig: list, _lNodeErr: list) -> list:
         """
         """
 
@@ -2182,7 +2040,7 @@ class Annie:
                 iIterations	= iTmpLen
 
                 #	STEP 4: Check if using bias and layer <= iLastRow -2
-                if ((self.__bUseBias) and (i <= iLastRow - 2)):
+                if ((self.use_bias) and (i <= iLastRow - 2)):
                     #	STEP 5: Adjust iterations
                     iIterations -= 1
 
@@ -2214,7 +2072,7 @@ class Annie:
         #	STEP 16: Return
         return _lNodeErr
 
-    def __pbWeightError__(self, _lNodeSig: list, _lNodeErr: list, _lWeightErr: list) -> list:
+    def __get_weight_errors__(self, _lNodeSig: list, _lNodeErr: list, _lWeightErr: list) -> list:
         """
         """
 
@@ -2228,7 +2086,7 @@ class Annie:
             iTmpLen     = len(_lNodeErr[i + 1])
             iIterations	= iTmpLen
             
-            if ((self.__bUseBias) and (i < len(_lWeightErr) - 1)):
+            if ((self.use_bias) and (i < len(_lWeightErr) - 1)):
                 iIterations -= 1
 
             #	STEP 4: Iterate through nodes in layer
@@ -2241,7 +2099,7 @@ class Annie:
         #	STEP 7: Return
         return _lWeightErr
 
-    def __pbUpdateWeights__(self, _lWeightErr: list) -> None:
+    def __update_weights__(self, _lWeightErr: list) -> None:
         """
         """
 
@@ -2307,15 +2165,7 @@ class Annie:
         #	STEP 17: Return
         return
 
-    #
-    #		endregion
-
-    #
-    #		endregion
-
-    #		region Back-End-(Training): Child
-
-    def	__trainChild__(self, **kwargs) -> None:
+    def	__train_secondary_ann__(self, **kwargs) -> None:
         """
             Description:
 
@@ -2372,12 +2222,12 @@ class Annie:
         #	STEP 4: Check if data passed
         if ("data" not in kwargs):
             #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.__trainChild__() -> Step 4: No data argument passed")
+            raise Exception("An error occured in Annie.__train_secondary_ann__() -> Step 4: No data argument passed")
 
         #	STEP 6: Check if original data passed
         if ("original_data" not in kwargs):
             #	STEP 7: Error handling
-            raise Exception("An error occured in Annie.__trainChild__() -> Step 6: No original_data argument passed")
+            raise Exception("An error occured in Annie.__train_secondary_ann__() -> Step 6: No original_data argument passed")
             
         #	STEP 8: Check if acc_check arg passed
         if ("show_comparison" in kwargs):
@@ -2459,7 +2309,7 @@ class Annie:
         fAcc	= 0
 
         #	STEP 26: Loop through iterations
-        for _ in range(0, self.__iIterationsChildGen):
+        for _ in range(0, self.secondary_neural_net_iterations):
             #	STEP 27: Create child
             vTmpChild = Annie()
             vTmpChild.is_secondary = True
@@ -2471,7 +2321,7 @@ class Annie:
             vTmpChild.trainSet(dNew, advanced_training=False)
 
             #	STEP 29: Get accuracy
-            json_data	= vTmpChild.getAccuracy(data=dNew, size=0, full_set=True)
+            json_data	= vTmpChild.get_accuracy(data=dNew, size=0, full_set=True)
             fTmp	= json_data["percent accuracy"]
 
             #	STEP 30: Check if accuracy better than current
@@ -2521,12 +2371,7 @@ class Annie:
         #	STEP 38: Return
         return
 
-    #
-    #		endregion
-
-    #		region Back-End-(Training): Classifier
-
-    def __trainClassifier__(self, **kwargs) -> None:
+    def __train_classifier__(self, **kwargs) -> None:
         """
             Description:
 
@@ -2568,7 +2413,7 @@ class Annie:
         #	STEP 2: Check if data arg was passed
         if ("data" not in kwargs):
             #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.__trainClassifier__() -> Step 2: No data argument passed")
+            raise Exception("An error occured in Annie.__train_classifier__() -> Step 2: No data argument passed")
 
         else:
             #	STEP 4: Set local variable
@@ -2608,130 +2453,77 @@ class Annie:
         return
 
     #
-    #		endregion
+    #endregion
 
-    #		region Back-End-(Training): Trust-Region-Optimization
-
-    def __trainTro__(self, _dData: Data) -> int:
+    #region --- resets ---
+    def __resetAverages__(self) -> None:
         """
-            Description
-
-                Pergorms training of this class through Hermione
-
-            |\n
-            |\n
-            |\n
-            |\n
-            |\n
-
-            Params:
-            
-                :param _dData:	= ( Data ) -- Data Container
-                    ~ Required
-
-            |\n
-
-            Returns:
-
-                + iterations	= ( int ) The number of iterations the training
-                    process took
         """
 
         #	STEP 0: Local variables
-        vOptimzier				= Hermione()
-
-        dResults				= None
-
-        iPassword				= None
 
         #	STEP 1: Setup - Local variables
-        vOptimzier.show_output	= self.show_output
 
-        iPassword				= self.__resetPassword__()
+        #	STEP 2: Iterate through layers
+        for i in range(0, len(self.node_averages)):
+            #	STEP 3: Iterate through nodes in layer
+            for j in range(0, len(self.node_averages[i])):
+                #	STEP 4: Reset node
+                self.node_averages[i][j] = 0.0
 
-        #	STEP 2: User Output
-        if (self.show_output):
-            print("\t- Outsourcing Trust-Region Optimization training to Hermione\n")
+        #	STEP 5: Return
+        return
 
-        #	STEP 3: Perform training
-        dResults = vOptimzier.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimizer=genetic_algorithm.TRO, threading=True)
+    def __resetNodes__(self) -> None:
+        """
+        """
         
-        #	STEP 4: Set new weights
-        self.__setWeights(dResults["surrogate"].getWeights(password=self.__password))
+        #	STEP 0: Local variables
+        #	STEP 1: Setup - Local vairalbes
 
-        #	STEP 6: Update password
-        self.__resetPassword__()
+        #	STEP 2: Iterate through node layers
+        for i in range(0, len(self.nodes)):
+            #	STEP 3: Iterate through nodes in layer
+            for j in range(0, len(self.nodes[i])):
+                #	STEP 4: Reset ndoe
+                self.nodes[i][j] 				= 0.0
+                self.pre_activation_nodes[i][j] 	= 0.0
 
-        #	STEP 7: Return
-        return dResults["iterations"]
+        #	STEP 5: Return
+        return
 
-    #
-    #		endregion
-
-    #		region Back-End-(Training): Particle Swarm Optimization
-
-    def __trainPso__(self, _dData: Data) -> int:
+    def __resetPassword__(self) -> int:
         """
             Description:
 
-                Performs training of this class through Hermione.
+                Resets the password for this class
 
             |\n
             |\n
             |\n
             |\n
-            |\n
-
-            Params:
-
-                :param _dData: 	= ( Data ) -- Data container
-                    ~ Required
-
             |\n
 
             Returns:
-            
-                + iterations	= ( int ) The number of iterations the training
-                    process took
+
+                + int			= ( int )
+                    ~ The new password for this class
 
         """
 
         #	STEP 0: Local variables
-        vOptimizer				= Hermione()
-
-        dResults				= None
-
-        iPassword				= None
-
         #	STEP 1: Setup - Local variables
-        vOptimizer.show_output = self.show_output
 
-        iPassword				= self.__resetPassword__()
+        #	STEP 2: Generate new password
+        self.__password = rn.random() * 111754552.83191288
 
-        #	STEP 2: User Output
-        if (self.show_output):
-            print("\t- Outsourcing Particle-Swarm Optimization training to Hermione\n")
-
-        #	STEP 3: Perform training
-        dResults = vOptimizer.trainSurrogate(surrogate=cp.deepcopy(self), data=_dData, password=iPassword, optimzier=swarms.PSO, threading=True)
-
-        #	STEP 4: Set new weights
-        self.__setWeights(dResults["surrogate"].getWeights(password=self.__password))
-        
-        #	STEP 6: Update password
-        self.__resetPassword__()
-
-        #	STEP 7: Return
-        return dResults["iterations"]
-
-    #
-    #		endregion
+        #	STEP 3: Return
+        return self.__password
 
     #
     #endregion
-
-    #region Back-End: Other
-
+    
+    #region --- other ---    
     def showComparison(self, _dData: Data) -> None:
         """
         """
@@ -2750,13 +2542,13 @@ class Annie:
         for _ in range(0, min(10, _dData.getLen())):
             dDNR = _dData.getRandDNR()
 
-            self.__propagateForward__(dDNR["in"])
-            print( MathHelper.round( dDNR["out"], 1) , MathHelper.round( self.getOutput(), 1), sep="\t")
+            self.__propagate_forward__(dDNR["in"])
+            print( MathHelper.round( dDNR["out"], 1) , MathHelper.round( self.get_ann_output(), 1), sep="\t")
 
         print("\n-----------------------------", "\tClassification\t\t", "-----------------------------\n")
         
         _dData.reset()
-        dHold = self.getAccuracy(data=_dData, size=_dData.getLen(), full_set=True)
+        dHold = self.get_accuracy(data=_dData, size=_dData.getLen(), full_set=True)
 
         print("Dataset Size: ", 	str( _dData.getLen() ))
         print("Correct Classifications: " + str(dHold["accurate samples"]))
@@ -2766,6 +2558,7 @@ class Annie:
 
     #
     #endregion
+
 
 #region	Testing - Training
 if (__name__ == "__main__"):
