@@ -200,7 +200,7 @@ class DAVID:
 
                         try:
                             #   STEP 8: Run
-                            iIterations = fire.trainSet(dIris, True, False, True, 3)
+                            iIterations = fire.train_set(dIris, True, False, True, 3)
                             iAccuracy = fire.getAccuracy(dIris)
 
                         except Exception as ex:

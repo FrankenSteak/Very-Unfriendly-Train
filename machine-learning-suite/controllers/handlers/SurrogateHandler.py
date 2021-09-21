@@ -788,7 +788,7 @@ class Golem:
             #   STEP 4: Train surrogate
             fTmp_Fitness    = None
 
-            fTmp_Fitness    = vSRG.trainSet(cp.deepcopy(vData), advanced_training=False, compare=False)
+            fTmp_Fitness    = vSRG.train_set(cp.deepcopy(vData), advanced_training=False, compare=False)
             fTmp_Fitness    = fTmp_Fitness["fitness"]
 
             #   STEP 5: Get accuracy and fitness

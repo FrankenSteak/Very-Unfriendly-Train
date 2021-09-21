@@ -2,6 +2,7 @@
 import copy as cp
 import datetime as dt
 import json as js
+import math as mt
 import numpy as np
 import os
 import random as rn
@@ -95,7 +96,7 @@ class Annie:
 
     def __setup_geometry__(self, _dGeometry: dict) -> None:
         """
-            Description:
+            - Description:
 
                 Initializes this instance's gemoetry variables; weights and
                 nodes are then initialized.
@@ -105,8 +106,8 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Arguments:
+            - Refactoring: ToDo
+            - Arguments:
 
                 + in width	= ( int ) The input data width
                     ~ Required
@@ -121,14 +122,11 @@ class Annie:
                     ~ Required
         """
 
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
         #	STEP 2: Initialize lists
-        self.input_width 		= _dGeometry["in width"]
-        self.output_width		= _dGeometry["out width"]
-        self.hidden_layers_width		= _dGeometry["hidden width"]
-        self.number_of_hidden_layers	= _dGeometry["hidden length"]
+        self.input_width = _dGeometry["in width"]
+        self.output_width = _dGeometry["out width"]
+        self.hidden_layers_width= _dGeometry["hidden width"]
+        self.number_of_hidden_layers = _dGeometry["hidden length"]
 
         #	STEP 3: Initialize weights and momentumWeights
         self.__setup_nodes__()
@@ -139,9 +137,16 @@ class Annie:
 
     def __setup_params__(self, _dParams: dict) -> None:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: ToDo
+            - Arguments:
         """
-
-        #	STEP 0: Local variables
 
         #	STEP 1: Setup - Local variables
         self.__bAllowTesting		= _dParams["allow testing"]
@@ -156,8 +161,7 @@ class Annie:
         self.__dHiddenDetails		= _dParams["hidden details"]
         self.current_activation_function_Output	= _dParams["output details"]["default"]
 
-        # self.activation_functions.setFunction(function=self.current_activation_function_Output, c=_dParams["output details"]["c"], boundary=_dParams["output details"]["boundary"])
-        
+        # self.activation_functions.setFunction(function=self.current_activation_function_Output, c=_dParams["output details"]["c"], boundary=_dParams["output details"]["boundary"])        
         self.momentum			= _dParams["momentum"]["momentum scalar"]
         self.use_momentum		= _dParams["momentum"]["is active"]
 
@@ -186,6 +190,15 @@ class Annie:
 
     def __setup_weights__(self) -> None:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: ToDo
+            - Arguments:
         """
 
         #	STEP 0: Local variables
@@ -213,6 +226,15 @@ class Annie:
 
     def __setup_nodes__(self) -> None:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: ToDo
+            - Arguments:
         """
 
         #	STEP 0: Local variables
@@ -281,16 +303,17 @@ class Annie:
     #region --- imports/exports ---
     def import_ann(self, **kwargs) -> None:
         """
-            - Description::
+            - Description:
 
                 Imports an Annie instance from the specified file.
-
+            
             |\n
             |\n
             |\n
             |\n
             |\n
-            - Arguments::
+            - Refacroting: ToDo
+            - Arguments:
 
                 :arg file: >> [required][str] The file path from which the Annie instance
                     should be imported
@@ -347,7 +370,6 @@ class Annie:
             self.output_width = json_data["output width"]
             self.hidden_layers_width = json_data["hidden width"]
             self.number_of_hidden_layers = json_data["hidden length"]
-            self.__dHiddenDetails = json_data["hidden layer details"]
             self.weight_range = json_data["weight range"]
             self.current_activation_function = json_data["activation function"]
             self.learning_rate = json_data["learning rate"]
@@ -358,10 +380,11 @@ class Annie:
             self.batch_size = json_data["batch size"]
             self.accuracy_test_sample_size = json_data["accuracy sample size"]
             self.fitness_test_sample_size = json_data["fitness sample size"]
-            self.__bAllowTesting = json_data["allow testing"]
             self.show_output = json_data["show output"]
             self.use_bias = json_data["use bias"]
             self.bias = json_data["bias value"]
+            self.__bAllowTesting = json_data["allow testing"]
+            self.__dHiddenDetails = json_data["hidden layer details"]
 
         except Exception as ex:
             print("Initial error: ", ex)
@@ -372,7 +395,7 @@ class Annie:
 
     def export_ann(self, **kwargs) -> None:
         """
-            - Description::
+            - Description:
 
                 Exports this instance of Annie to the specified file location.
 
@@ -381,7 +404,8 @@ class Annie:
             |\n
             |\n
             |\n
-            - Arguments::
+            - Refactoring: ToDo
+            - Arguments:
 
                 :arg file: >> [required][str] The file path this instance should be
                     exported
@@ -468,8 +492,7 @@ class Annie:
     #region --- is-type statements ---
     def is_accurate(self, expected_output_values: list, **kwargs) -> bool:
         """
-            Description:
-
+            - Description:
                 Checks if the current output of the layer is accurate compared
                 to the provided expected output.
 
@@ -478,89 +501,46 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Returns:
+            - Refactoring: Done
+            - Response:
 
                 + bAccurate	= ( bool )
 
                 + RMSD	= ( bool ) Flag to indicate if the RMSD should be used
                     ~ Default	= False
         """
+        #   --- variables --
+        ann_outputs = self.get_ann_output()
+        use_rmsd = False
 
-        #	STEP 0: Local variables
-        lOutputs				= self.get_ann_output()
-
-        bRMSD					= False
-
-        #	STEP 1: Check if RMSD arg passed
+        #   --- setup ---
         if ("RMSD" in kwargs):
-            #	STEP 2: Update - Local variables
-            bRMSD	= True
+            use_rmsd = kwargs["RMSD"]
 
-        #region STEP 3->11: Not RMSD
+        #   --- functionality (probz-bad) ---
+        if (use_rmsd == False):
+            accuracy_deviation_margin = self.__config.data["parameters"]["accuracy margin"]
+            number_of_correct_nodes = 0
 
-        #	STEP 3: Check if not RMSD
-        if (bRMSD == False):
-            #	STEP 4: Setup - Tmp variables
-            fTmp_Margin					= self.__config.data["parameters"]["accuracy margin"]
-
-            iTmp_Correct				= 0
-
-            #	STEP 5: Loop through outputs
-            for i in range(0, len( lOutputs ) ):
-                #	STEP 6: Get difference between output and actual
-                fTmp_Error = lOutputs[i] - expected_output_values[i]
-
-                #	STEP 7: If within margin
-                if ((fTmp_Error <= fTmp_Margin) and (fTmp_Error >= -1.0 * fTmp_Margin)):
-                    #	STEP 8: Increment number of correct outputs
-                    iTmp_Correct += 1
+            for i in range(0, len( ann_outputs ) ):
+                if (mt.fabs(ann_outputs[i] - expected_output_values[i]) <= accuracy_deviation_margin):
+                    number_of_correct_nodes += 1
                 
-            #	STEP 9: If all outputs were accurate
-            if (iTmp_Correct == len( lOutputs ) ):
-                #	STEP 10: Return
-                return True
-            
-            #	STEP 11: Return not correct
-            return False
-
-        #
-        #endregion
-
-        #region STEP 12->??: RMSD
-
-        #	STEP 12: Then RMSD
-        else:
-            #	STEP 13: Setup - Tmp variables
-            fTmp_Sum	= 0.0
-
-            #	STEP 14: Loop through outputs
-            for i in range(0, len( lOutputs ) ):
-                #	STEP 15: Get MSE
-                fTmp_MSE	= np.power( expected_output_values[i] - lOutputs[i], 2)
-
-                #	STEP 16: Add MSE to sum
-                fTmp_Sum	+= fTmp_MSE
-
-            #	STEP 17: Average MSE sum
-            fTmp_Avg	= fTmp_Sum / float( len( lOutputs ) )
-
-            #	STEP 18: Sqrt MSE average
-            fTmp_RMSD	= np.sqrt( fTmp_Avg )
-
-            #	STEP 19: Calculate the error margin
-            fTmp_Margin	= self.__config.data["parameters"]["accuracy margin"]
-            
-            #	STEP 20: Check if RMSD within error
-            if (fTmp_RMSD <= fTmp_Margin):
-                #	STEP 21: Return correct
-                return True
-
-            #	STEP 22: Return incorrect
+            if (number_of_correct_nodes == len( ann_outputs ) ): return True            
             return False
         
-        #
-        #endregion
+        #   --- functionality (RMSD) ---
+        else:
+            deviation_sum = 0.0
+
+            for i in range(0, len( ann_outputs ) ):
+                deviation_sum += np.power( expected_output_values[i] - ann_outputs[i], 2)
+
+            rmsd = np.sqrt( deviation_sum / float( len( ann_outputs ) ) )
+            
+            #   ToDo : this should return the actual rmsd as the fitness of this node, shouldn't it? xD
+            if (rmsd <= self.__config.data["parameters"]["accuracy margin"]): return True
+            return False
 
     #
     #endregion
@@ -568,7 +548,7 @@ class Annie:
     #region --- gets ---
     def get_accuracy(self, **kwargs) -> dict:
         """
-            Description:
+            - Description:
 
                 Gets the accuracy of this instance using the provided dataset.
 
@@ -577,8 +557,8 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Arguments:
+            - Refactoring: Done
+            - Arguments:
 
                 + data 	= ( vars ) Data container
                     ~ Required
@@ -595,8 +575,7 @@ class Annie:
                     split between correct and incorrect results
             
             |\n
-
-            Returns:
+            - Response:
 
                 + dDetails	= ( dict ) Dictionary containing the following
                     ~ child dataset = ( vars ) Child dataset that was created
@@ -607,121 +586,50 @@ class Annie:
                         the test
                     ~ accurate samples	= ( int ) The amount of accurat samples
         """
-
-        #region STEP 0->1: Init
-
-        #	STEP 0: Local variables
-        dData					= None
-        dChild					= None
-
-        iIterations				= None
-
-        iAccurate				= 0
-
-        bSplit					= False
-
-        #	STEP 1: Setup - Local variables
-
-        #
-        #endregion
-
-        #region STEP 2->18: Error checking
-
-        #	STEP 2: Check if data passed
+        
+        #   --- Variables ---
+        accurate_data_point = 0
+        child_dataset = Data()
+        should_split_data = False
+        test_data = None
+        test_iterations = 1
+        
+        #   --- Setup (data) ---
         if ("data" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.get_accuracy() -> Step 2: No data argument passed")
-
+            raise Exception("An error occured in Annie.get_accuracy(): No 'data' argument passed")
         else:
-            #	STEP 4: Set data var
-            dData = kwargs["data"]
+            test_data = cp.deepcopy(kwargs["data"])
+            test_data.reset()
 
-        #	STEP 5: Check if size passed
-        if ("size" not in kwargs):
-            #	STEP 6: Use default
-            iIterations = self.accuracy_test_sample_size
+        #   --- Setup (Test Size) ---
+        if (("full_set" in kwargs) and (kwargs["full_set"] == True)): test_iterations = test_data.getLen()
+        elif ("size" not in kwargs): test_iterations = self.accuracy_test_sample_size
+        elif (kwargs["size"] > self.accuracy_test_sample_size): test_iterations = self.accuracy_test_sample_size
+        else: test_iterations = max(kwargs["size"], 1)
 
-        else:
-            #	STEP 7: If size greater than limit
-            if (kwargs["size"] > self.accuracy_test_sample_size):
-                #	STEP 8: Limit size
-                iIterations = self.accuracy_test_sample_size
+        #   --- Setup (Data Split) ---
+        if ("split" in kwargs): should_split_data = kwargs["split"]
 
-            else:
-                #	STEP 9: Not larger, used passed arg
-                iIterations = kwargs["size"]
+        #   --- Functionality ---
+        for _ in range(0, test_iterations):
+            data_point = test_data.getRandDNR()
+            
+            self.__propagate_forward__(data_point["in"])
 
-        #	STEP 10: Shortcut
-        try:
-            #	STEP 11: Check if full_set is true
-            if (kwargs["full_set"] == True):
-                #	STEP 12: Set iterations
-                iIterations = dData.getLen()
+            if (self.is_accurate(data_point["out"], RMSD=True)): accurate_data_point += 1
+            elif (should_split_data): child_dataset.insert(data=test_data.pop(last_seen=True))
 
-        except:
-            #	STEP 13: Do nothing
-            ApplicationHelper.nop()
-
-        #	STEP 14: Shortcut
-        try:
-            #	STEP 15: Set split flag
-            bSplit = kwargs["split"]
-
-            #	STEP 16: Use copy of data set instead
-            dData = cp.deepcopy(kwargs["data"])
-
-            #	STEP 17: Create child data set
-            dChild = Data()
-
-        except:
-            #	STEP 18: YEET
-            ApplicationHelper.nop()
-
-        #
-        #endregion
-
-        #region STEP 19->24: Accuracy test
-
-        #	STEP 19: Reset data set
-        dData.reset()
-
-        #	STEP 20: Iterate through dataset
-        for _ in range(0, iIterations):
-            #	STEP 21: Get random data sample
-            dDNR = dData.getRandDNR()
-
-            #	STEP 21: Propagate forward
-            self.__propagate_forward__(dDNR["in"])
-
-            #	STEP 22: Get accuracy
-            if (self.is_accurate(dDNR["out"], RMSD=True)):
-                iAccurate += 1
-
-            else:
-                #	STEP 23: Check if data set should be split
-                if (bSplit):
-                    #	STEP 24: Pop and lock
-                    dChild.insert(data=dData.pop(last_seen=True))
-
-        #
-        #endregion
-
-        #	STEP 25: Populate output dictionary
-        dOut = {
-            "child dataset":		dChild,
-
-            "percent accuracy":		float(iAccurate) / iIterations,
-            "iterations": 			iIterations,
-
-            "accurate samples":		iAccurate
+        #   --- Response ---
+        return {
+            "accurate samples": accurate_data_point,
+            "child dataset": child_dataset,
+            "iterations": test_iterations,
+            "percent accuracy": float(accurate_data_point) / test_iterations,
         }
-
-        #	STEP 26: Return
-        return dOut
 
     def get_fitness_of_array(self, **kwargs) -> float:
         """
-            Description:
+            - Description:
 
                 Returns the sum of the fitness of a number of samples in the
                 provided dataset.
@@ -731,116 +639,99 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Arguments:
-
-                + data	= ( vars ) The dataset to use for testing
+            - Refactoring: Done
+            - Arguments:
+            
+                + data = ( vars ) The dataset to use for testing
                     ~ Required
 
-                + debug	= ( bool ) Flag that specifies if the dataset stats
+                + debug = ( bool ) Flag that specifies if the dataset stats
                     should be printed
+            
+            |\n
+            - Response: ToDo
         """
-
-        #	STEP 0: Local variables
-        dData					= None
-        iIterations				= None
-
-        fOut					= 0.0
-
-        #	STEP 1: Setup - Local variables
-
-        #region STEP 2->11: Argument error checking
-
-        #	STEP 2: Check if data passed
+        
+        #   --- Variables ---
+        data_set = None
+        iterations = self.fitness_test_sample_size
+        response = 0.0
+        
+        #   --- Setup (Data Set) ---
         if ("data" not in kwargs):
-            #	STEP 3: Error handling
             raise Exception("An error occured in Annie.get_fitness_of_array() -> Step 2: No data argument passed")
-
         else:
-            #	STEP 4: Set local variable
-            dData = kwargs["data"]
+            data_set = kwargs["data"]
+            data_set.reset()
+            
+        #   --- Setup (Iterations) ---
+        if (data_set.getLen() < self.fitness_test_sample_size): iterations = data_set.getLen()
 
-            #	STEP 5: Reset dataset for accurate sampling
-            dData.reset()
+        #   --- Setup (Debug) ---
+        if (("debug" in kwargs) and (kwargs["debug"] == True)): data_set.stats()
 
-        #	STEP 6: Check length of dataset passed
-        if (dData.getLen() > self.fitness_test_sample_size):
-            #	STEP 7: Limit iterations
-            iIterations = self.fitness_test_sample_size
+        #   --- Functionality ---
+        for _ in range(0, iterations):
+            data_point = data_set.getRandDNR()
+            self.__propagate_forward__(data_point["in"])
+            response += self.get_ann_fitness(data_point["out"])
 
-        else:
-            #	STPE 8: Set local variable
-            iIterations = dData.getLen()
-
-        #	STEP 9: Check if debug arg passed
-        if ("debug" in kwargs):
-            #	STEP 10: If debug arg is true
-            if (kwargs["debug"] == True):
-                #	STEP 11: Print dataset statistics
-                dData.stats()
-
-        #
-        #endregion
-
-        #region STEP 12->15: Fitness test
-
-        #	STEP 12: Iterate through dataset
-        for _ in range(0, iIterations):
-            #	STEP 13: Get random data sample from dataset
-            dDNR = dData.getRandDNR()
-
-            #	STEP 14: Propagate forward
-            self.__propagate_forward__(dDNR["in"])
-
-            #	STEP 15: Sum fitness
-            fOut += self.get_ann_fitness(dDNR["out"])
-
-        #
-        #endregion
-
-        #	STEP 16: Return
-        return fOut
+        #   --- Response ---
+        return response
 
     def get_ann_error(self, expected_output_values: list) -> list:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: Done
+            - Arguments:
+            - Response:
         """
         
-        #	STEP 0: Local variables
-        lOut					= []
-        lTmp					= None
+        #   --- Variables ---
+        response = []
+        ann_output = self.get_ann_output()
 
-        #	STEP 1: Setup - Local variables
-        lTmp					= self.get_ann_output()
-
-        #	STEP 2: Iterate through outputs
+        #   --- Functionality ---
         for i in range(0, len(expected_output_values)):
-            #	STEP 3: Append E = expected - actual
-            lOut.append(expected_output_values[i] - lTmp[i])
+            response.append(expected_output_values[i] - ann_output[i])
 
-        #	STEP 4: Return
-        return lOut
+        #   --- Response ---
+        return response
 
     def get_ann_fitness(self, expected_output_values: list) -> float:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: Done
+            - Arguments:
+            - Response
         """
 
-        #	STEP 0: Local variables
-        fOut				= 0.0
-        lTmp				= None
+        #   --- Variables ---
+        response = 0.0
+        lTmp = self.get_ann_error(expected_output_values)
 
-        #	STEP 1: Setup - Local variables
-        lTmp 				= self.get_ann_error(expected_output_values)
-
-        #	STEP 2: Get the fitness of the sample
+        #   --- Functionality ---
         for i in range(0, len(lTmp)):
-            fOut = fOut + abs(lTmp[i])
+            response += abs(lTmp[i])
         
-        #	STEP 3: Return
-        return fOut
+        #   --- Response ---
+        return response
 
     def get_ann_output(self, **kwargs) -> list:
         """
-            Description:
+            - Description:
 
                 Returns the rounded output of this instance.
 
@@ -849,63 +740,55 @@ class Annie:
             |\n
             |\n
             |\n
+            - Refactoring: Done
+            - Arguments:
 
-            Arguments:
+                + round = ( bool ) Flag for if rounding should be used in the return
 
-                + round	= ( bool ) Flag for if rounding should be used in the return
+            - Response:
 
-            Returns:
-
-                + lOut	= ( list ) The output layer of this instance
-        """
-
-        #	STEP 0: Local variables
-        lOut				= None
-        
-        #	STEP 1: Setup - local variables
-        lOut				= self.nodes[self.number_of_hidden_layers + 1]
-
-        #	STEP 2: Check if rounding specified
-        if ("round" in kwargs):
-            #	STEP 3: If rounding required
-            if (kwargs["round"] == True):
-                #	STEP 4: Iterate through the list
-                for i in range(0, len(lOut)):
-                    #	STEP 5: Round the list value
-                    lOut[i] = round(lOut[i], 5)
-
-        #	STEP 6: Return
-        return lOut
-
-    def get_ann_output_and_reset(self, _lData: list) -> vars:
-        """
+                + response = ( list ) The output layer of this instance
         """
         
-        #	STEP 0: Local variables
-        lOut				= None
+        #   --- Variables ---
+        response = self.nodes[self.number_of_hidden_layers + 1]
 
-        #	STEP 1: Setup - Local variables
+        #   --- Functionality ---
+        if (("round" in kwargs) and (kwargs["round"] == True)):
+            for i in range(0, len(response)):
+                response[i] = round(response[i], 5)
 
-        #	STEP 2: Propagate forward
-        self.__propagate_forward__(_lData)
+        #   --- Response ---
+        return response
 
-        #	STEP 3: Get the output to return
-        lOut = np.ndarray.tolist(cp.deepcopy(self.get_ann_output()))
+    def get_ann_output_and_reset(self, input_data: list) -> vars:
+        """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: Done
+            - Arguments: 
+            - Response:
+        """
 
-        #	STEP 4: Reset the network
-        self.__resetNodes__()
+        #   --- Propagate ---
+        self.__propagate_forward__(input_data)
+        response = np.ndarray.tolist(cp.deepcopy(self.get_ann_output()))
 
-        #	STEP 5: Check if only single output
-        if (len(lOut) == 1):
-            #	STEP 6: Return only that output
-            return lOut[0]
+        #   --- Reset ---
+        self.__reset_nodes__()
 
-        #	STEP 7: Return normally
-        return lOut
+        #   --- Response ---
+        if (len(response) == 1): return response[0]
+        return response
 
     def get_weights(self, **kwargs) -> list:
         """
-            Description:
+            - Description:
 
                 Returns this class isntance's weight list if the provided password
                 matches this instance's password.
@@ -915,39 +798,28 @@ class Annie:
             |\n
             |\n
             |\n
+            - Refactoring: Done
+            - Arguments:
 
-            Args:
-
-                + password		= ( int/float ) This class' password
+                + password = ( int/float ) This class' password
                     ~ Required
 
             |\n
+            - Response:
 
-            Returns:
-
-                + list			= ( list )
+                + list = ( list )
                     ~ A deep copy of this class' weights
         """
+        #   --- Protection ---
+        if (("password" not in kwargs) or (kwargs["password"] != self.__password)):
+            raise Exception("An error occured in Annie.get_weights(): The provided password doesn't match this class' password")
 
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - local variables
-
-        #	STEP 2: Check if password provided
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.get_weights() -> Step 2: No password provided")
-
-        #	STEP 4: Check if password matches class password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.get_weights() -> Step 4: The provided password doesn't match this class' password")
-
-        #	STEP 6: Return
+        #   --- Response ---
         return cp.deepcopy(self.weights)
 
-    def __getClassificationDataset__(self, **kwargs) -> dict:
+    def __get_classification_set__(self, **kwargs) -> dict:
         """
-            Description:
+            - Description:
 
                 Creates a new dataset using the provided dataset. The new
                 dataset groups the data that is correctly classified by this
@@ -959,166 +831,138 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Arguments:
+            - Refactoring: Done
+            - Arguments:
 
                 + data	= ( vars ) The dataset to adjust
                     ~ Required
+                    
+            |\n
+            - Response: ToDo
         """
 
-        #	STEP 0: Local variables
-        dNewData				= None
-        dOldData				= None
+        #   --- Variables ---
+        new_data_set = Data()
+        old_data_set = None
 
-        dOut					= {}
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if data arg passed
+        #   --- Setup ---
         if ("data" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.__getClassificationDataset__() -> Step 2: No data argument passed")
-
+            raise Exception("An error occured in Annie.__get_classification_set__() -> Step 2: No data argument passed")
         else:
-            #	STEP 4: Set local variable
-            dOldData = kwargs["data"]
-            dOldData.reset()
+            old_data_set = kwargs["data"]
+            old_data_set.reset()
 
-        #	STEP 5: Create new dataset
-        dNewData = Data()
+        #   --- Functionality ---
+        for _ in range(0, old_data_set.getLen()):
+            data_point = old_data_set.getRandDNR()
+            self.__propagate_forward__(data_point["in"])
 
-        #	STEP 6: Iterate through old dataset
-        for _ in range(0, dOldData.getLen()):
-            #	STEP 7: Get random data sample
-            dDNR = dOldData.getRandDNR()
-
-            #	STEP 8: Propagate forward
-            self.__propagate_forward__(dDNR["in"])
-
-            #	STEP 9: Check if accurate
-            if (self.is_accurate(dDNR["out"], RMSD=True)):
-                #	STEP 10: Create temp dictionary
-                json_data = {
-                    "in": dDNR["in"],
+            if (self.is_accurate(data_point["out"], RMSD=True)):
+                new_data_set.insert(data={
+                    "in": data_point["in"],
                     "out": [1.0, -1.0]
-                }
-
-                #	STEP 11: Insert into new dataset
-                dNewData.insert(data=json_data)
+                })
 
             else:
-                #	STEP 12: Create temp dictionary
-                json_data = {
-                    "in": dDNR["in"],
+                new_data_set.insert(data={
+                    "in": data_point["in"],
                     "out": [-1.0, 1.0]
-                }
+                })
 
-                #	STEP 13: Insert into new dataset
-                dNewData.insert(data=json_data)
-
-        #	STEP 14: Populate output dictionary
-        dOut = {
-            "new set": dNewData
+        #   --- Response ---
+        return {
+            "new set": new_data_set
         }
 
-        #	STEP 15: Return
-        return dOut
-
-    def __get_geometry__(self, _dData: Data) -> dict:
+    def __get_geometry__(self, data_set: Data) -> dict:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: Done
+            - Arguments:
+            - Response:
         """
+        
+        #   --- Variables ---
+        hidden_layers_length = 1
+        input_width = data_set.getInputWidth()
+        output_width = data_set.getOutputWidth()
+        hidden_layer_width = input_width + int(rn.random() * input_width)
 
-        #	STEP 0: Local variables
-        dOut					= None
-
-        iWidth_Input			= None
-        iWidth_Output			= None
-        iWidth_Hidden			= None
-        iLength_Hidden			= None
-
-        #	STEP 1: Setup - Local variables
-        iWidth_Input	= _dData.getInputWidth()
-        iWidth_Output	= _dData.getOutputWidth()
-
-        iWidth_Hidden 	= iWidth_Input + int(rn.random() * iWidth_Input)
-
-        #	STEP 2: Check if geometry is shallow
+        #   --- Functionality ---
         if (( self.__dHiddenDetails["is shallow"] ) and ( rn.uniform(0.0, 1.0) < 0.95 ) and ( self.use_drop_out == False ) ):
-            #	STEP 3: Get length probabilities
-            dProbabilities	= self.__dHiddenDetails["probabilities"] 
+            temp_float = rn.uniform(0.0, 1.0)
+            probability_config	= self.__dHiddenDetails["probabilities"] 
 
-            #	STEP 4: Get random number
-            fTmp = rn.uniform(0.0, 1.0)
+            if (temp_float < probability_config["2"]): hidden_layers_length = 2
+            elif (temp_float < probability_config["2"] + probability_config["3"]): hidden_layers_length = 3
 
-            #	STEP 5: Check if 2 length
-            if (fTmp < dProbabilities["2"]):
-                iLength_Hidden = 2
-
-            #	STEP 6: Check if 3 lenght
-            elif (fTmp < dProbabilities["2"] + dProbabilities["3"]):
-                iLength_Hidden = 3
-
-            #	STEP 7: Then must be 1 length
-            else:
-                iLength_Hidden = 1
-
-        #	STEP 8: Not shallow
         else:
-            #	STEP 9
-            iTmp_Len1	= iWidth_Input + int(rn.random() * iWidth_Input)
-            iTmp_Len2	= rn.randint(4, 7)
-
-            iLength_Hidden	= min(iTmp_Len1, iTmp_Len2)
-
-            #	STEP 10: User output
+            hidden_layers_length = min(input_width + int(rn.random() * input_width), rn.randint(4, 7))
             if (self.show_output):
                 print("Annie (get-geo) {" + ApplicationHelper.time() + "} - Initializing deep net")
-                print("\t~ Depth: " + str(iLength_Hidden), end="\n\n")
+                print("\t~ Depth: " + str(hidden_layers_length), end="\n\n")
 
-        #	STEP 2: Populate output dictionary
-        dOut = {
-            "in width": 		iWidth_Input,
-            "out width": 		iWidth_Output,
-            "hidden width":		iWidth_Hidden,
-            "hidden length":	iLength_Hidden
+        #   --- Response ---
+        return {
+            "in width": 		input_width,
+            "out width": 		output_width,
+            "hidden width":		hidden_layer_width,
+            "hidden length":	hidden_layers_length
         }
-
-        #	STEP 3: Return
-        return dOut
 
     def __get_wheights_shape__(self) -> list:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: Done
+            - Arguments:
+            - Response:
         """
 
-        #	STEP 0: Local variables
-        lOut = []
+        #   --- Variables ---
+        response = []
 
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Iterate thrgouh weight layers
+        #   --- Functionality ---
         for i in range(0, len(self.weights)):
-            #	STEP 3: Append zeros for layer
-            lOut.append(np.zeros(len(self.weights[i])))
+            response.append(np.zeros(len(self.weights[i])))
         
-        #	STEP 4: Return
-        return lOut
+        #   --- Response ---
+        return response
 
     def __get_nodes_shape__(self) -> list:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: Done
+            - Arguments:
+            - Response:
         """
 
-        #	STEP 0: Local variables
-        lOut = []
+        #   --- Variables ---
+        response = []
 
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Iterate through node layers
+        #   --- Functionality ---
         for i in range(0, len(self.nodes)):
-            #	STEP 3: Append zeros for node layer
-            lOut.append(np.zeros(len(self.nodes[i])))
+            response.append(np.zeros(len(self.nodes[i])))
         
-        #	STEP 6: Return
-        return lOut
+        #   --- Response ---
+        return response
 
     #
     #endregion
@@ -1126,7 +970,7 @@ class Annie:
     #region --- sets ---
     def set_activation_function(self, **kwargs) -> None:
         """
-            Description
+            - Description:
 
                 Sets the activation function for the class to match the range
                 of weights that will be used and updates the learning rate
@@ -1137,8 +981,8 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Args:
+            - Refactoring: Done
+            - Arguments:
 
                 + password		= ( int/float ) This class' password
                     ~ Required
@@ -1146,31 +990,23 @@ class Annie:
                     ~ Required
                 + scalar		= ( float ) The scalar to use
                     ~ Required
-
+                    
+            - Response:
         """
+        
+        #   --- Protection ---
+        if (("password" not in kwargs) and (kwargs["password"] != self.__password)):
+            raise Exception("An error occured in Annie.set_activation_function(): Passed password does not match this class' password")
 
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if password passed
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.set_activation_function() -> Step 2: No password passed")
-
-        #	STEP 4: Check if password matches class password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.set_activation_function() -> Step 3: Passed password does not match this class' password")
-
-        #	STEP 5: Outsource
+        #   --- Outsource ---
         self.__set_activation_function__(algorithm=kwargs["algorithm"], scalar=kwargs["scalar"])
 
-        #	STEP 6: Return
+        #   --- Response ---
         return
 
     def set_weights(self, **kwargs) -> None:
         """
-            Description:
+            - Description:
 
                 Sets this class' weights to be the provided weights.
 
@@ -1179,43 +1015,34 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Args:
+            - Refactoring: Done
+            - Arguments:
 
                 + password		= ( int/float ) This class' password
                     ~ Required
                 + weights 		= ( list ) The weights to update to
                     ~ Required
-                    
+            
+            - Response:
         """
+        
+        #   --- Protection ---
+        if (("password" not in kwargs) and (kwargs["password"] != self.__password)):
+            raise Exception("An error occured in Annie.set_weights(): The provided password doesn't match this class' password")
 
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if password passed
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.set_weights() -> Step 2: No password provided")
-
-        #	STEP 4: Check if password matches class password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.set_weights() -> Step 4: The provided password doesn't match this class' password")
-
-        #	STEP 6: Check if new weights provided
+        #   --- Requirements ---
         if ("weights" not in kwargs):
-            #	STEP 7: Error handling
             raise Exception("An error occured in Annie.set_weights() -> Step 6: No weights provided to update to")
 
-        #	STEP 8: Set the weights
+        #   --- Functionality ---
         self.weights = kwargs["weights"]
 
-        #	STEP 9: Return
+        #	--- Response ---
         return
 
     def __set_activation_function__(self, **kwargs) -> None:
         """
-            Description:
+            - Description:
 
                 Sets the activation function for the class to match the range
                 of weights that will be used and updates the learning rate
@@ -1226,102 +1053,80 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Args:
+            - Refactoring: Done
+            - Arguments:
             
                 + algorithm		= ( str ) Name of the algorithm that's updating
                     ~ Required
                 + scalar		= ( float ) The scalar to use
                     ~ Required
 
+            - Response:
         """
         
-        #	STEP 0: Local variables
-        fTmp					= 0.0
-
-        #	STEP 1: Setup - Local variables
-        
-        #	STEP 2: Be safe
         try:
-            #	STEP 3: Check if algorithm passed
+            #   --- Safety First ---
             if ("algorithm" not in kwargs):
-                #	STEP 4: Error handling
                 raise Exception("An error occured in Annie.__set_activation_function__() -> Step 3: No algorithm passed")
 
-            #	STEP 5: Check if scalar passed
             if ("scalar" not in kwargs):
-                #	STEP 5: Error handling
                 raise Exception("An error occured in Annie.__set_activation_function__() -> Step 5: No scalar passed")
 
-            #	STEP 7: Check if normal propagation
             if (kwargs["algorithm"] == "def"):
-                #	STEP 8: Return
                 return
 
-            #	STEP 9: Check if tro
+            #   --- TRO ---
             if (kwargs["algorithm"] == "tro"):
-                #	STEP 10: Get scalar range
-                fTmp = float( 6.5 * kwargs["scalar"] )
+                random_value = float( 6.5 * kwargs["scalar"] )
+                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / random_value ))
+                self.learning_rate = self.learning_rate * ( random_value / 2.0 )
 
-                #	STEP 11: update activation functions
-                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / fTmp ))
-
-                #	STEP 12: Update class learning rate
-                self.learning_rate = self.learning_rate * ( fTmp / 2.0 )
-
-                #	STEP 13: Return of the jedi
-                return
-
-            #	STEP 14: Check if pso
+            #	--- PSO ---
             if (kwargs["algorithm"] == "pso"):
-                #	STEP 15: Get scalar range
-                fTmp = kwargs["scalar"]
+                scalar = kwargs["scalar"]
+                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / scalar ))
+                self.learning_rate = self.learning_rate * float ( scalar / 2.5 )
 
-                #	STEP 16: Update activation function
-                self.activation_functions.setFunction(function=self.current_activation_function, c=float( 2.0 / fTmp ))
-
-                #	STEP 17: Update class learning rate
-                self.learning_rate = self.learning_rate * float ( fTmp / 2.5 )
-
-                #	STEP 18: Return of the jedi
-                return
-
-            #	STEP 19: Error handing
+            #	--- Error Handling ---
             raise Exception("An error occured in Annie.__set_activation_function__() -> Step 19: Unimplemented algorithm passed")
 
         except Exception as ex:
-            #	STEP ??: Error handling
+            #	--- Error Handling ---
             print("Initial Error: ", ex)
             raise Exception("An error occured in Annie.__set_activation_function__()")
 
-        #	STEP ??: Return
+        #	--- Response ---
         return
 
     def __set_bias_values__(self) -> None:
         """
+            - Description:
+            
+            |\n
+            |\n
+            |\n
+            |\n
+            |\n
+            - Refactoring: Done
+            - Arguments:
+            - Response:
         """
 
-        #	STEP 0: Local variables
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Check if bias is being used
+        #   --- Functionality ---
         if (self.use_bias):
-            #	STEP 3: Iterate through bias list
             for i in range(0, len(self.bias_array)):
-                #	STEP 4: Set bias node value
                 self.bias_array[i] = self.bias
-
-        #	STEP 5: Return
+        
+        #   --- Response ---
         return
 
     #
     #endregion
 
     #region --- training ---
-    def trainSet(self, _dData: Data, **kwargs) -> dict:
+    def train_set(self, data_set: Data, **kwargs) -> dict:
         """
-            - Description::
+            - Description:
 
                 Trains this instance of Annie using the data set provided as
                 well as the parameters in kwargs.
@@ -1331,9 +1136,10 @@ class Annie:
             |\n
             |\n
             |\n
-            - Parameters::
+            - Refactoring: Done
+            - Parameters:
 
-                :param _dData: >> ( vars ) -- The data container containing the
+                :param data_set: >> ( vars ) -- The data container containing the
                     data set to train with
 
                 :arg acc: >> ( bool ) Check accuracy flag for default training
@@ -1349,8 +1155,7 @@ class Annie:
                     ~ default 	= randint(0, 3)
 
             |\n
-
-            Returns:
+            - Response:
 
                 + dResults		= ( dict ) Dictionary containing
                     ~ result	= ( int ) Number of iterations training took
@@ -1362,129 +1167,63 @@ class Annie:
 
         """
 
-        #	STEP 0: Local variables
-        dOut							= None
+        #   --- Variables ---
+        advanced_algorithm = rn.randint(0, 1)
+        check_accuracy = True
+        compare_results = False
+        advanced_training = False
+        training_results = None
 
-        iAlgorithm						= rn.randint(0, 1)
+        #   --- Setup ---
+        data_set.reset()
 
-        bCheckAcc						= True
-        bComparison						= False
-        bOptimization					= False
+        if ("acc" in kwargs): check_accuracy = kwargs["acc"]
+        if ("compare" in kwargs): compare_results = kwargs["compare"]
+        if ("advanced_training" in kwargs): advanced_training = kwargs["advanced_training"]
+        if ("advanced_algorithm" in kwargs): advanced_algorithm = kwargs["advanced_algorithm"]
+        if (self.weights == None): self.__setup_geometry__(self.__get_geometry__(data_set))
 
-        #	STEP 1: Setup - Local variables
-        _dData.reset()
-
-        #region STEP 2->11: Argument check
-
-        #	STEP 2: Check if acc flag passed
-        if ("acc" in kwargs):
-            #	STEP 3: Update - Local variables
-            bCheckAcc = kwargs["acc"]
-
-        #	STEP 4: Check if compare flag passed
-        if ("compare" in kwargs):
-            #	STPE 5: Update - Local variable
-            bComparison = kwargs["compare"]
-
-        #	STEP 6: Check if advanced training flag passed
-        if ("advanced_training" in kwargs):
-            #	STEP 7: Update - Local variable
-            bOptimization = kwargs["advanced_training"]
-
-        #	STEP 10: Check if advanced algorithm passed
-        if ("advanced_algorithm" in kwargs):
-            #	STEP 11: Update - Local variable
-            iAlgorithm = kwargs["advanced_algorithm"]
-
-        #
-        #endregion
-
-        #region STEP 12->14: Check if class fully initialized
-
-        #	STEP 12: Check if weights initialized
-        if (self.weights == None):
-            #	STEP 13: Get geometry from data
-            dGeo = self.__get_geometry__(_dData)
-
-            #	STEP 14: Init geometry
-            self.__setup_geometry__(dGeo)
-
-        #
-        #endregion
-
-        #region STEP 15->17: Default training
-
-        #	STEP 5: Check if DEF training
-        if (bOptimization == False):
-            #	STEP 6: User Output
+        #   --- DEF ---
+        if (advanced_training == False):
             if (self.show_output):
                 print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Default Training")
-                input("\n> Start:")
 
-            #	STEP 7: Outsource default training
-            json_data_Out	= self.__perform_default_training__(_dData, bCheckAcc)
+            training_results = self.__perform_default_training__(data_set, check_accuracy)
 
-        #
-        #endregion
-
-        #region STEP 18->21: Trust-Region Optimization training
-
-        #	STEP 18: Check if TRO assisted DEF training
-        elif ((bOptimization == True) and (iAlgorithm == 0)):
-            #	STEP 19: User Output
+        #   --- TRO and DEF ---
+        elif ((advanced_training == True) and (advanced_algorithm == 0)):
             if (self.show_output):
                 print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Trust-Region Optimization assisted Default training")
-                input("\n> Start:")
 
-            #	STEP 20: Outsource tro training
-            self.__perform_tro_training__(_dData)
+            self.__perform_tro_training__(data_set)
+            training_results = self.__perform_default_training__(data_set, check_accuracy)
 
-            #	STEP 21: Outsoruce def training
-            json_data_Out	= self.__perform_default_training__(_dData, bCheckAcc)
-
-        #
-        #endregion
-        
-        #region STEP 22->25: Particle-Swarm Optimization training
-
-        #	STEP 22: Chec if PSO assisted DEF training
-        elif ((bOptimization == True) and (iAlgorithm == 1)):
-            #	STEP 23: User Output
+        #   --- PSO and DEF ---
+        elif ((advanced_training == True) and (advanced_algorithm == 1)):
             if (self.show_output):
                 print("Annie (train-set) {" + ApplicationHelper.time() + "} - Training via Particle-Swarm Optimization assisted Default training")
-                input("\n> Start:")
 
-            #	STEP 24: Outsource pso training
-            self.__preform_pso_training__(_dData)
+            self.__preform_pso_training__(data_set)
+            training_results = self.__perform_default_training__(data_set, check_accuracy)
 
-            #	STEP 25: Outsource def training
-            json_data_Out 	= self.__perform_default_training__(_dData, bCheckAcc)
 
-        #
-        #endregion
+        #	--- Compare Results? ---
+        if (compare_results):
+            self.show_comparison(data_set)
 
-        #	STEP 26: Check if comparison results should be shown
-        if (bComparison):
-            #	STEP 27: Perform data comparison
-            self.showComparison(_dData)
-
-        #	STEP 28: Populate output dictionary
-        dOut = {
-            "fitness":					json_data_Out["fitness"],
-            "iterations":				json_data_Out["iterations"],
-
-            "check accuracy": 			bCheckAcc,
-            "show comparison": 			bComparison,
-            "use optimization": 		bOptimization,
-            "optimization algorithm": 	iAlgorithm
+        #   --- Response ---
+        return {
+            "fitness":					training_results["fitness"],
+            "iterations":				training_results["iterations"],
+            "check accuracy": 			check_accuracy,
+            "show comparison": 			compare_results,
+            "use optimization": 		advanced_training,
+            "optimization algorithm": 	advanced_algorithm
         }
 
-        #	STEP 29: Return
-        return dOut
-
-    def propagate_forward(self, **kwargs) -> None:
+    def propagate_forward(self, inputs: list, **kwargs) -> None:
         """
-            Description:
+            - Description:
 
                 Performs forward propagation using the provided input.
 
@@ -1493,43 +1232,30 @@ class Annie:
             |\n
             |\n
             |\n
+            - Refactoring: Done
+            - Arguments:
 
-            Args:
-
-                + data			= ( list ) Data point
+                + inputs = ( list ) Data point
                     ~ Required
-                + password		= ( int/float ) This class' password
+                + password = ( int/float ) This class' password
                     ~ Required
-
+            
+            - Response:
         """
+        
+        #   --- Protection ---
+        if (("password" not in kwargs) and (kwargs["password"] != self.__password)):
+            raise Exception("An error occured in Annie.propagate_forward(): Passed password does not match this class' password")
 
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
+        #   --- Functionality ---
+        self.__propagate_forward__(inputs)
 
-        #	STEP 2: check if password passed
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.propagate_forward() -> Step 2: No password passed")
-
-        #	STEP 4: Check if password matches class' password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.propagate_forward() -> Step 4: Passed password does not match this class' password")
-
-        #	STEP 6: Check if data passed
-        if ("data" not in kwargs):
-            #	STEP 7: Error handling
-            raise Exception("An error occured in Annie.propagate_forward() -> Step 6: No data point passed")
-
-        #	STEP 7: Outsource
-        self.__propagate_forward__(kwargs["data"])
-
-        #	STEP 8: Return
+        #   --- Response ---
         return
 
-    def propagate_backward(self, **kwargs) -> None:
+    def propagate_backward(self, outputs: list, **kwargs) -> None:
         """
-            Description
+            - Description:
 
                 Perform back propagation using the provided output.
 
@@ -1538,43 +1264,30 @@ class Annie:
             |\n
             |\n
             |\n
+            - Refactoring: Done
+            - Arguments:
 
-            Args:
-
-                + data			= ( list ) Data point
+                + outputs = ( list ) Data point
                     ~ Required
-                + password		= ( int/float ) This class' password
+                + password = ( int/float ) This class' password
                     ~ Required
-
+            
+            - Response:
         """
+        
+        #   --- Protection ---
+        if (("password" not in kwargs) and (kwargs["password"] != self.__password)):
+            raise Exception("An error occured in Annie.propagate_forward(): Passed password does not match this class' password")
 
-        #	STEP 0: Local variables
-        #	STEP 1: Setup - Local variables
+        #   --- Functionality ---
+        self.__propagate_backward__(outputs)
 
-        #	STEP 2: check if password passed
-        if ("password" not in kwargs):
-            #	STEP 3: Error handling
-            raise Exception("An error occured in Annie.propagate_forward() -> Step 2: No password passed")
-
-        #	STEP 4: Check if password matches class' password
-        if (kwargs["password"] != self.__password):
-            #	STEP 5: Error handling
-            raise Exception("An error occured in Annie.propagate_forward() -> Step 4: Passed password does not match this class' password")
-
-        #	STEP 6: Check if data passed
-        if ("data" not in kwargs):
-            #	STEP 7: Error handling
-            raise Exception("An error occured in Annie.propagate_forward() -> Step 6: No data point passed")
-
-        #	STEP 7: Outsource
-        self.__propagate_backward__(kwargs["data"])
-
-        #	STEP 8: Return
+        #   --- Response ---
         return
 
     def __perform_default_training__(self, _dData: Data, _bCheckAcc: bool) -> int:
         """
-            Description:
+            - Description:
 
                 Performs default forward and backward propagation training
                 using the provided dataset.
@@ -1584,15 +1297,14 @@ class Annie:
             |\n
             |\n
             |\n
-
-            Params:
+            - Refactoring: Done
+            - Parameters:
             
                 :param _dData: = ( vars ) -- Data container
                 :param _bCheckAcc: = ( bool ) -- Check accuracy flag
 
             |\n
-
-            Returns:
+            - Response:
 
                 + dOut	= ( dict )
                     ~ iterations	= ( int ) The amount of iterations used
@@ -1600,56 +1312,34 @@ class Annie:
 
                     ~ child set	= ( vars ) The child data set created from the
                         incorrecy data samples
-
-            |\n
-
-            ToDo:
-
-                + Recount steps
         """
 
-        #	STEP 0: Local variables
-        dData_Testing		= None
-        dData_Training		= None
+        #   --- Variables ---
+        best_training_result_weights = self.get_weights(password=self.__password)
+        best_training_result_fitness = np.inf
+        training_set_fitness_scalar = 30.0
+        testing_set_fitness_scalar = 70.0
+        batch_size = self.batch_size
+        number_of_epochs = self.number_of_epochs
+        dData_Training = _dData.splitData()
+        dData_Testing = dData_Training["testing"]
+        dData_Training = dData_Training["training"]        
+        number_of_batches = int( np.ceil( dData_Training.getLen() / batch_size ) )
 
-        lBest_Set			= self.get_weights(password=self.__password)
-        fBest_Fitness		= np.inf
-
-        fScalar_Train		= 30.0
-        fScalar_Test		= 70.0
-
-        iBatch_Iterations	= None
-        iBatch_Size			= self.batch_size
-
-        iEpochs				= self.number_of_epochs
-
-        #region STEP 1->6: Setup - Localv variables
-
-        #	STEP 1: Setup - Local variables
-        dData_Training		= _dData.splitData()
-
-        dData_Testing		= dData_Training["testing"]
-        dData_Training		= dData_Training["training"]
-        
-        iBatch_Iterations	= int( np.ceil( dData_Training.getLen() / iBatch_Size ) )
-
-        #	STEP 2: Check for small dataset
-        if ( dData_Training.getLen() < iBatch_Size ):
-            fScalar_Train	= 80.0
-            fScalar_Test	= 20.0
-
+        #   --- Setup ---        
         if (self.use_drop_out):
-            iEpochs	= int(iEpochs * 0.65)
+            number_of_epochs	= int(number_of_epochs * 0.65)
 
-        #
-        #endregion
+        if ( dData_Training.getLen() < batch_size ):
+            training_set_fitness_scalar = 80.0
+            testing_set_fitness_scalar = 20.0
 
-        #	STEP 7: User Output
+        #   --- Output ---
         if (self.show_output):
             print("Annie (def-training) {" + ApplicationHelper.time() + "} - Starting default training")
-            print("\t~ Epochs:\t\t"				+ str(iEpochs))
-            print("\t~ Batches per Epoch:\t"	+ str(iBatch_Iterations))
-            print("\t~ Batch size:\t\t"			+ str(iBatch_Size))
+            print("\t~ Epochs:\t\t"				+ str(number_of_epochs))
+            print("\t~ Batches per Epoch:\t"	+ str(number_of_batches))
+            print("\t~ Batch size:\t\t"			+ str(batch_size))
             print("\t~ Dataset size:\t\t"		+ str(dData_Training.getLen()) + "\n")
 
             print("\t~ Node Drop Out:\t\t" 			+ str(self.use_drop_out))
@@ -1658,100 +1348,58 @@ class Annie:
             print("\t~ L1 Regularization:\t\t" 		+ str(self.use_l1_regularization))
             print("\t~ L2 Regularization:\t\t"		+ str(self.use_l2_regularization) + "\n")
         
-        #	STEP 8: Iterate for epochs
-        for i in range(0, iEpochs):
-            #	STEP 9: Iterate for batch iterations
-            for j in range(0, iBatch_Iterations):
+        #   --- Functionality ---
+        for i in range(0, number_of_epochs):
+            for j in range(0, number_of_batches):
+                #   --- Propagation ---
+                for _ in range(0, batch_size):
+                    data_point = dData_Training.getRandDNR(noise=self.use_noise_injection)
+                    if (self.use_drop_out): self.__propagate_forward__(data_point["in"], training=True)
+                    else: self.__propagate_forward__(data_point["in"])
+                    self.__propagate_backward__(data_point["out"])
 
-                #region STEP 10->16: Train
+                #   --- Fitness Test ---
+                testing_set_acc_test = self.get_accuracy(data=dData_Testing, size=dData_Testing.getLen())
+                training_set_acc_test = self.get_accuracy(data=dData_Training, size=dData_Training.getLen())
+                batch_fitness = 100.0 * ( 1.0 - testing_set_acc_test["percent accuracy"] ) * ( 1.01 - training_set_acc_test["percent accuracy"] ) + testing_set_fitness_scalar * ( 1.0 - testing_set_acc_test["percent accuracy"] ) + training_set_fitness_scalar * ( 1.01 - training_set_acc_test["percent accuracy"] )
 
-                #	STEP 10: Iterate for batch size
-                for _ in range(0, iBatch_Size):
-                    #	STEP 11: Get data point
-                    dDNR = dData_Training.getRandDNR(noise=self.use_noise_injection)
+                if (batch_fitness < best_training_result_fitness):
+                    best_training_result_weights = self.get_weights(password=self.__password)
+                    best_training_result_fitness = batch_fitness
 
-                    #	STEP 12: Check - Drop Out status
-                    if (self.use_drop_out):
-                        #	STEP 13: Set dropout flag
-                        self.__propagate_forward__(dDNR["in"], training=True)
-
-                    #	STEP 14: No dropout
-                    else:
-                        #	STEP 15: Propagate forwared
-                        self.__propagate_forward__(dDNR["in"])
-                    
-                    #	STEP 16: Outsource - Back Prop
-                    self.__propagate_backward__(dDNR["out"])
-
-                #
-                #endregion
-
-                #region STEP 17->24: Accuracy check point
-
-                #	STEP 17: Get accuracy
-                json_data_AccTest	= self.get_accuracy(data=dData_Testing, 	size=dData_Testing.getLen())
-                json_data_AccTrain	= self.get_accuracy(data=dData_Training, size=dData_Training.getLen())
-
-                #	STEP 18: Get fitness
-                fTmp_Fitness	= 100.0 * ( 1.0 - json_data_AccTest["percent accuracy"] ) * ( 1.01 - json_data_AccTrain["percent accuracy"] ) + fScalar_Test * ( 1.0 - json_data_AccTest["percent accuracy"] ) + fScalar_Train * ( 1.01 - json_data_AccTrain["percent accuracy"] )
-
-                #	STEP 19: Check if best fitness
-                if (fTmp_Fitness < fBest_Fitness):
-                    #	STEP 20: Update - Best
-                    lBest_Set		= self.get_weights(password=self.__password)
-                    fBest_Fitness	= fTmp_Fitness
-
-                    #	STEP 21: User output
+                    #   --- Output ---
                     if (self.show_output):
-                        print("\t{" + ApplicationHelper.time() + "} -", "Fitness: " + str( round( fBest_Fitness, 2 ) ) + "\t", "Test: " + str( round( json_data_AccTest["percent accuracy"], 2) ), "Train: " + str( round( json_data_AccTrain["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
+                        print("\t{" + ApplicationHelper.time() + "} -", "Fitness: " + str( round( best_training_result_fitness, 2 ) ) + "\t", "Test: " + str( round( testing_set_acc_test["percent accuracy"], 2) ), "Train: " + str( round( training_set_acc_test["percent accuracy"], 2) ), "Index: " + str(i) + "-" + str(j), sep="\t")
 
-                #	STEP 22: If temp fitness not converging
-                elif ( fTmp_Fitness > 5.0 * fBest_Fitness ):
-                    #	STEP 23: User output
+                #	--- Not Converging ---
+                elif ( batch_fitness > 5.0 * best_training_result_fitness ):
+                    #   --- Output ---
                     if (self.show_output):
-                        print("\t{" + ApplicationHelper.time() + "} - \tEnding epoch " + str(i) + " early by " + str( iBatch_Iterations - j ) + " batch iterations")
-                    
-                    #	STEP 24: End epoch
+                        print("\t{" + ApplicationHelper.time() + "} - \tEnding epoch " + str(i) + " early by " + str( number_of_batches - j ) + " batch iterations")
+                        
                     break
-                
-                #
-                #endregion
 
-        #region STEP 25->31: Post training evaluations
+        #   --- Finish Up ---
+        self.weights = best_training_result_weights
+        training_set_acc_test = self.get_accuracy(data=_dData, full_set=True)
+        total_training_iterations = self.number_of_epochs * (number_of_batches * batch_size)
 
-        #	STEP 25: Get total iterations
-        iTmp = self.number_of_epochs * (iBatch_Iterations * iBatch_Size)
-
-        #	STEP 26: Update weights to fittest set
-        self.set_weights(password=self.__password, weights=lBest_Set)
-
-        #	STEP 27: Get dataset accuracy
-        json_data_AccTrain = self.get_accuracy(data=_dData, size=0, full_set=True)
-
-        #	STEP 28: User output
+        #   --- Output ---
         if (self.show_output):
-            #	STEP 29: Get accuracy as percentage
-            iAccTmp = json_data_AccTrain["accurate samples"]
-            fAccTmp = json_data_AccTrain["percent accuracy"]
+            accuracy_samples = training_set_acc_test["accurate samples"]
+            percent_accuracy = training_set_acc_test["percent accuracy"]
 
-            #	STEP 30: Print output
             print("")
-            print("\t- Iterations: " + str(iTmp))
-            print("\t- Accurate Samples: " + str(iAccTmp))
-            print("\t- Percentage Accuracy: " + str(round(fAccTmp * 100.0, 2)) + "%\n")						
+            print("\t- Iterations: " + str(total_training_iterations))
+            print("\t- Accurate Samples: " + str(accuracy_samples))
+            print("\t- Percentage Accuracy: " + str(round(percent_accuracy * 100.0, 2)) + "%\n")
         
-        #
-        #endregion
-
-        #	STEP 32: Populate output dictionary
-        dOut = {
-            "iterations":	iTmp,
-            "fitness":		fBest_Fitness,
-            "child set":	json_data_AccTrain["child dataset"]
+        #   --- Response ---	
+        return {
+            "iterations":	total_training_iterations,
+            "fitness":		best_training_result_fitness,
+            "child set":	training_set_acc_test["child dataset"]
         }
-
-        #	STEP 33: Return		
-        return dOut
 
     def __perform_tro_training__(self, _dData: Data) -> int:
         """
@@ -1788,7 +1436,7 @@ class Annie:
         #	STEP 1: Setup - Local variables
         vOptimzier.show_output	= self.show_output
 
-        iPassword				= self.__resetPassword__()
+        iPassword				= self.__reset_password__()
 
         #	STEP 2: User Output
         if (self.show_output):
@@ -1801,7 +1449,7 @@ class Annie:
         self.weights = dResults["surrogate"].get_weights(password=self.__password)
 
         #	STEP 6: Update password
-        self.__resetPassword__()
+        self.__reset_password__()
 
         #	STEP 7: Return
         return dResults["iterations"]
@@ -1842,7 +1490,7 @@ class Annie:
         #	STEP 1: Setup - Local variables
         vOptimizer.show_output = self.show_output
 
-        iPassword				= self.__resetPassword__()
+        iPassword				= self.__reset_password__()
 
         #	STEP 2: User Output
         if (self.show_output):
@@ -1855,7 +1503,7 @@ class Annie:
         self.weights = dResults["surrogate"].get_weights(password=self.__password)
         
         #	STEP 6: Update password
-        self.__resetPassword__()
+        self.__reset_password__()
 
         #	STEP 7: Return
         return dResults["iterations"]
@@ -1867,7 +1515,7 @@ class Annie:
         #	STEP 0: Local variables
 
         #	STEP 1: Setup - Local variables
-        self.__resetNodes__()
+        self.__reset_nodes__()
 
         #	STEP 2: Check - Data width
         if (len(_dataPoint) != self.input_width):
@@ -2203,10 +1851,10 @@ class Annie:
         dNew					= None
         dOrg					= None
 
-        lOutputs_New			= None
-        lOutputs_Org			= None
+        ann_outputs_New			= None
+        ann_outputs_Org			= None
 
-        bShowComparison			= False
+        bshow_comparison			= False
         bChildOutput			= self.show_output
 
         #	STEP 1: Setup - Local variables
@@ -2232,7 +1880,7 @@ class Annie:
         #	STEP 8: Check if acc_check arg passed
         if ("show_comparison" in kwargs):
             #	STEP 9: Set variable
-            bShowComparison = kwargs["show_comparison"]
+            bshow_comparison = kwargs["show_comparison"]
 
         #	STEP ??: Check if child_output arg passed
         if ("child_output" in kwargs):
@@ -2247,11 +1895,11 @@ class Annie:
         dNew	= kwargs["data"]
         dOrg	= kwargs["original_data"]
 
-        lOutputs_New = dNew.getUniqueOutputs()
-        lOutputs_Org = dOrg.getUniqueOutputs()
+        ann_outputs_New = dNew.getUniqueOutputs()
+        ann_outputs_Org = dOrg.getUniqueOutputs()
 
         #	STEP 11: Check if num outputs is same
-        iRequired	= len(lOutputs_Org) - len(lOutputs_New)
+        iRequired	= len(ann_outputs_Org) - len(ann_outputs_New)
 
         #region STEP 12->23: Data set expansion
 
@@ -2261,17 +1909,17 @@ class Annie:
                 print("Annie (child-train) {" + ApplicationHelper.time() + "} - Expanding dataset to avoid single class dataset")
 
             #	STEP 13: Get the output\s that isn't in the new dataset
-            lOutputs = []
+            ann_outputs = []
 
             #	STEP 14: Loop till done
-            while (len(lOutputs) < iRequired):
+            while (len(ann_outputs) < iRequired):
                 #	STEP 15: Get random data sample
                 dDNR = dOrg.getRandDNR()
 
                 #	STEP 16: Check if not in new required outputs or current outputs
-                if ((dDNR["out"] not in lOutputs) and (dDNR["out"] not in lOutputs_New)):
+                if ((dDNR["out"] not in ann_outputs) and (dDNR["out"] not in ann_outputs_New)):
                     #	STEP 17: Append new output
-                    lOutputs.append(dDNR["out"])
+                    ann_outputs.append(dDNR["out"])
 
             #	STEP 18: Get the size of the new data to append
             iNewSize	= rn.randint(5, 10) / 10.0
@@ -2285,7 +1933,7 @@ class Annie:
                 dDNR = dOrg.getRandDNR()
 
                 #	STEP 21: Check if sample is of the required outputs
-                if (dDNR["out"] in lOutputs):
+                if (dDNR["out"] in ann_outputs):
                     #	STEP 22: Append new data sample
                     dNew.insert(data=dOrg.copy(last_seen=True))
 
@@ -2318,7 +1966,7 @@ class Annie:
                 vTmpChild.show_output = bChildOutput
 
             #	STEP 28: Train child
-            vTmpChild.trainSet(dNew, advanced_training=False)
+            vTmpChild.train_set(dNew, advanced_training=False)
 
             #	STEP 29: Get accuracy
             json_data	= vTmpChild.get_accuracy(data=dNew, size=0, full_set=True)
@@ -2335,10 +1983,10 @@ class Annie:
                     if (self.show_output):
                         print("Annie (child-train) {" + ApplicationHelper.time() + "} - Child net successfully trained")
 
-                    if (bShowComparison):
+                    if (bshow_comparison):
                         print("\n***\n")
 
-                        self.secondary_neural_nets.showComparison(dNew)
+                        self.secondary_neural_nets.show_comparison(dNew)
 
                         print("\n***\n")
 
@@ -2358,10 +2006,10 @@ class Annie:
             print("Annie (child-train) {" + ApplicationHelper.time() + "} - Child net successfully trained")
             print("\t> Required accuracy not achieved")
 
-        if (bShowComparison):
+        if (bshow_comparison):
             print("\n***\n")
 
-            self.secondary_neural_nets.showComparison(dNew)
+            self.secondary_neural_nets.show_comparison(dNew)
 
             print("\n***\n")
 
@@ -2405,7 +2053,7 @@ class Annie:
         #	STEP 0: Local variables
         dData					= None
 
-        bShowComparison			= False
+        bshow_comparison			= False
         show_output				= self.show_output
 
         #	STEP 1: Setup - Local variables
@@ -2422,7 +2070,7 @@ class Annie:
         #	STEP 5: Check if show_comparison passed
         if ("show_comparison" in kwargs):
             #	STEP 6: Set local variable
-            bShowComparison = kwargs["show_comparison"]
+            bshow_comparison = kwargs["show_comparison"]
 
         #	STEP 7: Check if show_output passed
         if ("show_output" in kwargs):
@@ -2447,7 +2095,7 @@ class Annie:
                 print("Annie (train-classifier) {" + ApplicationHelper.time() + "} - Training classifier\n")
 
             #	STEP 14: Train classifier
-            self.classifier_neural_net.trainSet(dData, compare=bShowComparison)
+            self.classifier_neural_net.train_set(dData, compare=bshow_comparison)
 
         #	STEP 15: Return
         return
@@ -2456,25 +2104,7 @@ class Annie:
     #endregion
 
     #region --- resets ---
-    def __resetAverages__(self) -> None:
-        """
-        """
-
-        #	STEP 0: Local variables
-
-        #	STEP 1: Setup - Local variables
-
-        #	STEP 2: Iterate through layers
-        for i in range(0, len(self.node_averages)):
-            #	STEP 3: Iterate through nodes in layer
-            for j in range(0, len(self.node_averages[i])):
-                #	STEP 4: Reset node
-                self.node_averages[i][j] = 0.0
-
-        #	STEP 5: Return
-        return
-
-    def __resetNodes__(self) -> None:
+    def __reset_nodes__(self) -> None:
         """
         """
         
@@ -2492,7 +2122,7 @@ class Annie:
         #	STEP 5: Return
         return
 
-    def __resetPassword__(self) -> int:
+    def __reset_password__(self) -> int:
         """
             Description:
 
@@ -2524,7 +2154,7 @@ class Annie:
     #endregion
     
     #region --- other ---    
-    def showComparison(self, _dData: Data) -> None:
+    def show_comparison(self, _dData: Data) -> None:
         """
         """
 
@@ -2559,30 +2189,28 @@ class Annie:
     #
     #endregion
 
-
 #region	Testing - Training
 if (__name__ == "__main__"):
-	dat = Data()
-	dat.importData(file="4x - Banknote/banknote_0.json")
+    dat = Data()
+    dat.importData(file="4x - Iris/iris_0.json")
 
-	x = ""
+    x = ""
 
-	while (True):
-		x = input("> Continue (Y): ")
-		if (x == "exit" or x == "N" or x == "n"):
-			break
+    while (True):
+        print("")
+        x = input("> Continue? ")
+        if (x == "exit" or x == "N" or x == "n"):
+            break
 
-		os.system("clear")
+        os.system("clear")
 
-		fire = Annie()
-		
-		fire.show_output 	= True
-		fire.use_l1_regularization		= False
-		fire.use_l2_regularization		= True
+        fire = Annie()
+        fire.show_output = True
+        fire.use_l1_regularization = False
+        fire.use_l2_regularization = True
+        fire.train_set(cp.deepcopy(dat), advanced_training=True, compare=True)
 
-		y = fire.trainSet(cp.deepcopy(dat), advanced_training=True, compare=True)
-
-		print("---", "---", sep="\n", end="\n\n")
+        print("--------------------------------------------------------------------------------------")
 
 
 #endregion

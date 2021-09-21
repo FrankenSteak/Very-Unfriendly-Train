@@ -582,8 +582,8 @@ class Sarah:
                 dDNR = dTrainingData.getRandDNR(noise=True)
 
                 #   STEP 13: Perform propagation
-                surrogate.propagate_forward(data=dDNR["in"], password=password)
-                surrogate.propagate_backward(data=dDNR["out"], password=password)
+                surrogate.propagate_forward(dDNR["in"], password=password)
+                surrogate.propagate_backward(dDNR["out"], password=password)
 
             #   STEP 14: Update best candidate
             swarm.lBestSolution = surrogate.get_weights(password=password)

@@ -558,8 +558,8 @@ class SpongeBob:
                 dDNR = dData_Train.getRandDNR(noise=True)
 
                 #   STEP 13: Perform propagation
-                surrogate.propagate_forward( data=dDNR["in"], password=password)
-                surrogate.propagate_backward( data=dDNR["out"], password=password)
+                surrogate.propagate_forward(dDNR["in"], password=password)
+                surrogate.propagate_backward(dDNR["out"], password=password)
 
             #   STEP 14: Update garry
             garry.vBestSolution.lCurrPosition   = surrogate.get_weights(password=password)
